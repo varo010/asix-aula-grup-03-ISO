@@ -1,0 +1,38 @@
+# Imágenes y discos (van al almacenamiento docente, no al repo)
+*.iso
+*.img
+*.qcow2
+*.vmdk
+*.vdi
+*.vhd
+*.vhdx
+*.ova
+*.ovf
+*.vma
+*.vma.*
+*.zst
+# Credenciales y secretos
+.env
+*.env
+*.key
+*.pem
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+secrets/
+credenciales*
+*password*
+*contraseña*
+# Copias y temporales
+*.bak
+*.tmp
+*.swp
+~$*
+.~lock*
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
