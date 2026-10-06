@@ -6,6 +6,8 @@ Preguntas: ¿qué sistema pondrías en un cliente, en un servidor de datos y en 
 
 ## Álvaro
 
+> Pendiente de rellenar por Álvaro antes de buscar información.
+
 - Cliente:
 - Servidor de datos:
 - Comunicaciones:
