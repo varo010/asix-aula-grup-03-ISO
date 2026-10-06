@@ -6,13 +6,11 @@ Preguntas: ¿qué sistema pondrías en un cliente, en un servidor de datos y en 
 
 ## Álvaro
 
-> Pendiente de rellenar por Álvaro antes de buscar información.
-
-- Cliente:
-- Servidor de datos:
-- Comunicaciones:
-- Comprobaciones de hardware:
-- Pérdida de un disco:
+- Cliente: Pondría 3 Linux y 2 Windows, para tener varios sistemas operativos en la empresa.
+- Servidor de datos: No lo sé. (Idea de la red: switch de clase → switch → MikroTik → switch → ordenadores clientes.)
+- Comunicaciones: El router va a tener MikroTik.
+- Comprobaciones de hardware: Me dan un PC usado, pero en teoría funcionaría todo.
+- Pérdida de un disco: No lo sé.
 
 ## Alex
 
