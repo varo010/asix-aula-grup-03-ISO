@@ -277,7 +277,7 @@ El PC tiene 16 GB de RAM, el doble del mínimo oficial. Se usa la 25.10.7 porque
   - Windows Server 2025: exige licencias y CAL (incumple N8) y en el laboratorio solo habría 180 días de evaluación.
   - Synology DSM y QNAP QTS: solo funcionan en su propio hardware.
 
-**Integración:** se une al dominio del Domain Controller para la autenticación y ofrece almacenamiento NFS a Proxmox (supuesto, pendiente de confirmar con Virtualización).
+**Integración:** se une al dominio del Domain Controller para la autenticación y ofrece almacenamiento NFS a Proxmox VE para copias de VM e ISOs, coherente con [D-02](../decisions/D-02-virtualizacion.md).
 
 ## Datos pendientes (N/C)
 
