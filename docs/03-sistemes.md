@@ -13,7 +13,7 @@ Las decisiones de cada función están registradas en [decisions/](../decisions/
 | Comunicaciones | ¿Cómo conectamos y filtramos redes? | MikroTik RouterOS (routing y VPN) + OPNsense (seguridad perimetral) | Iván | [D-01](../decisions/D-01-comunicaciones.md) |
 | Virtualización | ¿Qué recursos y nodos necesita el laboratorio? | Proxmox VE 9.2 | Juan Pablo | [D-02](../decisions/D-02-virtualizacion.md) |
 | Gestión centralizada | ¿Qué servicio gestiona identidades y equipos? | Windows Server 2025 con Active Directory | Alex | [D-03](../decisions/D-03-gestion-centralizada.md) |
-| Clientes | ¿Qué opción admite las tareas de cada departamento? | Windows 11 Pro (puestos) y Ubuntu Desktop 26.04 LTS (Informática) | Mauro y Adam | [D-04](../decisions/D-04-clientes.md) |
+| Clientes | ¿Qué opción admite las tareas de cada departamento? | Windows 11 Pro (puestos) y Ubuntu Desktop 26.04 LTS con VM de Windows 11 Pro (Informática) | Mauro y Adam | [D-04](../decisions/D-04-clientes.md) |
 | Datos | ¿Cómo organizamos, compartimos y recuperamos ficheros? | TrueNAS Community Edition 25.10.7 | Álvaro | [D-05](../decisions/D-05-datos.md) |
 
 **Criterio general:** Windows donde lo exigen las identidades y el software de los puestos de trabajo; Linux y software libre para cortafuegos, virtualización y datos. Solo se paga licencia donde el software de gestión de la empresa la exige.
@@ -35,24 +35,25 @@ Responsable: Iván.
 |---|---|---|---|
 | Función | Router, firewall básico y VPN | Firewall perimetral, IDS/IPS y VPN | Firewall perimetral y VPN |
 | Arquitectura | Hardware MikroTik o CHR virtual (x86 de 64 bits con virtualización) | x86-64 (amd64) | x86-64 (amd64) |
-| Versión | 7.24.5 *stable* (29/09/2026); 7.23.8 *long-term* (09/10/2026) | Serie 26.7 «Xenial Xenops» (26.7.7) | N/C |
-| Soporte | N/C | Comunidad; edición Business de pago | N/C |
-| Origen de la descarga | mikrotik.com/download | opnsense.org/download | N/C |
+| Versión | 7.24.5 *stable* (29/09/2026); 7.23.8 *long-term* (09/10/2026) | Serie 26.7 «Xenial Xenops» (26.7.7) | 2.9.0 (20/08/2026) |
+| Soporte | Foro oficial y soporte del fabricante; licencias perpetuas | Comunidad; edición Business de pago | Comunidad; las funciones avanzadas van en pfSense Plus |
+| Origen de la descarga | mikrotik.com/download | opnsense.org/download | Instalador oficial de Netgate (netgate.com) |
 | Requisitos mínimos oficiales | CHR: 256 MB de RAM (recomienda 1024 MiB) y 128 MB de disco | CPU de doble núcleo a 1 GHz, 3 GB de RAM y 4 GB de almacenamiento | CPU amd64, 1 GB de RAM y disco de 8 GB |
 | Requisitos recomendados | — | CPU multinúcleo a 1,5 GHz, 8 GB de RAM y SSD de 120 GB | — |
 | Recursos propuestos para el laboratorio | Routers MikroTik del aula (supuesto, según Tarea 0) | VM con 8 GB de RAM (supuesto; depende del inventario de la Tarea 2) | — |
-| Licencia y precio | Pago único: en routers va incluida; CHR gratuito limitado a 1 Mbps, P1 (1 Gbps) 45 $, P10 (10 Gbps) 95 $, ilimitada 250 $ | Open source, sin coste de software | N/C |
-| Administración | Curva de aprendizaje pronunciada | Interfaz web | N/C |
-| Actualizaciones | Canales *stable* y *long-term* | Dos series al año (enero y julio) | N/C |
+| Licencia y precio | Pago único: en routers va incluida; CHR gratuito limitado a 1 Mbps, P1 (1 Gbps) 45 $, P10 (10 Gbps) 95 $, ilimitada 250 $ | Open source, sin coste de software | CE gratuito; varias funciones solo en pfSense Plus |
+| Administración | Winbox, web y CLI; curva de aprendizaje pronunciada | Interfaz web | Interfaz web |
+| Actualizaciones | Canales *stable* y *long-term* | Dos versiones mayores al año (enero y julio) y menores cada dos semanas | Irregulares: 2.7.2 (12/2023), 2.8.0 (05/2025), 2.9.0 (08/2026) |
 | Compatibilidad | CHR probado en VirtualBox, VMware, QEMU, Hyper-V (solo generación 1) y Xen | Hardware x86-64 o VM | Hardware x86-64 |
 | Ventajas | Protocolos de routing avanzados; bajo coste de licencia y hardware | IDS/IPS con Suricata e inspección de capa 7 con Zenarmor; sin coste de licencia | Requisitos mínimos más bajos que OPNsense |
-| Limitaciones | Sin funciones de firewall de nueva generación (NGFW) | Necesita más CPU y RAM que un router dedicado | Pendiente de revisar (ver justificación) |
+| Limitaciones | Sin funciones de firewall de nueva generación (NGFW) | Necesita más CPU y RAM que un router dedicado | OpenVPN DCO, CARP unicast, entornos de arranque ZFS y exportación NetFlow solo en pfSense Plus |
 
 ### 3. Contraste
 
 - **MikroTik:** la documentación oficial de CHR fija requisitos y precios de licencia de pago único, sin suscripción anual. Versiones según el registro de cambios oficial y el anuncio en el foro oficial.
 - **OPNsense:** la documentación oficial de hardware separa requisitos mínimos y recomendados; las notas de versión muestran dos series al año.
-- **pfSense CE:** la documentación oficial de Netgate pide 1 GB de RAM y 8 GB de disco, menos que el mínimo de OPNsense (3 GB de RAM).
+- **pfSense CE:** la documentación oficial de Netgate pide 1 GB de RAM y 8 GB de disco, menos que OPNsense (3 GB de RAM). Su lista de versiones muestra publicaciones irregulares de CE (casi 18 meses entre la 2.7.2 y la 2.8.0) y su documentación reserva varias funciones a pfSense Plus.
+- **OPNsense:** su documentación de actualizaciones fija dos versiones mayores al año con actualizaciones menores cada dos semanas.
 - Un equipo «todo en uno» de gama alta (Fortinet, Palo Alto) que reúna routing y NGFW exige licencias anuales.
 
 ### 4. Justificación
@@ -60,9 +61,9 @@ Responsable: Iván.
 Se elige una **topología mixta**: MikroTik se encarga del enrutamiento y las VPN, y OPNsense de la seguridad perimetral. Cada sistema cubre la carencia del otro: MikroTik no tiene NGFW y OPNsense aporta IDS/IPS e inspección de capa 7 sin coste de licencia. El rendimiento de cada equipo se medirá en la Tarea 7 antes de afirmar nada sobre él.
 
 - **Inconveniente aceptado:** administrar dos plataformas distintas en lugar de una centralizada.
-- **Descartados:** Cisco, Fortinet y Palo Alto por el coste recurrente de licencias.
-
-> **Pendiente de revisar (Iván):** el borrador descartaba pfSense «por requerir más recursos», pero según las fuentes oficiales pide menos RAM que OPNsense. Hace falta otro motivo de descarte con fuente, o reconsiderar pfSense.
+- **Descartados:**
+  - Cisco, Fortinet y Palo Alto, por el coste recurrente de licencias.
+  - pfSense CE: aunque pide menos recursos que OPNsense, sus versiones salen de forma irregular y Netgate reserva varias funciones a pfSense Plus. OPNsense publica parches cada dos semanas e incluye todas sus funciones en la edición libre. En un cortafuegos perimetral, la regularidad de los parches de seguridad pesa más que 2 GB de RAM.
 
 ## Virtualización
 
@@ -80,25 +81,26 @@ Responsable: Juan Pablo.
 | Criterio | Proxmox VE | Hyper-V | VMware ESXi | XCP-ng | VirtualBox |
 |---|---|---|---|---|---|
 | Función | VM, contenedores, clúster, migración, alta disponibilidad y copias | Hipervisor incluido en Windows Server | Hipervisor | Hipervisor basado en Xen | Virtualización de escritorio |
-| Arquitectura | x86-64; arm64 desde agosto de 2026 | x64 | N/C | x86-64 | Anfitriones Windows, macOS, Linux y Solaris |
+| Arquitectura | x86-64; arm64 desde agosto de 2026 | x64 | x86-64 | x86-64 | Anfitriones Windows, macOS, Linux y Solaris |
 | Versión | 9.2 (21/05/2026), sobre Debian 13 | Windows Server 2025 | 8.0 Update 3e (versión gratuita) | 8.3 LTS | 7.2.20 |
-| Soporte | Comunidad; suscripción de pago. Cada versión, al menos lo mismo que su Debian | Microsoft, según el ciclo de Windows Server | Versión gratuita sin soporte oficial | Comunidad; soporte de pago de Vates | N/C |
+| Soporte | Comunidad; suscripción de pago. Cada versión, al menos lo mismo que su Debian | Microsoft, según el ciclo de Windows Server | Versión gratuita sin soporte oficial | Comunidad; soporte de pago de Vates | Comunidad; soporte comercial de Oracle |
 | Origen de la descarga | proxmox.com/en/downloads | Centro de evaluación de Microsoft | Portal de Broadcom | xcp-ng.org | virtualbox.org/wiki/Downloads |
-| Requisitos mínimos oficiales | CPU de 64 bits con Intel VT o AMD-V, 1 GB de RAM más la de las VM, disco y una NIC | CPU de 64 bits con SLAT, VT-x/AMD-V y DEP; al menos 4 GB de RAM | N/C | CPU x86 de 64 bits a 1,5 GHz con VT-x/AMD-V y SLAT, 2 GB de RAM y 46 GB de disco | N/C |
+| Requisitos mínimos oficiales | CPU de 64 bits con Intel VT o AMD-V, 1 GB de RAM más la de las VM, disco y una NIC | CPU de 64 bits con SLAT, VT-x/AMD-V y DEP; al menos 4 GB de RAM | 2 núcleos, 8 GB de RAM (12 GB recomendados), disco de arranque de 32 GB, NX/XD y VT-x/AMD-V | CPU x86 de 64 bits a 1,5 GHz con VT-x/AMD-V y SLAT, 2 GB de RAM y 46 GB de disco | Sin mínimo oficial: depende del anfitrión y de las VM |
 | Requisitos recomendados | 2 GB de RAM para el sistema más la de las VM; almacenamiento redundante; varias NIC | — | — | CPU multinúcleo a 2 GHz, 8 GB de RAM y 70 GB de disco | — |
 | Recursos propuestos para el laboratorio | 3 nodos y almacenamiento compartido NAS/SAN (diseño del enunciado; no confirmados en el aula) | — | — | — | — |
-| Licencia y precio | AGPLv3, gratuito; suscripción opcional desde 120 €/socket/año | Requiere Windows Server (desde 1.176 $ más CAL) | ESXi gratuito con limitaciones; versión completa por suscripción (precio N/C) | Open source | Base GPLv3 gratuita; el Extension Pack es de pago para uso comercial |
-| Administración | Consola web | Administrador Hyper-V y PowerShell | Host Client web; sin vCenter en la versión gratuita | N/C | Aplicación de escritorio |
-| Actualizaciones | Versiones mayores sobre cada Debian | Las de Windows Server | N/C | N/C | N/C |
-| Compatibilidad | KVM y contenedores LXC | N/C | Máximo 2 CPU físicas y 8 vCPU por VM (gratuito) | N/C | N/C |
-| Limitaciones | La alta disponibilidad exige 3 nodos y almacenamiento compartido | Coste de licencias | Versión gratuita sin vMotion, DRS ni alta disponibilidad | Pendiente de revisar (ver justificación) | No está pensado para servidores |
+| Licencia y precio | AGPLv3, gratuito; suscripción opcional desde 120 €/socket/año | Requiere Windows Server (desde 1.176 $ más CAL) | ESXi gratuito con limitaciones; versión completa por suscripción por núcleo (Broadcom no publica tarifa) | Open source | Base GPLv3 gratuita; el Extension Pack es de pago para uso comercial |
+| Administración | Consola web integrada en cada nodo, también para clúster y copias | Administrador Hyper-V y PowerShell | Host Client web; sin vCenter en la versión gratuita | XO Lite y `xe` para un solo host; Xen Orchestra, desplegado aparte, para varios hosts y copias | Aplicación de escritorio |
+| Actualizaciones | Versiones mayores sobre cada Debian | Las de Windows Server | Parches de Broadcom (sin soporte en la versión gratuita) | Rama LTS (8.3) | Versiones de mantenimiento de Oracle |
+| Compatibilidad | KVM y contenedores LXC | VM Windows y Linux; sin contenedores LXC | Máximo 2 CPU físicas y 8 vCPU por VM (gratuito) | VM Xen; sin contenedores LXC | VM de escritorio |
+| Limitaciones | La alta disponibilidad exige 3 nodos y almacenamiento compartido | Coste de licencias | Versión gratuita sin vMotion, DRS ni alta disponibilidad | La gestión de varios hosts y las copias dependen de Xen Orchestra | No está pensado para servidores |
 
 ### 3. Contraste
 
 - **Proxmox VE:** requisitos, versiones, licencia AGPLv3 y ciclo de soporte según la wiki oficial; precio de la suscripción en proxmox.com.
 - **Hyper-V:** requisitos de hardware según Microsoft Learn.
 - **VMware ESXi:** según la base de conocimiento de Broadcom, la versión gratuita 8.0U3e no se gestiona con vCenter, no tiene vMotion, DRS ni alta disponibilidad y no tiene soporte oficial.
-- **XCP-ng:** requisitos según su documentación oficial.
+- **VMware ESXi:** requisitos según Broadcom TechDocs.
+- **XCP-ng:** requisitos, gestión y alta disponibilidad según su documentación oficial. XO Lite solo gestiona un host; para varios hosts hace falta Xen Orchestra. La alta disponibilidad pide, como Proxmox, almacenamiento compartido y se recomiendan 3 hosts.
 - **VirtualBox:** licencias según su FAQ oficial.
 
 ### 4. Justificación
@@ -109,9 +111,8 @@ Se elige **Proxmox VE** por su coste nulo de licencias, por reunir todas las fun
 - **Descartados:**
   - Hyper-V, por el coste de la licencia de Windows Server.
   - VMware ESXi: la versión gratuita no tiene alta disponibilidad ni clúster con vCenter, y la completa es de suscripción.
+  - XCP-ng: es libre y pide un clúster parecido, pero gestionar 3 nodos y hacer copias exige desplegar y mantener Xen Orchestra aparte, y no ofrece contenedores. Proxmox integra clúster, copias y contenedores LXC en la misma consola web, con menos piezas que montar en el laboratorio.
   - VirtualBox: no está pensado para servidores y el Extension Pack es de pago para uso comercial.
-
-> **Pendiente de revisar (Juan Pablo):** el borrador descartaba VMware y XCP-ng por falta de datos oficiales, pero ahora sí los hay. Para VMware el motivo está actualizado arriba. XCP-ng es open source y cumple requisitos similares, así que hace falta un motivo de descarte con fuente, o reconsiderarlo.
 
 ## Gestión centralizada
 
@@ -132,15 +133,15 @@ La implantación completa del dominio y las políticas corresponde a fases poste
 |---|---|---|---|
 | Función | Directorio, GPO, DNS y recursos compartidos | Controlador de dominio compatible con Active Directory | Identidad y autenticación para entornos Linux/UNIX (389 Directory Server, Kerberos MIT, Dogtag, BIND y SSSD) |
 | Arquitectura | x64 | Linux | Linux |
-| Versión | 2025 (disponible desde el 01/11/2024) | 4.25 (septiembre de 2026) | Versión de los paquetes de cada distribución (N/C) |
+| Versión | 2025 (disponible desde el 01/11/2024) | 4.25 (septiembre de 2026) | 4.13.4 |
 | Soporte | Estándar hasta el 14/11/2029 y extendido hasta el 15/11/2034 | Cada serie unos 18 meses; la 4.25 hasta marzo de 2028 | Comunidad |
 | Origen de la descarga | Centro de evaluación de Microsoft | samba.org o paquetes de la distribución | Paquetes de Fedora, RHEL o Debian, o contenedor |
-| Requisitos mínimos oficiales | CPU de 1,4 GHz y 64 bits, 2 GB de RAM (4 GB con escritorio) y 32 GB de disco | IP estática, nombre DNS propio (no `.local`) y nombre de equipo de menos de 15 caracteres | N/C |
+| Requisitos mínimos oficiales | CPU de 1,4 GHz y 64 bits, 2 GB de RAM (4 GB con escritorio) y 32 GB de disco | IP estática, nombre DNS propio (no `.local`) y nombre de equipo de menos de 15 caracteres | Servidor Linux (Fedora, RHEL o Debian) con IP estática y DNS (los de la distribución) |
 | Recursos propuestos para el laboratorio | VM en Proxmox con 4 GB de RAM o más (supuesto) | — | — |
-| Licencia y precio | Standard: 1.176 $ (16 núcleos) más CAL | Libre (GNU GPL) | Libre (licencia N/C) |
-| Administración | Interfaz gráfica y PowerShell | `samba-tool` (herramientas de administración: N/C) | N/C |
+| Licencia y precio | Standard: 1.176 $ (16 núcleos) más CAL | Libre (GNU GPL) | Libre (GPLv3) |
+| Administración | Interfaz gráfica y PowerShell | `samba-tool` y herramientas RSAT desde un Windows | Web, CLI y API |
 | Actualizaciones | Según el ciclo de vida de Windows Server | Una serie nueva cada seis meses | Las de la distribución |
-| Compatibilidad | Nativa con clientes Windows; Linux con SSSD/realmd | Clientes Windows 10/11; nivel funcional de Windows Server 2008 R2 (los superiores son experimentales) | Pensado para Linux/UNIX |
+| Compatibilidad | Nativa con clientes Windows; Linux con SSSD/realmd | Clientes Windows 10/11; nivel funcional de Windows Server 2008 R2 (los superiores son experimentales) | Clientes Linux/UNIX; relaciones de confianza con Active Directory |
 | Ventajas | Integración nativa con clientes Windows; gestión centralizada | Sin coste de licencia | Sin coste de licencia; integración nativa con Linux |
 | Limitaciones | Coste de licencias; mayor consumo de recursos; las GPO no se aplican a Linux sin herramientas adicionales | Las GPO no funcionan solo con instalar el controlador; nivel funcional limitado | No está pensado para clientes Windows |
 
@@ -166,7 +167,7 @@ Responsables: Mauro y Adam.
 
 Las necesidades salen de lo que pide cada departamento:
 
-- Compatibilidad con las aplicaciones de cada puesto (Office, ERP, software de producción).
+- Compatibilidad con las aplicaciones de cada puesto (Office, ERP, software de producción). Las aplicaciones concretas de cada departamento son un supuesto (ver [01-requisits](01-requisits.md#necesidades-por-departamento)).
 - Unión al dominio y directivas de grupo.
 - Actualizaciones automáticas y soporte rápido ante incidencias.
 - Cifrado de disco.
@@ -181,7 +182,7 @@ Las necesidades salen de lo que pide cada departamento:
 | Origen de la descarga | microsoft.com/software-download/windows11 | ubuntu.com/download/desktop | — |
 | Requisitos mínimos oficiales | CPU de 64 bits compatible a 1 GHz con 2 núcleos, 4 GB de RAM, 64 GB de almacenamiento, UEFI con arranque seguro y TPM 2.0 | CPU de doble núcleo a 2 GHz, 6 GB de RAM y 25 GB de disco | — |
 | Recursos propuestos para el laboratorio | VM con 4 GB de RAM, 64 GB de disco y TPM virtual (supuesto) | VM con 6 GB de RAM y 25 GB de disco (supuesto) | — |
-| Licencia y precio | Por equipo (OEM o volumen); precio N/C | Libre; Ubuntu Pro opcional | — |
+| Licencia y precio | Por equipo (OEM o volumen); 259 € en la Microsoft Store de España | Libre; Ubuntu Pro opcional | — |
 | Administración | Unión al dominio y GPO | Unión al dominio con SSSD/realmd; GPO con ADSys | — |
 | Actualizaciones | Cada versión tiene 24 meses de soporte | LTS con 5 años de parches | Sin actualizaciones de seguridad |
 | Compatibilidad | Office y ERP | No ejecuta el software de gestión de Windows; solo sesión Wayland (sin X11) | — |
@@ -193,8 +194,8 @@ Las necesidades salen de lo que pide cada departamento:
 | Departamento | Sistema | Necesidad que cubre | Inconveniente aceptado | Alternativa descartada |
 |---|---|---|---|---|
 | Dirección | Windows 11 Pro | Office y consulta de informes del ERP sin incompatibilidades; disco cifrado con BitLocker | Licencia por equipo y requisito de TPM 2.0 | Ubuntu Desktop: no garantiza compatibilidad total con Office |
-| Informática | Ubuntu Desktop 26.04 LTS y 2 equipos con Windows 11 Pro | Linux nativo para SSH, scripting y redes; Windows para las herramientas de administración del dominio | Mantener dos sistemas cliente | Todo Ubuntu: no administra el dominio con las herramientas de Windows Server. Todo Windows: pierde la línea de comandos Linux |
-| Producción | Windows 11 Pro, unidos al dominio y bloqueados con GPO en los terminales de planta | Software de gestión de producción y de etiquetas que solo funciona en Windows (supuesto) | Una licencia por equipo | Ubuntu Desktop: no ejecuta ese software. Windows 11 Enterprise LTSC: precio y disponibilidad N/C |
+| Informática | Anfitrión Ubuntu Desktop 26.04 LTS con una VM de Windows 11 Pro | Linux nativo para SSH, scripting y redes; la VM aporta las herramientas RSAT para administrar el dominio y permite reproducir incidencias de los puestos | Mantener dos sistemas y reservar RAM para la VM (16 GB en el anfitrión: 6 GB para Ubuntu y 4 GB para la VM, supuesto) | Todo Ubuntu: no administra el dominio con las herramientas de Windows Server. Todo Windows: pierde la línea de comandos Linux |
+| Producción | Windows 11 Pro, unidos al dominio y bloqueados con GPO en los terminales de planta | Software de gestión de producción y de etiquetas que solo funciona en Windows (supuesto) | Una licencia por equipo | Ubuntu Desktop: no ejecuta ese software. Windows 11 Enterprise LTSC: solo por licencia por volumen y Microsoft lo reserva a dispositivos de propósito específico |
 | Administración | Windows 11 Pro | ERP, Excel con macros, certificados digitales y facturación electrónica | Cada versión de Windows 11 dura 24 meses y hay que actualizar | Ubuntu Desktop: Excel con macros y certificados no garantizados |
 | Comercial | Windows 11 Pro con BitLocker | Portátiles fuera de la oficina: disco cifrado y VPN contra el cortafuegos | Gestionar las claves de recuperación de BitLocker | — |
 
@@ -204,7 +205,15 @@ Ciclo de vida y requisitos contrastados con Microsoft Learn, microsoft.com y ubu
 
 Windows 11 Pro cubre los puestos de trabajo porque el software de gestión de la empresa lo exige y se integra con el dominio. Ubuntu Desktop se reserva para Informática, donde aporta herramientas nativas de red y scripting. **Windows 10 se descarta** en todos los departamentos porque ya no recibe actualizaciones de seguridad.
 
-> **Pendiente de revisar (Mauro y Adam):** el borrador inicial asignaba Windows 10 a Producción, un anfitrión Windows 11 con VM de Ubuntu a Dirección y un anfitrión Ubuntu con VM de Windows 10 y 11 a Informática. La tabla de contraste lo sustituye por la asignación anterior; falta confirmar si se mantienen las máquinas virtuales en Dirección e Informática.
+**Asignación final y cambios respecto al borrador inicial:**
+
+| Departamento | Borrador inicial | Decisión final | Motivo del cambio |
+|---|---|---|---|
+| Producción | Windows 10 | Windows 11 Pro | Windows 10 no recibe parches desde el 14/10/2025; un terminal de planta sin parches es un riesgo para toda la LAN |
+| Comercial | Windows 11 | Windows 11 Pro | Sin cambio; se concreta la edición Pro (dominio y BitLocker) |
+| Administración | Windows 11 | Windows 11 Pro | Sin cambio; se concreta la edición Pro |
+| Dirección | Anfitrión Windows 11 con VM de Ubuntu | Windows 11 Pro sin VM | Ninguna tarea de Dirección necesita Linux; la VM solo añadiría un sistema más que parchear y RAM consumida |
+| Informática | Anfitrión Ubuntu con VM de Windows 10 y 11 | Anfitrión Ubuntu 26.04 LTS con VM de Windows 11 Pro | Se elimina la VM de Windows 10 por falta de soporte; la de Windows 11 cubre las herramientas RSAT y las pruebas |
 
 ## Datos
 
@@ -272,17 +281,15 @@ El PC tiene 16 GB de RAM, el doble del mínimo oficial. Se usa la 25.10.7 porque
 
 ## Datos pendientes (N/C)
 
-| Dato | Función | Responsable | Propuesta de comprobación |
+Todos los datos de la Tarea 1 están contrastados. Los siguientes solo se pueden obtener sobre el material del aula y se completan en las tareas indicadas:
+
+| Dato | Función | Tarea | Propuesta de comprobación |
 |---|---|---|---|
-| Motivo de descarte de pfSense | Comunicaciones | Iván | Comparar funciones y licencia en docs.netgate.com con las de OPNsense |
-| Duración del soporte de cada serie de OPNsense | Comunicaciones | Iván | Consultar el ciclo de vida en opnsense.org o preguntar en su foro oficial |
-| Versión de RouterOS instalada en los routers del aula | Comunicaciones | Iván | Ejecutar `/system resource print` en cada router (Tarea 2) |
-| Motivo de descarte de XCP-ng | Virtualización | Juan Pablo | Comparar gestión (Xen Orchestra), clúster y alta disponibilidad en docs.xcp-ng.org con Proxmox VE |
-| Soporte de VT-x/AMD-V y SLAT en los PC del aula | Virtualización | Juan Pablo | Comprobar en la BIOS/UEFI y con `lscpu` o `systeminfo` (Tarea 2) |
-| Precio de Windows 11 Pro y de Windows 11 Enterprise LTSC | Clientes | Mauro y Adam | Consultar la tienda oficial de Microsoft o el proveedor del centro |
-| Aplicaciones reales de cada departamento (ERP, software de producción) | Clientes | Mauro y Adam | Confirmar con el profesorado (gerencia) y anotarlo en [01-requisits](01-requisits.md) |
-| CPU, número y tamaño de discos del PC de datos | Datos | Álvaro | Inventario de la Tarea 2 |
-| Hash de las ISO descargadas | Todas | Cada responsable | Anotar el SHA-256 publicado y el calculado con `sha256sum` al descargar |
+| Versión de RouterOS instalada en los routers del aula | Comunicaciones | Tarea 2 | Ejecutar `/system resource print` en cada router |
+| Soporte de VT-x/AMD-V y SLAT en los PC del aula | Virtualización | Tarea 2 | Comprobar en la BIOS/UEFI y con `lscpu` (Linux) o `systeminfo` (Windows) |
+| TPM 2.0 y arranque seguro en los equipos cliente | Clientes | Tarea 2 | `tpm.msc` y `msinfo32` en Windows; `ls /dev/tpm*` y `mokutil --sb-state` en Linux |
+| CPU, número y tamaño de discos del PC de datos | Datos | Tarea 2 | Inventario con `lsblk`, `smartctl -a` y la ficha del fabricante |
+| Hash de las ISO descargadas | Todas | Tarea 5 (instalación) | Comparar el SHA-256 publicado con el calculado con `sha256sum` |
 
 ## Fuentes
 
@@ -294,24 +301,32 @@ El PC tiene 16 GB de RAM, el doble del mínimo oficial. Se usa la 25.10.7 porque
 | OPNsense – requisitos de hardware | 26.7 | https://docs.opnsense.org/manual/hardware.html | 19/10/2026 |
 | OPNsense – versiones Community Edition | 26.7.7 | https://docs.opnsense.org/CE_releases.html | 19/10/2026 |
 | OPNsense – descarga | 26.7 | https://opnsense.org/download/ | 19/10/2026 |
-| pfSense CE – requisitos mínimos | N/C | https://docs.netgate.com/pfsense/en/latest/hardware/minimum-requirements.html | 19/10/2026 |
+| pfSense CE – requisitos mínimos | 2.9.0 | https://docs.netgate.com/pfsense/en/latest/hardware/minimum-requirements.html | 19/10/2026 |
+| pfSense – versiones CE y Plus | 2.9.0 | https://docs.netgate.com/pfsense/en/latest/releases/versions.html | 19/10/2026 |
+| pfSense Plus – funciones exclusivas | — | https://docs.netgate.com/pfsense/en/latest/general/plus.html | 19/10/2026 |
+| OPNsense – calendario de actualizaciones | 26.7 | https://docs.opnsense.org/manual/updates.html | 19/10/2026 |
 | Proxmox VE – requisitos | 9.x | https://pve.proxmox.com/wiki/System_Requirements | 19/10/2026 |
 | Proxmox VE – versiones, ciclo de soporte y licencia | 9.2 | https://pve.proxmox.com/wiki/FAQ · https://pve.proxmox.com/wiki/Roadmap | 19/10/2026 |
 | Proxmox VE – descarga y suscripción | 9.2 | https://www.proxmox.com/en/downloads · https://proxmox.com | 19/10/2026 · 13/10/2026 |
 | Hyper-V – requisitos | Windows Server 2025 | https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/host-hardware-requirements | 19/10/2026 |
 | VMware ESXi gratuito (Broadcom KB) | 8.0 U3e | https://knowledge.broadcom.com/external/article/399823 | 19/10/2026 |
+| VMware ESXi – requisitos de hardware | 8.0 | https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/8-0/esx-installation-and-setup/installing-and-setting-up-esxi-install/esxi-requirements-install/esxi-hardware-requirements-install.html | 19/10/2026 |
 | XCP-ng – requisitos | 8.3 LTS | https://docs.xcp-ng.org/installation/requirements/ | 19/10/2026 |
+| XCP-ng – gestión | 8.3 LTS | https://docs.xcp-ng.org/management/ | 19/10/2026 |
+| XCP-ng – alta disponibilidad | 8.3 LTS | https://docs.xcp-ng.org/management/ha/ | 19/10/2026 |
 | VirtualBox – licencias y descarga | 7.2.20 | https://www.virtualbox.org/wiki/Licensing_FAQ · https://www.virtualbox.org/wiki/Downloads | 19/10/2026 |
 | Windows Server (AD DS) | 2025 | https://learn.microsoft.com · https://microsoft.com | 13/10/2026 |
 | Windows Server – evaluación y descarga | 2025 | https://www.microsoft.com/en-us/evalcenter/evaluate-windows-server-2025 | 19/10/2026 |
 | Samba AD – controlador de dominio | 4.25 | https://wiki.samba.org/index.php/Setting_up_Samba_as_an_Active_Directory_Domain_Controller | 19/10/2026 |
 | Samba – planificación de versiones | 4.25 | https://wiki.samba.org/index.php/Samba_Release_Planning | 19/10/2026 |
-| FreeIPA – descripción y descarga | N/C | https://www.freeipa.org/page/About · https://www.freeipa.org/page/Downloads | 19/10/2026 |
+| FreeIPA – descripción, versión y descarga | 4.13.4 | https://www.freeipa.org · https://www.freeipa.org/page/About · https://www.freeipa.org/page/Downloads | 19/10/2026 |
 | Ubuntu – SSSD con Active Directory | 26.04 LTS | https://ubuntu.com/server/docs/how-to/sssd/with-active-directory/ | 19/10/2026 |
 | Red Hat – conectar RHEL a AD con SSSD | RHEL 9 | https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/integrating_rhel_systems_directly_with_windows_active_directory/connecting-rhel-systems-directly-to-ad-using-sssd_integrating-rhel-systems-directly-with-active-directory | 19/10/2026 |
 | Windows 11 – requisitos | 26H2 | https://www.microsoft.com/en-us/windows/windows-11-specifications | 19/10/2026 |
 | Windows 11 Home y Pro – ciclo de vida | 25H2 / 26H2 | https://learn.microsoft.com/en-us/lifecycle/products/windows-11-home-and-pro | 19/10/2026 |
 | Windows 11 – descarga | 26H2 | https://www.microsoft.com/en-us/software-download/windows11 | 19/10/2026 |
+| Windows 11 Pro – precio (Microsoft Store España) | 26H2 | https://www.microsoft.com/es-es/d/windows-11-pro/dg7gmgf0d8h4 | 19/10/2026 |
+| Windows Enterprise LTSC – descripción | LTSC 2024 | https://learn.microsoft.com/en-us/windows/whats-new/ltsc/overview | 19/10/2026 |
 | Windows 10 Home y Pro – ciclo de vida | 22H2 | https://learn.microsoft.com/en-us/lifecycle/products/windows-10-home-and-pro | 19/10/2026 |
 | Ubuntu – ciclo de versiones | 26.04 LTS | https://ubuntu.com/about/release-cycle | 19/10/2026 |
 | Ubuntu Desktop – descarga y requisitos | 26.04.1 LTS | https://ubuntu.com/download/desktop | 19/10/2026 |
@@ -329,9 +344,20 @@ El PC tiene 16 GB de RAM, el doble del mínimo oficial. Se usa la 25.10.7 porque
 
 ## Uso de IA
 
-Se usó un asistente de IA (Claude) para dos cosas:
+Se usó un asistente de IA (Claude) para tres cosas:
 
 1. **Formato:** pasar el estudio del grupo a Markdown, ordenar cada función en los cuatro pasos y detectar huecos frente al enunciado.
-2. **Búsqueda de fuentes oficiales** (19/10/2026) para los datos que faltaban: versiones, requisitos, licencias, ciclos de soporte y URL de descarga. Cada dato procede de la página oficial citada en [Fuentes](#fuentes). Cada responsable debe abrir las URL de su sección y confirmar los datos antes de la entrega.
+2. **Búsqueda de fuentes oficiales** (19/10/2026) para los datos que faltaban: versiones, requisitos, licencias, ciclos de soporte, precios y URL de descarga. Cada dato procede de la página oficial citada en [Fuentes](#fuentes).
+3. **Revisión de los motivos de descarte.** Dos motivos del borrador no se sostenían con los datos oficiales y se sustituyeron por otros con fuente:
+   - pfSense: el borrador decía «requiere más recursos», pero pide menos RAM que OPNsense. Se cambia por la irregularidad de sus versiones y las funciones reservadas a pfSense Plus.
+   - VMware y XCP-ng: el borrador decía «faltan datos oficiales», pero sí los hay. Se cambia por la falta de alta disponibilidad en ESXi gratuito y la dependencia de Xen Orchestra en XCP-ng.
 
-Resultado del contraste: dos motivos de descarte del borrador no se sostienen con los datos oficiales y quedan marcados como pendientes (pfSense en Comunicaciones; VMware y XCP-ng en Virtualización). También se mantuvieron dos propuestas de la IA: unificar Comunicaciones en una topología mixta y señalar la contradicción de Clientes entre la lista inicial y la tabla de contraste. Las decisiones siguen siendo del grupo.
+   En Clientes se resolvió la contradicción entre la lista inicial y la tabla de contraste (ver la asignación final).
+
+Datos que aporta la experiencia técnica y no una fuente concreta:
+- la administración de MikroTik con Winbox;
+- que Hyper-V y XCP-ng no ofrecen contenedores LXC;
+- el criterio de priorizar la regularidad de los parches en un cortafuegos;
+- quitar la VM de Ubuntu en Dirección.
+
+Cada responsable revisa su sección y la defiende en el debate de clase.

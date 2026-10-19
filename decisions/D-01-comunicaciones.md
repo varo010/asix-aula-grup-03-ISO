@@ -7,5 +7,5 @@
 - **Opción escogida:** topología mixta: MikroTik para routing y VPN, OPNsense para seguridad perimetral.
 - **Limitaciones aceptadas:** dos plataformas que administrar; curva de aprendizaje de MikroTik; OPNsense necesita más CPU y RAM que un router dedicado.
 - **Qué obligaría a revisarla:** que el inventario no tenga hardware para OPNsense, o que las pruebas de la Tarea 7 muestren un cuello de botella.
-- **Pendiente:** el descarte de pfSense «por requerir más recursos» no se sostiene: según Netgate pide 1 GB de RAM, frente a 3 GB de OPNsense. Hay que buscar otro motivo con fuente o reconsiderarlo.
-- **Uso de IA (si lo hubo):** formato y búsqueda de fuentes oficiales; propuso unificar en topología mixta la elección de MikroTik y OPNsense, que el borrador presentaba por separado. Se mantuvo.
+- **Alternativas descartadas:** Cisco, Fortinet y Palo Alto por licencias recurrentes. pfSense CE pide menos RAM que OPNsense, pero se descarta porque sus versiones son irregulares (de la 2.7.2 a la 2.8.0 pasaron casi 18 meses) y Netgate reserva funciones a pfSense Plus.
+- **Uso de IA (si lo hubo):** formato, búsqueda de fuentes y revisión del descarte de pfSense (el motivo del borrador, «más recursos», contradecía la fuente oficial y se cambió); propuso unificar en topología mixta la elección de MikroTik y OPNsense, que el borrador presentaba por separado. Se mantuvo.

@@ -7,5 +7,5 @@
 - **Opción escogida:** Proxmox VE.
 - **Limitaciones aceptadas:** el soporte oficial es de pago; la alta disponibilidad exige 3 nodos y almacenamiento compartido.
 - **Qué obligaría a revisarla:** que los PC del aula no soporten virtualización por hardware (Tarea 2), o que no haya 3 nodos ni almacenamiento compartido.
-- **Pendiente:** el borrador descartaba VMware y XCP-ng por falta de datos oficiales, pero ya los hay. VMware: la versión gratuita no tiene alta disponibilidad ni vCenter. XCP-ng: falta un motivo de descarte con fuente.
-- **Uso de IA (si lo hubo):** formato y búsqueda de fuentes oficiales; detectó que el motivo de descarte de VMware y XCP-ng había quedado desfasado.
+- **Alternativas descartadas:** Hyper-V por licencia de Windows Server; VMware ESXi gratuito por no tener alta disponibilidad ni vCenter (la versión completa es de suscripción); XCP-ng porque para gestionar 3 nodos y hacer copias necesita Xen Orchestra desplegado aparte y no ofrece contenedores; VirtualBox por no estar pensado para servidores.
+- **Uso de IA (si lo hubo):** formato y búsqueda de fuentes oficiales; el motivo de descarte de VMware y XCP-ng («faltan datos oficiales») se sustituyó por motivos con fuente.
