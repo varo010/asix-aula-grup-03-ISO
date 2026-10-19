@@ -19,7 +19,7 @@ Servidor de comunicaciones, virtualización (Proxmox VE), servidores empresarial
 |---|---|---|---|
 | Predicciones | [00-prediccions](docs/00-prediccions.md) | Pendiente | Todos |
 | Requisitos | [01-requisits](docs/01-requisits.md) | Ejecutado | Todos |
-| Inventario | [02-inventari](docs/02-inventari.md) | Pendiente | Mauro |
+| Inventario | [02-inventari](docs/02-inventari.md) | En curso | Mauro |
 | Sistemas | [03-sistemes](docs/03-sistemes.md) | Ejecutado | Todos |
 | Diseño | [04-disseny](docs/04-disseny.md) | Pendiente | Mauro |
 | Recursos | [05-recursos](docs/05-recursos.md) | Pendiente | Mauro |
