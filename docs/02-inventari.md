@@ -70,14 +70,6 @@ Desde la terminal del router (Winbox → *New Terminal*, o SSH).
 
 Comandos: `/interface ethernet print detail`, `/interface ethernet monitor ether1`.
 
-### Configuración de red actual
-
-| Interfaz | Dirección IP / máscara | Origen (estática o DHCP) | Observaciones |
-|---|---|---|---|
-| | | | |
-
-Comandos: `/ip address print`, `/ip dhcp-client print`, `/ip route print`. Para la evidencia: `/export file=t2-mikrotik-config-inicial`, revisando antes que no contenga contraseñas.
-
 ## 3. Switch: TP-Link Omada SG3428XMPP
 
 ### Ficha del modelo
