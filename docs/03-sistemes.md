@@ -232,7 +232,7 @@ Responsable: Álvaro.
 | N7 | Ofrecer almacenamiento NFS a Proxmox para copias de VM e ISOs | Supuesto |
 | N8 | Sin coste de licencias | Supuesto: presupuesto N/C |
 
-Hardware disponible: PC dedicado con 16 GB de RAM. CPU, número y tamaño de discos: N/C.
+Hardware disponible: PC dedicado con 16 GB de RAM (supuesto de la Tasca 1). **Medido en la Tasca 2:** Ticnova E70 SFF con Core i3-4160, 8 GB de RAM y un disco de ~500 GB; ver [02-inventari](02-inventari.md#4-ordenadores-ticnova-e70-sff).
 
 ### 2. Comparación
 
@@ -269,7 +269,7 @@ Se elige **TrueNAS Community Edition 25.10.7** porque es la única opción que c
 | N6 | Alertas de discos y pools |
 | N8 | Open source, sin coste |
 
-El PC tiene 16 GB de RAM, el doble del mínimo oficial. Se usa la 25.10.7 porque es la que el fabricante recomienda para uso general; la 27 sigue en fase de pruebas.
+Con el supuesto de 16 GB, el PC tendría el doble del mínimo oficial; los PC reales tienen 8 GB, justo el mínimo (ver [D-05](../decisions/D-05-datos.md)). Se usa la 25.10.7 porque es la que el fabricante recomienda para uso general; la 27 sigue en fase de pruebas.
 
 - **Inconvenientes aceptados:** disco de arranque dedicado que no guarda datos, soporte solo de comunidad, RAM sin ECC en el laboratorio y curva de aprendizaje de ZFS.
 - **Descartados:**
