@@ -14,9 +14,9 @@ Inventario del material que nos ha dado el profesorado para el entorno de prueba
 
 | ID | Tipo | Fabricante y modelo | Características principales (ficha oficial) | Cantidad | Estado |
 |---|---|---|---|---|---|
-| RT-01 | Router | MikroTik hEX (RB750Gr3) | CPU MT7621A (2 núcleos, 880 MHz, MMIPS), 256 MB de RAM, 5 puertos Gigabit, RouterOS licencia nivel 4 | N/C (contar) | Pendiente de probar |
+| RT-01 | Router | MikroTik hEX (RB750Gr3), revisión r4 | CPU MT7621 (MIPS 1004Kc, 880 MHz, MMIPS), 256 MiB de RAM, 16 MiB de flash, 5 puertos Gigabit, RouterOS 7.20.8 licencia nivel 4 | N/C (contar) | Funciona (datos medidos en el apartado 2) |
 | SW-01 | Switch gestionable | TP-Link Omada SG3428XMPP | 24 puertos Gigabit PoE+/PoE++ (500 W) + 4 SFP+ de 10 Gb, 4K VLAN, gestión web/CLI/SNMP, rack 1U | N/C (contar) | Pendiente de probar |
-| PC-01… | Ordenador de sobremesa | Dell OptiPlex 790 (minitorre) | Intel Core i5-2400 (4 núcleos, 3,1–3,4 GHz, VT-x con EPT), DDR3 hasta 16 GB, red Intel 82579LM Gigabit, TPM 1.2, fuente de 265 W | N/C (contar) | Pendiente de probar |
+| PC-01… | Ordenador de sobremesa | Ticnova E70 SFF (torre vertical) | Intel Core i3-4160 (2 núcleos / 4 hilos, 3,6 GHz, VT-x con EPT, sin VT-d), 8 GB DDR3, disco de ~500 GB, gráficos Intel HD integrados | N/C (contar) | Funciona (PC-01 medido en el apartado 4) |
 | CAB | Latiguillos de red | Cable patch RJ45 Cat5e, 350 MHz, conector moldeado, gris | Hasta 1 Gb/s (1000BASE-T) | N/C (contar) | Pendiente de probar |
 | OTR | Otros materiales | — | Adaptador de corriente del hEX (24 V, 0,38 A), cables de alimentación y kit de rack del switch | N/C (contar) | Pendiente de probar |
 
@@ -29,7 +29,7 @@ Estado: *Funciona* · *Funciona con incidencias* · *Averiado* · *Pendiente de 
 | Dato | Valor (ficha oficial) |
 |---|---|
 | Código de producto | RB750Gr3 (hEX) |
-| Procesador | MediaTek MT7621A, 2 núcleos / 4 hilos, 880 MHz |
+| Procesador | MediaTek MT7621A (MIPS 1004Kc), 2 núcleos / 4 hilos, 880 MHz |
 | Arquitectura | MMIPS: **no es x86**, solo ejecuta RouterOS |
 | RAM | 256 MB |
 | Almacenamiento | 16 MB de flash + ranura microSD |
@@ -48,27 +48,32 @@ Desde la terminal del router (Winbox → *New Terminal*, o SSH).
 
 | Dato | Valor medido | Comando |
 |---|---|---|
-| Número de serie | | `/system routerboard print` |
-| Modelo detectado | | `/system routerboard print` |
-| Versión de RouterOS | | `/system resource print` |
-| Canal de actualización | | `/system package update print` |
-| Firmware RouterBOOT (actual / disponible) | | `/system routerboard print` |
-| RAM libre en reposo | | `/system resource print` |
-| Uso de CPU en reposo | | `/system resource print` |
-| Temperatura y voltaje | | `/system health print` |
-| Licencia | | `/system license print` |
+| Número de serie | HMF0B3M3EK8 (leído de una foto poco nítida: **verificar en el equipo**) | `/system routerboard print` |
+| Modelo detectado | hEX, RB750Gr3, revisión r4 | `/system routerboard print` |
+| Versión de RouterOS | 7.20.8 (long-term), compilada el 30/01/2026; software de fábrica 6.46.3 | `/system resource print` |
+| Arquitectura y CPU | mmips; MIPS 1004Kc V2.15 a 880 MHz, RouterOS muestra 4 CPU (los 2 núcleos × 2 hilos de la ficha) | `/system resource print` |
+| Canal de actualización | stable, versión instalada 7.20.8 | `/system package update print` |
+| Firmware RouterBOOT (fábrica / actual / disponible) | mt7621L · 7.20.8 / 7.20.8 / 7.20.8 (al día) | `/system routerboard print` |
+| RAM libre en reposo | 199,8 MiB libres de 256 MiB | `/system resource print` |
+| Almacenamiento libre | 5,2 MiB libres de 16 MiB | `/system resource print` |
+| Uso de CPU en reposo | 0 % | `/system resource print` |
+| Tiempo encendido | 1 semana y 7 min | `/system resource print` |
+| Temperatura y voltaje | 27 °C · 24,4 V | `/system health print` |
+| Licencia | software-id 17UE-7K4S, nivel 4 | `/system license print` |
 
 ### Puertos
 
-| Puerto | Velocidad máxima | Velocidad negociada | Conectado a | Estado del enlace |
-|---|---|---|---|---|
-| ether1 (PoE-in) | 1 Gb/s | | | |
-| ether2 | 1 Gb/s | | | |
-| ether3 | 1 Gb/s | | | |
-| ether4 | 1 Gb/s | | | |
-| ether5 | 1 Gb/s | | | |
+Los 5 puertos tienen MTU 1500 (L2MTU 1596), autonegociación activada anunciando 10/100/1000 en half y full dúplex, ARP activado y *loop-protect* por defecto (desactivado). Sus MAC son correlativas, de D0:EA:11:A0:2A:03 (ether1) a D0:EA:11:A0:2A:07 (ether5).
 
-Comandos: `/interface ethernet print detail`, `/interface ethernet monitor ether1`.
+| Puerto | MAC | Velocidad máxima | Velocidad negociada | Función | Estado del enlace |
+|---|---|---|---|---|---|
+| ether1 (PoE-in) | D0:EA:11:A0:2A:03 | 1 Gb/s | 1 Gb/s full dúplex (autonegociación completada, control de flujo desactivado) | Independiente | Conectado (*running*), link-ok |
+| ether2 | D0:EA:11:A0:2A:04 | 1 Gb/s | N/C (`monitor ether2`) | Esclavo de `switch1` | Conectado (*running*) |
+| ether3 | D0:EA:11:A0:2A:05 | 1 Gb/s | — | Esclavo de `switch1` | Sin enlace |
+| ether4 | D0:EA:11:A0:2A:06 | 1 Gb/s | — | Esclavo de `switch1` | Sin enlace |
+| ether5 | D0:EA:11:A0:2A:07 | 1 Gb/s | — | Esclavo de `switch1` | Sin enlace |
+
+Qué equipo hay al otro lado de ether1 y ether2: N/C (seguir el cable). Comandos: `/interface ethernet print detail`, `/interface ethernet monitor ether1`.
 
 ### Configuración de red actual
 
@@ -128,47 +133,45 @@ Comandos: `/ip address print`, `/ip dhcp-client print`, `/ip route print`. Para 
 
 Total: ___ puertos ocupados · ___ puertos libres. Comando: `show interface status`.
 
-## 4. Ordenadores: Dell OptiPlex 790 (minitorre)
+## 4. Ordenadores: Ticnova E70 SFF
 
 ### Ficha del modelo
 
-| Dato | Valor (ficha oficial) |
+Ticnova Quality Team SL fabrica el E70 en España. Del procesador hay ficha oficial de Intel; los datos de la placa base (chipset, ranuras de RAM, puertos SATA y USB, TPM) quedan pendientes de `sudo dmidecode -t baseboard`.
+
+| Dato | Valor |
 |---|---|
-| Formato | Minitorre |
-| Procesador | Intel Core i5-2400 (2.ª generación, «Sandy Bridge», 2011): 4 núcleos / 4 hilos, 3,10 GHz (turbo 3,40 GHz), 6 MB de caché, 95 W |
-| Virtualización | Intel VT-x, VT-x con EPT (SLAT) y VT-d |
-| Chipset | Intel Q65 (serie 6 Express) |
-| Memoria | 4 ranuras DDR3 1333 MHz sin ECC; **máximo 16 GB** según Dell (4 × 4 GB) |
-| Gráficos | Intel HD Graphics 2000 integrada (VGA y DisplayPort) |
-| Almacenamiento | 3 puertos SATA 2.0 (3 Gb/s) + 1 SATA 3.0 (6 Gb/s); 2 bahías de 3,5" y 2 bahías de 5,25" |
-| Red | Intel 82579LM Gigabit Ethernet (10/100/1000) |
-| Seguridad | TPM 1.2 integrado en placa (no admite TPM 2.0) |
-| USB | USB 2.0 (sin USB 3.0) |
-| Ranuras de expansión | 4 |
-| Fuente de alimentación | 265 W, 100–240 V |
-| Configuración de referencia | SSD de 256 GB, Windows 10 Pro, grabadora DVD; RAM de 8 o 16 GB según la unidad |
+| Formato | SFF (formato pequeño), en posición de torre vertical |
+| Procesador | Intel Core i3-4160 (4.ª generación, «Haswell», 2014): 2 núcleos / 4 hilos, 3,60 GHz sin turbo, 3 MB de caché, 54 W |
+| Virtualización | Intel VT-x y VT-x con EPT (SLAT); **sin VT-d** (no permite pasar dispositivos PCI a una VM) |
+| Memoria | DDR3/DDR3L 1333/1600; el procesador admite hasta 32 GB, pero el máximo real depende de la placa: N/C |
+| Gráficos | Intel HD Graphics 4400 integrada |
+| Placa base y chipset | N/C (`sudo dmidecode -t baseboard`) |
+| TPM | N/C (`ls /dev/tpm*` y BIOS) |
 
 ### Datos de cada unidad
 
-Una columna por equipo; se añaden columnas si hay más.
+Una columna por equipo; se añaden columnas si hay más. PC-01 es el equipo `pc33-t226`.
 
-| Dato | PC-01 | PC-02 | PC-03 | PC-04 | PC-05 | Comando Linux | Comando Windows |
+| Dato | PC-01 (pc33-t226) | PC-02 | PC-03 | PC-04 | PC-05 | Comando Linux | Comando Windows |
 |---|---|---|---|---|---|---|---|
-| Etiqueta de servicio (Service Tag) | | | | | | `sudo dmidecode -s system-serial-number` | `Get-CimInstance Win32_BIOS` |
-| Uso previsto | | | | | | Diseño (Tasca 4) | Diseño (Tasca 4) |
-| CPU detectada | | | | | | `lscpu` | `Get-CimInstance Win32_Processor` |
-| VT-x activado en BIOS | | | | | | `grep -c vmx /proc/cpuinfo` | `systeminfo` |
-| RAM instalada | | | | | | `free -h` | `Get-CimInstance Win32_PhysicalMemory` |
-| Módulos y ranuras libres | | | | | | `sudo dmidecode -t memory` | `Get-CimInstance Win32_PhysicalMemory` |
-| Discos (modelo, tipo y capacidad) | | | | | | `lsblk -d -o NAME,MODEL,SIZE,ROTA,TRAN` | `Get-PhysicalDisk` |
-| Estado SMART | | | | | | `sudo smartctl -H -A /dev/sdX` | CrystalDiskInfo |
-| Sistema operativo instalado | | | | | | `cat /etc/os-release` | `winver` |
-| Velocidad de la tarjeta de red | | | | | | `ethtool <interfaz>` | `Get-NetAdapter` |
-| Versión de BIOS | | | | | | `sudo dmidecode -s bios-version` | `msinfo32` |
-| TPM activado (1.2) | | | | | | `ls /dev/tpm*` | `Get-Tpm` |
-| Unidad óptica | | | | | | `lsblk` | Explorador |
-| Periféricos | | | | | | `lsusb` | Administrador de dispositivos |
-| Estado general | | | | | | Inspección y arranque | Inspección y arranque |
+| Número de serie | N/C | | | | | `sudo dmidecode -s system-serial-number` | `Get-CimInstance Win32_BIOS` |
+| Placa base | N/C | | | | | `sudo dmidecode -t baseboard` | `Get-CimInstance Win32_BaseBoard` |
+| Uso previsto | N/C | | | | | Diseño (Tasca 4) | Diseño (Tasca 4) |
+| CPU detectada | Intel Core i3-4160, 2C/4T, 3,6 GHz | | | | | `lscpu` | `Get-CimInstance Win32_Processor` |
+| VT-x activado en BIOS | N/C | | | | | `grep -c vmx /proc/cpuinfo` | `systeminfo` |
+| RAM instalada | 8 GB DDR3 (7,64 GiB utilizables) | | | | | `free -h` | `Get-CimInstance Win32_PhysicalMemory` |
+| Módulos y ranuras libres | N/C | | | | | `sudo dmidecode -t memory` | `Get-CimInstance Win32_PhysicalMemory` |
+| Discos (modelo, tipo y capacidad) | ~500 GB; tipo (HDD o SSD) N/C | | | | | `lsblk -d -o NAME,MODEL,SIZE,ROTA,TRAN` | `Get-PhysicalDisk` |
+| Particiones | root 57,3 GiB (53 % usado) · home 381 GiB (6 % usado) · swap 512 MiB | | | | | `lsblk`, `df -h` | `Get-Partition` |
+| Estado SMART | N/C | | | | | `sudo smartctl -H -A /dev/sdX` | CrystalDiskInfo |
+| Sistema operativo instalado | LliureX 21 (21.250729.1), kernel 5.15.0-113-generic, 64 bits | | | | | `cat /etc/os-release`, `uname -r` | `winver` |
+| Red | eth1, 172.16.222.19 (red interna del aula); velocidad N/C | | | | | `ip -br a`, `ethtool eth1` | `Get-NetAdapter` |
+| Versión de BIOS | N/C | | | | | `sudo dmidecode -s bios-version` | `msinfo32` |
+| TPM | N/C | | | | | `ls /dev/tpm*` | `Get-Tpm` |
+| Gráficos | Intel HD integrada | | | | | `lspci \| grep VGA` | Administrador de dispositivos |
+| Periféricos | N/C | | | | | `lsusb` | Administrador de dispositivos |
+| Estado general | Funciona | | | | | Inspección y arranque | Inspección y arranque |
 
 ## 5. Cableado
 
@@ -202,12 +205,12 @@ Con los sistemas operativos instalados, se ejecutan pruebas para conocer el **es
 | PC-xx | RAM | Test de memoria | MemTest86+ | Arranque desde USB, 1 pasada | | | |
 | PC-xx | Disco | Capacidad y espacio libre | `df -h` / Explorador | — | | | |
 | PC-xx | Disco | Estado SMART | `smartctl -H -A` / CrystalDiskInfo | — | | | |
-| PC-xx | Disco | Lectura y escritura secuencial | `fio` / CrystalDiskMark | Sin otras cargas; anotar si el disco va a SATA 2.0 o 3.0 | | | |
+| PC-xx | Disco | Lectura y escritura secuencial | `fio` / CrystalDiskMark | Sin otras cargas; anotar si el disco es HDD o SSD | | | |
 | PC-xx | Red | Velocidad de enlace | `ethtool` / `Get-NetAdapter` | Conectado al switch | | | |
 | PC-xx | Red | Conectividad | `ping` a la puerta de enlace y entre equipos | LAN del grupo | | | |
 | PC-xx | Red | Rendimiento | `iperf3` entre dos PC | Mismo switch, sin otro tráfico | | | |
-| RT-01 | CPU y RAM | Uso en reposo | `/system resource print` | Sin tráfico | | | |
-| RT-01 | Red | Estado y velocidad de los puertos | `/interface ethernet monitor` | Enlaces conectados | | | |
+| RT-01 | CPU y RAM | Uso en reposo | `/system resource print` | Sin tráfico, 1 semana encendido | CPU 0 %; 199,8 MiB libres de 256 MiB; 27 °C | Sobra capacidad en reposo para RouterOS | N/C |
+| RT-01 | Red | Estado y velocidad de los puertos | `/interface ethernet monitor` | Enlaces conectados | ether1: link-ok, 1 Gb/s full dúplex; ether2 con enlace; ether3–5 sin enlace | Cableado y puerto ether1 correctos a velocidad máxima | N/C |
 | RT-01 | Red | Rendimiento de NAT | `iperf3` de un PC de la LAN a uno de la WAN de pruebas | Banco aislado | | | |
 | SW-01 | Red | Enlaces y velocidad | `show interface status` | Todos los equipos conectados | | | |
 
@@ -215,10 +218,10 @@ Con los sistemas operativos instalados, se ejecutan pruebas para conocer el **es
 
 | Equipo | Recurso | Por qué puede limitar (dato de la ficha) | Prueba que lo confirma |
 |---|---|---|---|
-| OptiPlex 790 | RAM | Máximo 16 GB DDR3 por equipo: limita cuántas VM caben en cada nodo de Proxmox | `free -h` y tabla de recursos de la Tasca 4 |
-| OptiPlex 790 | Disco | 3 de los 4 puertos SATA son 2.0 (3 Gb/s): un SSD conectado a ellos rinde por debajo de su capacidad | `fio` en el puerto SATA 3.0 y en uno SATA 2.0 |
-| OptiPlex 790 | USB | Solo USB 2.0: copias y arranques desde USB lentos | Copia de un fichero grande a USB |
-| OptiPlex 790 | Red | Una sola tarjeta Gigabit: gestión, clúster, almacenamiento y VM compartirían el mismo enlace | `iperf3` mientras se migra una VM (Tasca 7) |
+| Ticnova E70 | RAM | 8 GB por equipo (7,64 GiB utilizables): Proxmox y cada VM se reparten muy poca memoria | `free -h` y tabla de recursos de la Tasca 4 |
+| Ticnova E70 | CPU | 2 núcleos / 4 hilos: pocas vCPU para repartir entre las VM de un nodo | `top` o `mpstat` con las VM arrancadas (Tasca 7) |
+| Ticnova E70 | Disco | Tipo de disco N/C: si es HDD, las VM y el ZFS de TrueNAS irán lentos | `lsblk -d -o NAME,ROTA` y `fio` |
+| Ticnova E70 | Red | Número de tarjetas N/C: si solo hay una, gestión, clúster, almacenamiento y VM compartirían el mismo enlace | `ip -br link` e `iperf3` mientras se migra una VM (Tasca 7) |
 | hEX RB750Gr3 | CPU | 880 MHz MIPS: el rendimiento con NAT, reglas de cortafuegos o VPN puede bajar del Gigabit | `iperf3` a través del router |
 
 ## 8. Impacto en el diseño y material que falta
@@ -227,17 +230,18 @@ Lo que el inventario obliga a revisar de las decisiones de la Tasca 1:
 
 | Hallazgo | Fuente | Decisión afectada | Consecuencia |
 |---|---|---|---|
-| El i5-2400 (2.ª generación) **no está en la lista de procesadores admitidos por Windows 11** (desde la 8.ª generación) y el OptiPlex 790 solo tiene **TPM 1.2** y no admite arranque seguro | Microsoft Learn, Dell | [D-04 Clientes](../decisions/D-04-clientes.md) | Windows 11 Pro sigue siendo la decisión para la empresa; en el aula solo se puede instalar **sin soporte oficial**, marcado como limitación del laboratorio |
-| El hEX es MMIPS (no x86) con 256 MB de RAM | MikroTik | [D-01 Comunicaciones](../decisions/D-01-comunicaciones.md) | OPNsense y el GNU/Linux con nftables (x86-64) no pueden ir en el hEX: van en un OptiPlex o en una VM de Proxmox |
-| Máximo 16 GB de RAM y Gigabit único por PC | Dell | [D-02 Virtualización](../decisions/D-02-virtualizacion.md) | Cada nodo admite pocas VM a la vez; la tabla de recursos de la Tasca 4 debe reservar memoria para Proxmox |
-| 16 GB de RAM sin ECC, 2 bahías de 3,5" y 4 puertos SATA (uno ocupado por el DVD) | Dell | [D-05 Datos](../decisions/D-05-datos.md) | TrueNAS cabe (mínimo 8 GB) con 1 disco de arranque + 2 de datos en espejo; hay que comprobar que haya discos para ello |
+| El i3-4160 (4.ª generación) **no está en la lista de procesadores admitidos por Windows 11** (desde la 8.ª generación); TPM 2.0 y arranque seguro: N/C | Intel, Microsoft Learn | [D-04 Clientes](../decisions/D-04-clientes.md) | Windows 11 Pro sigue siendo la decisión para la empresa; en el aula solo se puede instalar **sin soporte oficial**, marcado como limitación del laboratorio |
+| El hEX es MMIPS (no x86) con 256 MiB de RAM y 16 MiB de flash | MikroTik, medido | [D-01 Comunicaciones](../decisions/D-01-comunicaciones.md) | OPNsense y el GNU/Linux con nftables (x86-64) no pueden ir en el hEX: van en un Ticnova E70 o en una VM de Proxmox |
+| 8 GB de RAM y 2 núcleos por PC; VT-x con EPT pero sin VT-d | Intel, medido | [D-02 Virtualización](../decisions/D-02-virtualizacion.md) | Proxmox funciona, pero cada nodo admite muy pocas VM a la vez; la Tasca 4 debe reservar memoria para el anfitrión y no puede pasar dispositivos PCI a las VM |
+| 8 GB de RAM: justo el mínimo oficial de TrueNAS | Medido, TrueNAS | [D-05 Datos](../decisions/D-05-datos.md) | TrueNAS cabe solo en un PC dedicado (no en una VM de 8 GB); hay que comprobar los discos disponibles para el espejo |
 | El switch tiene VLAN, gestión y PoE de sobra | TP-Link | [D-01 Comunicaciones](../decisions/D-01-comunicaciones.md) | Permite separar redes de gestión, clúster y clientes por VLAN (Tasca 4) |
 
 | Material que falta | Por qué hace falta | Alternativa | Comunicado al profesorado |
 |---|---|---|---|
-| Discos para el espejo de TrueNAS (si las unidades solo traen el SSD de 256 GB) | Necesidad N3: tolerar la caída de un disco | Discos virtuales en una VM de TrueNAS (simulación identificada) | |
+| Discos para el espejo de TrueNAS (cada unidad trae un solo disco de ~500 GB, a confirmar) | Necesidad N3: tolerar la caída de un disco | Discos virtuales en una VM de TrueNAS (simulación identificada) | |
 | Segunda tarjeta de red por nodo | Separar el tráfico de clúster y almacenamiento del de las VM | VLAN en la única tarjeta | |
 | Módulos SFP+ o cables DAC | Usar los enlaces de 10 Gb del switch | Puertos Gigabit | |
+| Más RAM para los nodos de Proxmox (si la placa admite más de 8 GB) | Poder ejecutar varias VM por nodo | Repartir las VM entre más nodos | |
 | Equipos que cumplan los requisitos de Windows 11 | Clientes con soporte oficial | Instalación sin soporte en el aula, marcada como limitación | |
 
 ## Fuentes
@@ -246,14 +250,11 @@ Lo que el inventario obliga a revisar de las decisiones de la Tasca 1:
 |---|---|---|
 | MikroTik hEX (RB750Gr3) – ficha | https://mikrotik.com/product/RB750Gr3 | 19/10/2026 |
 | TP-Link Omada SG3428XMPP – ficha | https://www.omadanetworks.com/es/business-networking/omada-switch-access-plus/sg3428xmpp/ | 19/10/2026 |
-| Intel Core i5-2400 – especificaciones | https://www.intel.com/content/www/us/en/products/sku/52207/intel-core-i52400-processor-6m-cache-up-to-3-40-ghz/specifications.html | 19/10/2026 |
-| Dell OptiPlex 790 – guía técnica | https://i.dell.com/sites/doccontent/shared-content/data-sheets/en/Documents/optiplex-790-tech-guide.pdf | 19/10/2026 |
-| Dell OptiPlex 790 – guía de instalación | https://dl.dell.com/manuals/all-products/esuprt_desktop/esuprt_optiplex_desktop/optiplex-790_setup%20guide_en-us.pdf | 19/10/2026 |
-| Dell OptiPlex 790 – configuración de referencia | https://refurbishedpc.com/products/renewed-tower-computer-package-dell-optiplex-790-intel-quad-core-i5-2400-up-to-3-40-ghz-win-10-pro-dvd-rw-wifi-bluetooth-customize | 19/10/2026 |
-| OptiPlex 790 y Windows 11 (TPM 1.2, sin arranque seguro) – comunidad de Dell | https://www.dell.com/community/en/conversations/optiplex-desktops/optiplex-and-windows-11/647f95ccf4ccf8a8de8676c6 | 19/10/2026 |
+| Intel Core i3-4160 – especificaciones | https://www.intel.com/content/www/us/en/products/sku/77488/intel-core-i34160-processor-3m-cache-3-60-ghz/specifications.html | 20/10/2026 |
+| MikroTik hEX y Ticnova E70 (pc33-t226) – datos medidos en el aula | Salidas de RouterOS y del sistema del PC | 20/10/2026 |
 | Windows 11 – procesadores Intel admitidos | https://learn.microsoft.com/en-us/windows-hardware/design/minimum/supported/windows-11-supported-intel-processors | 19/10/2026 |
 | Cable patch Cat5e 350 MHz – referencia | https://www.infinitecables.com/products/molded-boot-custom-rj45-cat5e-350mhz-assembled-patch-cable-grey | 19/10/2026 |
 
 ## Uso de IA
 
-La lista de material sale de una conversación con ChatGPT sobre la Tasca 2: el grupo confirmó que los productos que identificó son el material real del aula. Claude (asistente de IA) completó las características con las fichas oficiales de cada fabricante y detectó el impacto en las decisiones de la Tasca 1 (apartado 8). Las cantidades y los datos de cada unidad se comprueban en el aula con los comandos indicados.
+La lista de material sale de una conversación con ChatGPT sobre la Tasca 2. Los datos medidos en el aula el 20/10/2026 corrigieron un error: los PC no son Dell OptiPlex 790, sino Ticnova E70 SFF con Core i3-4160 y 8 GB de RAM. Claude (asistente de IA) completó las características con las fichas oficiales de cada fabricante y detectó el impacto en las decisiones de la Tasca 1 (apartado 8). Las cantidades y los datos de cada unidad se comprueban en el aula con los comandos indicados.
