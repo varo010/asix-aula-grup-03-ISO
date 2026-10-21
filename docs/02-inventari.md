@@ -17,8 +17,8 @@ Inventario del material que nos ha dado el profesorado para el entorno de prueba
 | RT-01 | Router | MikroTik hEX (RB750Gr3), revisión r4 | CPU MT7621 (MIPS 1004Kc, 880 MHz, MMIPS), 256 MiB de RAM, 16 MiB de flash, 5 puertos Gigabit, RouterOS 7.20.8 licencia nivel 4 | N/C (contar) | Funciona (datos medidos en el apartado 2) |
 | SW-01 | Switch no gestionable (grande) | TP-Link TL-SG116 | 16 puertos Gigabit, sin VLAN ni gestión, QoS 802.1p/DSCP, carcasa metálica sin ventilador | 1 | Pendiente de probar |
 | SW-02… | Switch no gestionable (pequeño) | TP-Link LS1008G (LiteWave) | 8 puertos Gigabit, sin VLAN ni gestión, carcasa de plástico sin ventilador | N/C (contar) | Pendiente de probar |
-| PC-01 | Ordenador de sobremesa (horizontal) | APD ALDA+ (ALDA+C), placa Gigabyte B85M-DS3H-A | Intel Core i3-4160 (2 núcleos / 4 hilos, 3,6 GHz, VT-x con EPT, sin VT-d), 8 GB DDR3-1600 (ampliable a 32 GB), disco de ~500 GB, DVD | 1 | Funciona (medido en el apartado 4) |
-| PC-02 | Ordenador (torre vertical) | Ticnova E70 SFF | Por confirmar en el equipo; un ejemplar público del modelo lleva Core i3-8100 y 8 GB DDR4-2400 | 1 | Pendiente de probar |
+| PC-01 | Ordenador de sobremesa (horizontal) | APD ALDA+ (ALDA+C), placa Gigabyte B85M-DS3H-A | Intel Core i3-4160 (2 núcleos / 4 hilos, 3,6 GHz, VT-x con EPT, sin VT-d), 8 GB DDR3-1600 (ampliable a 32 GB), HDD Toshiba de 500 GB, DVD, 2 tarjetas de red (integrada + USB) | 1 | Funciona (medido en el apartado 4) |
+| PC-02 | Ordenador SFF (torre vertical) | Ticnova E70 SFF, placa ASRock H310CM-HDV | Intel Core i3-8100 (4 núcleos / 4 hilos, 3,6 GHz), 8 GB DDR4-2400 (ampliable a 32 GB), SSD de 256 GB, 3 SATA libres | 1 | Funciona (medido en el apartado 4) |
 | CAB | Latiguillos de red | Cable patch RJ45 Cat5e, 350 MHz, conector moldeado, gris | Hasta 1 Gb/s (1000BASE-T) | N/C (contar) | Pendiente de probar |
 | OTR | Otros materiales | — | Adaptadores de corriente del hEX (24 V, 0,38 A) y de los switches, cables de alimentación de los PC | N/C (contar) | Pendiente de probar |
 
@@ -75,7 +75,7 @@ Los 5 puertos tienen MTU 1500 (L2MTU 1596), autonegociación activada anunciando
 | ether4 | D0:EA:11:A0:2A:06 | 1 Gb/s | — | Esclavo de `switch1` | Sin enlace |
 | ether5 | D0:EA:11:A0:2A:07 | 1 Gb/s | — | Esclavo de `switch1` | Sin enlace |
 
-Qué equipo hay al otro lado de ether1 y ether2: N/C (seguir el cable). Comandos: `/interface ethernet print detail`, `/interface ethernet monitor ether1`.
+Qué equipo hay al otro lado de ether1 y ether2: N/C, se completa en la Tasca 3 (seguir el cable). Comandos: `/interface ethernet print detail`, `/interface ethernet monitor ether1`.
 
 ## 3. Switches: TP-Link TL-SG116 y LS1008G
 
@@ -98,6 +98,8 @@ Corregido el 21/10/2026: antes figuraba un TP-Link Omada SG3428XMPP (gestionable
 | Dimensiones | 286 × 111,7 × 25,4 mm | N/C |
 
 ### Datos de cada unidad
+
+Las tablas de unidades y puertos de los switches se completan en la Tasca 3 (rack e interconexión).
 
 No son gestionables: no tienen IP, firmware configurable ni VLAN. Los datos salen de la etiqueta inferior y de los LED.
 
@@ -133,43 +135,47 @@ Resumen de los dos equipos en [hardware-grupo3](hardware-grupo3.md).
 | Memoria | 4 ranuras DDR3; máximo 32 GB |
 | Gráficos | Intel HD Graphics 4400 integrada |
 
-### PC-02: Ticnova E70 SFF (pendiente de verificar)
+### PC-02: Ticnova E70 SFF
 
-Ticnova Quality Team SL fabrica el E70 en España. Los datos marcados *por confirmar* son de otro ejemplar del mismo modelo publicado en Geekbench, no de este equipo.
+Ticnova Quality Team SL fabrica el E70 en España. Datos comprobados en el equipo y en su BIOS el 21/10/2026.
 
 | Dato | Valor |
 |---|---|
 | Formato | SFF, en posición de torre vertical |
 | Orden de fabricación / número de serie | 701413 / 1720408949 |
-| Procesador (por confirmar) | Intel Core i3-8100 (8.ª generación, «Coffee Lake»): 4 núcleos / 4 hilos, 3,6 GHz |
-| Memoria (por confirmar) | 8 GB DDR4-2400 |
-| Gráficos (por confirmar) | Intel UHD Graphics 630 |
-| Conectividad | USB 3.0 frontal |
-| Comprobación pendiente | `sudo dmidecode -t system -t baseboard -t memory`, `lscpu`, `free -h`, `lsblk -d -o NAME,MODEL,SIZE,ROTA` |
+| Placa base | ASRock H310CM-HDV (chipset Intel H310, zócalo LGA1151 v2), BIOS P4.20P |
+| Procesador | Intel Core i3-8100 (8.ª generación, «Coffee Lake»): 4 núcleos / 4 hilos, 3,6 GHz, 6 MB de caché, 65 W |
+| Virtualización | Intel VT-x con EPT y VT-d (ficha de Intel) |
+| Memoria | 2 ranuras DDR4; máximo 32 GB |
+| Discos | 4 puertos SATA3 (SATA3_0 a SATA3_3) |
+| Gráficos | Intel UHD Graphics 630 integrada |
+| Conectividad | USB 3.0 frontal; Realtek Gigabit con arranque PXE |
 
 ### Datos de cada unidad
 
-Una columna por equipo; se añaden columnas si hay más. PC-01 es el APD ALDA+ `pc33-t226` y PC-02 el Ticnova E70.
+Una columna por equipo; se añaden columnas si hay más. PC-01 es el APD ALDA+ (hostname `PCG3`; antes `pc33-t226` con LliureX) y PC-02 el Ticnova E70.
 
-| Dato | PC-01 (pc33-t226) | PC-02 (Ticnova) | PC-03 | PC-04 | PC-05 | Comando Linux | Comando Windows |
+| Dato | PC-01 (PCG3) | PC-02 (Ticnova) | PC-03 | PC-04 | PC-05 | Comando Linux | Comando Windows |
 |---|---|---|---|---|---|---|---|
 | Número de serie | N/C | 1720408949 | | | | `sudo dmidecode -s system-serial-number` | `Get-CimInstance Win32_BIOS` |
-| Placa base | Gigabyte B85M-DS3H-A | N/C | | | | `sudo dmidecode -t baseboard` | `Get-CimInstance Win32_BaseBoard` |
-| Uso previsto | N/C | | | | | Diseño (Tasca 4) | Diseño (Tasca 4) |
-| CPU detectada | Intel Core i3-4160, 2C/4T, 3,6 GHz | | | | | `lscpu` | `Get-CimInstance Win32_Processor` |
-| VT-x activado en BIOS | N/C | | | | | `grep -c vmx /proc/cpuinfo` | `systeminfo` |
-| RAM instalada | 8 GB DDR3-1600 (7,64 GiB utilizables) | | | | | `free -h` | `Get-CimInstance Win32_PhysicalMemory` |
-| Módulos y ranuras libres | 1 módulo de 8 GB DDR3-1600 en ChannelB-DIMM1; 3 de 4 ranuras libres | N/C | | | | `sudo dmidecode -t memory` | `Get-CimInstance Win32_PhysicalMemory` |
-| Discos (modelo, tipo y capacidad) | ~500 GB; modelo y tipo (HDD o SSD) N/C | | | | | `lsblk -d -o NAME,MODEL,SIZE,ROTA,TRAN` | `Get-PhysicalDisk` |
-| Particiones | root 57,3 GiB (53 % usado) · home 381 GiB (6 % usado) · swap 512 MiB | | | | | `lsblk`, `df -h` | `Get-Partition` |
-| Estado SMART | N/C | | | | | `sudo smartctl -H -A /dev/sdX` | CrystalDiskInfo |
-| Sistema operativo instalado | LliureX 21 (21.250729.1), kernel 5.15.0-113-generic, 64 bits | | | | | `cat /etc/os-release`, `uname -r` | `winver` |
-| Red | Ethernet integrada: eth1, 172.16.222.19 (red del aula); velocidad N/C | | | | | `ip -br a`, `ethtool eth1` | `Get-NetAdapter` |
-| Versión de BIOS | N/C | | | | | `sudo dmidecode -s bios-version` | `msinfo32` |
-| TPM | N/C | | | | | `ls /dev/tpm*` | `Get-Tpm` |
-| Gráficos | Intel HD integrada | | | | | `lspci \| grep VGA` | Administrador de dispositivos |
-| Periféricos | N/C | | | | | `lsusb` | Administrador de dispositivos |
-| Estado general | Funciona | | | | | Inspección y arranque | Inspección y arranque |
+| Placa base | Gigabyte B85M-DS3H-A | ASRock H310CM-HDV | | | | `sudo dmidecode -t baseboard` | `Get-CimInstance Win32_BaseBoard` |
+| Uso | Cliente Lubuntu con VirtualBox (confirmado) | Servidor TrueNAS (previsto) | | | | Diseño (Tasca 4) | Diseño (Tasca 4) |
+| CPU detectada | Intel Core i3-4160, 2C/4T, 3,6 GHz | Intel Core i3-8100, 4C/4T, 3,6 GHz | | | | `lscpu` | `Get-CimInstance Win32_Processor` |
+| VT-x activado en BIOS | N/C (la CPU lo admite) | N/C (la CPU lo admite) | | | | `grep -c vmx /proc/cpuinfo` | `systeminfo` |
+| RAM instalada | 8 GB DDR3-1600 (7,64 GiB utilizables) | 8 GB DDR4-2400 | | | | `free -h` | `Get-CimInstance Win32_PhysicalMemory` |
+| Módulos y ranuras libres | 1 módulo de 8 GB DDR3-1600 en ChannelB-DIMM1; 3 de 4 ranuras libres | 1 módulo Hynix de 8 GB en DDR4_B1; ranura DDR4_A1 libre | | | | `sudo dmidecode -t memory` | `Get-CimInstance Win32_PhysicalMemory` |
+| Discos (modelo, tipo y capacidad) | `sda`: HDD Toshiba DT01ACA050, 500 GB (465,8 GiB), 7200 rpm, SATA 6 Gb/s | SSD SATA Silicon Power (SPCC) 256 GB en SATA3_0 (n.º de serie C63807991B6A00225529); SATA3_1–3 libres | | | | `lsblk -d -o NAME,MODEL,SIZE,ROTA,TRAN` | `Get-PhysicalDisk` |
+| Unidad óptica | `sr0`: regrabadora DVD ATAPI iHAS124 F | No | | | | `lsblk -d` | Explorador |
+| Particiones | N/C (reinstalado con Lubuntu) | — (TrueNAS ocupará el SSD entero) | | | | `lsblk`, `df -h` | `Get-Partition` |
+| Estado SMART | N/C | N/C | | | | `sudo smartctl -H -A /dev/sdX` | CrystalDiskInfo |
+| Sistema operativo instalado | Lubuntu (versión N/C) con VirtualBox | TrueNAS (previsto) | | | | `cat /etc/os-release`, `uname -r` | `winver` |
+| Red | `enp2s0`: NIC integrada, MAC 40:8d:5c:27:fe:73 · `enxb44bd6c64adc`: adaptador Ethernet USB, MAC b4:4b:d6:c6:4a:dc; IP pendiente de configurar; velocidad N/C | Realtek Gigabit integrada (PXE); MAC e IP N/C | | | | `ip -br link`, `ip -br a`, `ethtool enp2s0` | `Get-NetAdapter` |
+| Versión de BIOS | N/C | P4.20P (fecha corregida a 21/10/2026; vigilar la pila CR2032) | | | | `sudo dmidecode -s bios-version` | `msinfo32` |
+| TPM | N/C | N/C | | | | `ls /dev/tpm*` | `Get-Tpm` |
+| Gráficos | Intel HD Graphics 4400 integrada | Intel UHD Graphics 630 integrada | | | | `lspci \| grep VGA` | Administrador de dispositivos |
+| Fuente de alimentación | ~300 W (estimada para el formato; consumo real ~30–65 W) | ~180–300 W (estimada para un SFF; consumo real ~30–65 W) | | | | Etiqueta de la fuente | Etiqueta de la fuente |
+| Periféricos | Monitor, teclado y ratón compartidos (apartado 6) | Ninguno fijo: se administra por la web de TrueNAS | | | | `lsusb` | Administrador de dispositivos |
+| Estado general | Funciona | Funciona | | | | Inspección y arranque | Inspección y arranque |
 
 ## 5. Cableado
 
@@ -179,7 +185,7 @@ Una columna por equipo; se añaden columnas si hay más. PC-01 es el APD ALDA+ `
 
 - Cat5e admite **1000BASE-T (1 Gb/s) hasta 100 m**, suficiente para todos los puertos RJ45 del material.
 - El estado se comprueba con un comprobador de cables o con la velocidad negociada en los puertos (apartados 2 y 3).
-- Cada cable se etiqueta en sus dos extremos con su ID (Tasca 3).
+- Cada cable se etiqueta en sus dos extremos con su ID; la longitud y la cantidad se completan en la Tasca 3.
 
 ## 6. Otros materiales
 
@@ -188,7 +194,7 @@ Una columna por equipo; se añaden columnas si hay más. PC-01 es el APD ALDA+ `
 | OTR-01 | Adaptador de corriente del hEX | N/C | 24 V, 0,38 A | |
 | OTR-02 | Cables de alimentación de los PC | N/C | IEC C13 | |
 | OTR-03 | Adaptadores de corriente de los switches | N/C | TL-SG116: 12 V DC, 1 A; LS1008G: el suyo | |
-| OTR-04 | Teclados, ratones y monitores | N/C | | |
+| OTR-04 | Monitor, teclado y ratón | 1 de cada, compartidos | El monitor se usa con PC-01; PC-02 (TrueNAS) se administra por la web | Funciona |
 | OTR-05 | Regletas | N/C | | |
 
 ## 7. Diagnósticos (línea base)
@@ -217,8 +223,9 @@ Con los sistemas operativos instalados, se ejecutan pruebas para conocer el **es
 |---|---|---|---|
 | PC-01 | RAM | 8 GB (7,64 GiB utilizables) en un solo módulo, sin doble canal: Proxmox y cada VM se reparten muy poca memoria; ampliable a 32 GB | `free -h` y tabla de recursos de la Tasca 4 |
 | PC-01 | CPU | 2 núcleos / 4 hilos: pocas vCPU para repartir entre las VM de un nodo | `top` o `mpstat` con las VM arrancadas (Tasca 7) |
-| PC-01 | Disco | Tipo de disco N/C: si es HDD, las VM y el ZFS de TrueNAS irán lentos | `lsblk -d -o NAME,ROTA` y `fio` |
-| PC-01 y PC-02 | Red | Número de tarjetas N/C: si solo hay una, gestión, clúster, almacenamiento y VM compartirían el mismo enlace | `ip -br link` e `iperf3` mientras se migra una VM (Tasca 7) |
+| PC-01 | Disco | Es un HDD de 7200 rpm (Toshiba DT01ACA050): arranque, aplicaciones y VM de VirtualBox lentos con accesos aleatorios | `fio` (lectura y escritura aleatoria 4K) |
+| PC-02 | Red | Una sola tarjeta Gigabit: el acceso a la web de TrueNAS y la transferencia de datos comparten el enlace (PC-01 tiene dos: integrada y USB) | `iperf3` y copia de ficheros al NAS (Tasca 7) |
+| PC-02 | RAM | 8 GB es el mínimo de TrueNAS; ZFS usa la RAM libre como caché | `free -h` y estadísticas de ARC en TrueNAS |
 | hEX RB750Gr3 | CPU | 880 MHz MIPS: el rendimiento con NAT, reglas de cortafuegos o VPN puede bajar del Gigabit | `iperf3` a través del router |
 
 ## 8. Impacto en el diseño y material que falta
@@ -227,19 +234,20 @@ Lo que el inventario obliga a revisar de las decisiones de la Tasca 1:
 
 | Hallazgo | Fuente | Decisión afectada | Consecuencia |
 |---|---|---|---|
-| El i3-4160 de PC-01 (4.ª generación) **no está en la lista de procesadores admitidos por Windows 11** (desde la 8.ª generación); PC-02 podría llevar un i3-8100 (8.ª generación, sí admitido), por confirmar; TPM 2.0 y arranque seguro: N/C | Intel, Microsoft Learn | [D-04 Clientes](../decisions/D-04-clientes.md) | Windows 11 Pro sigue siendo la decisión para la empresa; en el aula solo se puede instalar **sin soporte oficial**, marcado como limitación del laboratorio |
+| El i3-4160 de PC-01 (4.ª generación) **no está en la lista de procesadores admitidos por Windows 11** (desde la 8.ª generación); PC-02 lleva un i3-8100 (8.ª generación, sí admitido); TPM 2.0 y arranque seguro: N/C | Intel, Microsoft Learn | [D-04 Clientes](../decisions/D-04-clientes.md) | Windows 11 Pro sigue siendo la decisión para la empresa; en el aula solo se puede instalar **sin soporte oficial**, marcado como limitación del laboratorio |
 | El hEX es MMIPS (no x86) con 256 MiB de RAM y 16 MiB de flash | MikroTik, medido | [D-01 Comunicaciones](../decisions/D-01-comunicaciones.md) | OPNsense y el GNU/Linux con nftables (x86-64) no pueden ir en el hEX: van en un PC del aula o en una VM de Proxmox |
 | PC-01: 8 GB de RAM (ampliable a 32 GB, 3 ranuras libres) y 2 núcleos; VT-x con EPT pero sin VT-d | Intel, `dmidecode` | [D-02 Virtualización](../decisions/D-02-virtualizacion.md) | Proxmox funciona, pero cada nodo admite muy pocas VM a la vez; la Tasca 4 debe reservar memoria para el anfitrión y no puede pasar dispositivos PCI a las VM |
-| 8 GB de RAM en PC-01 (y quizá en PC-02): justo el mínimo oficial de TrueNAS | Medido, TrueNAS | [D-05 Datos](../decisions/D-05-datos.md) | TrueNAS cabe solo en un PC dedicado (no en una VM de 8 GB); hay que comprobar los discos disponibles para el espejo |
+| PC-02: 8 GB de RAM, justo el mínimo oficial de TrueNAS, y un solo disco (SSD de 256 GB, que TrueNAS usa entero para arrancar) | Medido, TrueNAS | [D-05 Datos](../decisions/D-05-datos.md) | TrueNAS va en PC-02 dedicado; para el espejo de datos hacen falta dos discos más en los SATA libres |
 | Los switches (TL-SG116 y LS1008G) **no son gestionables**: sin VLAN, sin gestión ni SNMP, sin SFP | TP-Link | [D-01 Comunicaciones](../decisions/D-01-comunicaciones.md) | No se pueden separar redes de gestión, clúster y clientes por VLAN en el switch; la separación se hace con segmentos físicos (un switch por red, conectado a un puerto distinto del hEX) o con VLAN en el hEX y en Proxmox, sabiendo que el switch no aísla el tráfico (Tasca 4) |
 
 | Material que falta | Por qué hace falta | Alternativa | Comunicado al profesorado |
 |---|---|---|---|
-| Discos para el espejo de TrueNAS (cada unidad trae un solo disco de ~500 GB, a confirmar) | Necesidad N3: tolerar la caída de un disco | Discos virtuales en una VM de TrueNAS (simulación identificada) | |
+| Dos discos para el espejo de TrueNAS en PC-02 (solo tiene el SSD de arranque; quedan 3 SATA libres) | Necesidad N3: tolerar la caída de un disco | Discos virtuales en una VM de TrueNAS (simulación identificada) | |
 | Segunda tarjeta de red por nodo | Separar el tráfico de clúster y almacenamiento del de las VM | VLAN etiquetadas en la única tarjeta (sin aislamiento en el switch) | |
 | Switch gestionable con VLAN | Separar redes por VLAN y supervisarlas (SNMP) | Un switch no gestionable por segmento, enrutados por el hEX | |
 | Segundo módulo DDR3-1600 para PC-01 (la placa admite 32 GB y tiene 3 ranuras libres) | Más VM por nodo y doble canal de memoria | Repartir las VM entre más nodos | |
-| SSD SATA para PC-01 | Arranque y VM más rápidos que en el disco actual | Disco actual | |
+| Segundo módulo DDR4-2400 para PC-02 (ranura DDR4_A1 libre) | Más caché ZFS en TrueNAS y doble canal | 8 GB, el mínimo de TrueNAS | |
+| SSD SATA para PC-01 | Arranque y VM más rápidos que en el HDD actual de 7200 rpm | HDD actual | |
 | Equipos que cumplan los requisitos de Windows 11 | Clientes con soporte oficial | Instalación sin soporte en el aula, marcada como limitación | |
 
 ## Fuentes
@@ -250,8 +258,10 @@ Lo que el inventario obliga a revisar de las decisiones de la Tasca 1:
 | TP-Link TL-SG116 – ficha | https://www.tp-link.com/es/business-networking/unmanaged-switch/tl-sg116/ | 21/10/2026 |
 | TP-Link LS1008G – ficha | https://www.tp-link.com/es/home-networking/soho-switch/ls1008g/ | 21/10/2026 |
 | Intel Core i3-4160 – especificaciones | https://www.intel.com/content/www/us/en/products/sku/77488/intel-core-i34160-processor-3m-cache-3-60-ghz/specifications.html | 20/10/2026 |
-| MikroTik hEX y APD ALDA+ (pc33-t226) – datos medidos en el aula | Salidas de RouterOS, `dmidecode` y del sistema del PC; resumen en [hardware-grupo3](hardware-grupo3.md) | 20/10/2026 |
-| Ticnova E70 SFF – ejemplar público del modelo (no es nuestro equipo) | Geekbench | 20/10/2026 |
+| MikroTik hEX y APD ALDA+ (entonces pc33-t226, con LliureX) – datos medidos en el aula | Salidas de RouterOS, `dmidecode` y del sistema del PC; resumen en [hardware-grupo3](hardware-grupo3.md) | 20/10/2026 |
+| Ticnova E70 SFF – datos medidos en el equipo y en su BIOS | Etiqueta, BIOS y comandos del sistema; resumen en [hardware-grupo3](hardware-grupo3.md) | 21/10/2026 |
+| Intel Core i3-8100 – especificaciones | https://www.intel.com/content/www/us/en/products/sku/126688/intel-core-i38100-processor-6m-cache-3-60-ghz/specifications.html | 21/10/2026 |
+| PC-01 (PCG3) – disco y red | `lsblk -d -o NAME,MODEL,SIZE,ROTA`, `ip -br link` | 21/10/2026 |
 | Windows 11 – procesadores Intel admitidos | https://learn.microsoft.com/en-us/windows-hardware/design/minimum/supported/windows-11-supported-intel-processors | 19/10/2026 |
 | Cable patch Cat5e 350 MHz – referencia | https://www.infinitecables.com/products/molded-boot-custom-rj45-cat5e-350mhz-assembled-patch-cable-grey | 19/10/2026 |
 
