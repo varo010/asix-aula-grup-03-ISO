@@ -40,7 +40,7 @@ Disponemos de dos PC para el proyecto. Resumen en [hardware-grupo3](hardware-gru
 | Estado de los discos | Ver diagnóstico (apartado 5) | Ver diagnóstico (apartado 5) | `sudo smartctl -H /dev/sdX` |
 | Unidad óptica | Regrabadora DVD ATAPI iHAS124 F | No | `lsblk -d` |
 | Interfaces de red | `enp2s0` integrada (MAC 40:8d:5c:27:fe:73) + adaptador USB `enxb44bd6c64adc` (MAC b4:4b:d6:c6:4a:dc) | Realtek Gigabit integrada con PXE (MAC N/C) | `ip -br link` |
-| Firmware y arranque | BIOS UEFI, versión N/C; arranca desde el HDD | BIOS P4.20P, UEFI; arranque por red (PXE) disponible. Fecha corregida a 21/10/2026: vigilar la pila CR2032 | `sudo dmidecode -s bios-version` |
+| Firmware y arranque | UEFI (comprobado); arranca desde el HDD | BIOS P4.20P, UEFI; arranque por red (PXE) disponible. Fecha corregida a 21/10/2026: vigilar la pila CR2032 | Configuración de la BIOS |
 | Gráficos | Intel HD Graphics 4400 integrada | Intel UHD Graphics 630 integrada | `lspci \| grep VGA` |
 | Periféricos | Monitor, teclado y ratón compartidos | Ninguno: se administra por la web de TrueNAS | Inspección |
 | Alimentación | Fuente de ~300 W (estimada para el formato); consumo real ~30–65 W | Fuente de ~180–300 W (estimada para un SFF); consumo real ~30–65 W | Etiqueta de la fuente |
