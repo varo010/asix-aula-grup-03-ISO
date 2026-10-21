@@ -232,7 +232,7 @@ Responsable: Álvaro.
 | N7 | Ofrecer almacenamiento NFS a Proxmox para copias de VM e ISOs | Supuesto |
 | N8 | Sin coste de licencias | Supuesto: presupuesto N/C |
 
-Hardware disponible: PC dedicado con 16 GB de RAM (supuesto de la Tasca 1). **Medido en la Tasca 2:** APD ALDA+ con Core i3-4160, 8 GB de RAM (ampliable a 32 GB) y un disco de ~500 GB; ver [02-inventari](02-inventari.md#4-ordenadores).
+Hardware disponible: PC dedicado con 16 GB de RAM (supuesto de la Tasca 1). **Medido en la Tasca 2:** TrueNAS irá en PC-02 (Ticnova E70 SFF): Core i3-8100, 8 GB de RAM (ampliable a 32 GB) y un SSD de 256 GB que queda solo para el arranque; los datos necesitan discos adicionales en los 3 SATA libres. Ver [02-inventari](02-inventari.md#2-ordenadores).
 
 ### 2. Comparación
 
