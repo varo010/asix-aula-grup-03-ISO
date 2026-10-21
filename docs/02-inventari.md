@@ -24,7 +24,7 @@ Estado: *Funciona* · *Funciona con incidencias* · *Averiado* · *Pendiente de 
 
 ## 2. Ordenadores
 
-Disponemos de dos PC para el proyecto. Resumen en [hardware-grupo3](hardware-grupo3.md).
+Disponemos de dos PCs extra para el proyecto. Resumen en [hardware-grupo3](hardware-grupo3.md).
 
 | Dato | PC-01: APD ALDA+ (hostname `PCG3`) | PC-02: Ticnova E70 SFF | Comprobación |
 |---|---|---|---|
