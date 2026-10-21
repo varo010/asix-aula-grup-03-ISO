@@ -175,7 +175,7 @@ Una columna por equipo; se añaden columnas si hay más. PC-01 es el APD ALDA+ `
 
 | ID | Tipo | Categoría | Conectores | Longitud | Cantidad | Estado | Conecta |
 |---|---|---|---|---|---|---|---|
-| CAB-01… | Latiguillo (patch cord), gris | Cat5e, 350 MHz | RJ45 con protector moldeado | N/C (medir) | N/C (contar) | | |
+| CAB-01… | Latiguillo (patch cord), gris | Cat6, 250 MHz | RJ45 | 80 metros | 12 cables | | |
 
 - Cat5e admite **1000BASE-T (1 Gb/s) hasta 100 m**, suficiente para todos los puertos RJ45 del material.
 - El estado se comprueba con un comprobador de cables o con la velocidad negociada en los puertos (apartados 2 y 3).
