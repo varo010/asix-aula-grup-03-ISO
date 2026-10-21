@@ -12,12 +12,12 @@ Inventario del material que nos ha dado el profesorado y diagnóstico del estado
 
 | ID | Tipo | Fabricante y modelo | Características principales | Cantidad | Estado |
 |---|---|---|---|---|---|
-| RT-01 | Router | MikroTik hEX (RB750Gr3), revisión r4 | MMIPS 880 MHz, 256 MiB de RAM, 16 MiB de flash, 5 puertos Gigabit | N/C (Tasca 3) | Funciona |
-| SW-01 | Switch no gestionable | TP-Link TL-SG116 | 16 puertos Gigabit, sin VLAN ni gestión | 1 | Pendiente de probar |
-| SW-02… | Switch no gestionable | TP-Link LS1008G | 8 puertos Gigabit, sin VLAN ni gestión | N/C (Tasca 3) | Pendiente de probar |
+| RT-01 | Router | MikroTik hEX (RB750Gr3), revisión r4 | MMIPS 880 MHz, 256 MiB de RAM, 16 MiB de flash, 5 puertos Gigabit | 1 | Funciona |
+| SW-01 | Switch no gestionable | TP-Link TL-SG116 | 16 puertos Gigabit, sin VLAN ni gestión | 1 | Funciona |
+| SW-02… | Switch no gestionable | TP-Link LS1008G | 8 puertos Gigabit, sin VLAN ni gestión | 2 | Funciona |
 | PC-01 | Ordenador de sobremesa | APD ALDA+ | Core i3-4160, 8 GB DDR3, HDD de 500 GB | 1 | Funciona |
 | PC-02 | Ordenador SFF | Ticnova E70 SFF | Core i3-8100, 8 GB DDR4, SSD de 256 GB | 1 | Funciona |
-| CAB | Latiguillos de red | RJ45 Cat5e | Hasta 1 Gb/s | N/C (Tasca 3) | Pendiente de probar |
+| CAB | Latiguillos de red | RJ45 Cat6 | Hasta 1 Gb/s | 12 | Funciona |
 | PER | Periféricos | — | 1 monitor, 1 teclado y 1 ratón, compartidos por los dos PC | 1 de cada | Funciona |
 
 Estado: *Funciona* · *Funciona con incidencias* · *Averiado* · *Pendiente de probar*.
@@ -73,7 +73,7 @@ Los puertos, las conexiones y la configuración de red se documentan en la Tasca
 
 | ID | Tipo | Categoría | Conectores | Longitud | Cantidad | Estado |
 |---|---|---|---|---|---|---|
-| CAB-01… | Latiguillo (patch cord), gris | Cat6, 250 MHz | RJ45 | 80 m | 12 | |
+| CAB-01… | Latiguillo (patch cord), gris | Cat6, 250 MHz | RJ45 | 80 m | 12 | Funciona |
 
 Cat6 admite 1000BASE-T (1 Gb/s) hasta 100 m, suficiente para todos los puertos del material. El etiquetado y qué conecta cada cable se documentan en la Tasca 3.
 
