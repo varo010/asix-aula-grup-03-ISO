@@ -77,14 +77,6 @@ Los 5 puertos tienen MTU 1500 (L2MTU 1596), autonegociación activada anunciando
 
 Qué equipo hay al otro lado de ether1 y ether2: N/C (seguir el cable). Comandos: `/interface ethernet print detail`, `/interface ethernet monitor ether1`.
 
-### Configuración de red actual
-
-| Interfaz | Dirección IP / máscara | Origen (estática o DHCP) | Observaciones |
-|---|---|---|---|
-| | | | |
-
-Comandos: `/ip address print`, `/ip dhcp-client print`, `/ip route print`. Para la evidencia: `/export file=t2-mikrotik-config-inicial`, revisando antes que no contenga contraseñas.
-
 ## 3. Switches: TP-Link TL-SG116 y LS1008G
 
 Corregido el 21/10/2026: antes figuraba un TP-Link Omada SG3428XMPP (gestionable), que no es el material del aula.
