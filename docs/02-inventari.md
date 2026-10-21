@@ -2,7 +2,7 @@
 
 Tasca 2 · RA principales: FDM RA1 a-h y RA4 h-i.
 
-Inventario del material que nos ha dado el profesorado para el entorno de pruebas y diagnóstico del estado inicial de cada equipo. Hola
+Inventario del material que nos ha dado el profesorado para el entorno de pruebas y diagnóstico del estado inicial de cada equipo.
 
 **Cómo se ha hecho y cómo se completa:**
 - Las características de cada **modelo** salen de su ficha oficial (ver [Fuentes](#fuentes)).
