@@ -71,7 +71,11 @@ Los puertos, las conexiones y la configuración de red se documentan en la Tasca
 
 ## 4. Cableado
 
-Latiguillos RJ45 Cat5e (350 MHz): admiten 1000BASE-T (1 Gb/s) hasta 100 m, suficiente para todos los puertos del material. La cantidad, la longitud y el etiquetado se completan en la Tasca 3.
+| ID | Tipo | Categoría | Conectores | Longitud | Cantidad | Estado |
+|---|---|---|---|---|---|---|
+| CAB-01… | Latiguillo (patch cord), gris | Cat6, 250 MHz | RJ45 | 80 m | 12 | |
+
+Cat6 admite 1000BASE-T (1 Gb/s) hasta 100 m, suficiente para todos los puertos del material. El etiquetado y qué conecta cada cable se documentan en la Tasca 3.
 
 ## 5. Diagnósticos (línea base)
 
