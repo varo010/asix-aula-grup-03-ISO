@@ -36,15 +36,17 @@
 ## PC 1 (sobremesa horizontal) — APD ALDA+ — rol: cliente Lubuntu
 | Componente | Detalle |
 |---|---|
-| Equipo | APD ALDA+ (versión ALDA+C), dotación GVA, con DVD |
+| Equipo | APD ALDA+ (versión ALDA+C), dotación GVA · hostname PCG3, usuario admin |
 | Placa base | Gigabyte B85M-DS3H-A (chipset Intel B85, LGA1150) |
 | CPU | Intel Core i3-4160 (Haswell, 2C/4T, 3,6 GHz) |
 | RAM | 8 GB DDR3-1600 (1 módulo en ChannelB-DIMM1; 3 de 4 slots libres, máx. 32 GB) |
-| Disco | ~500 GB (modelo y HDD/SSD por confirmar con lsblk) |
+| Disco | HDD mecánico Toshiba DT01ACA050, 500 GB (465,8 GiB), 7200 rpm, SATA 6 Gb/s |
+| Unidad óptica | Regrabadora DVD ATAPI iHAS124 F |
 | Gráficos | Intel HD integrada |
-| SO | Lubuntu (previsto; actualmente LliureX 21, kernel 5.15) |
-| MAC | _(por rellenar)_ |
-| IP | _(por rellenar; actual de aula: 172.16.222.19)_ |
+| SO | Lubuntu instalado, con VirtualBox (rol cliente confirmado); versión exacta pendiente (cat /etc/os-release) |
+| Red | enp2s0: NIC integrada, MAC 40:8d:5c:27:fe:73 · enxb44bd6c64adc: adaptador Ethernet USB, MAC b4:4b:d6:c6:4a:dc |
+| IP | _(pendiente de configurar)_ |
+| Fuente de alimentación | ~300 W (estimada para este formato; consumo real del equipo ~30–65 W) |
 
 ## PC 2 (torre vertical) — Ticnova E70 SFF — rol: servidor TrueNAS
 | Componente | Detalle |
@@ -60,9 +62,15 @@
 | MAC | _(por rellenar)_ |
 | IP | _(por rellenar)_ |
 | Conectividad | USB 3.0 frontal, Realtek Gigabit con arranque PXE |
+| Fuente de alimentación | ~180–300 W (estimada para un SFF; consumo real ~30–65 W) |
 | BIOS | Fecha corregida a 21/10/2026 (marcaba 2019); vigilar pila CMOS CR2032 |
+
+## Periféricos (compartidos)
+- 1 monitor para los dos PC: se usa con el PC 1; el PC 2 (TrueNAS) se administra por la interfaz web y puede ir sin monitor.
+- 1 teclado y 1 ratón compartidos.
 
 ### Notas para el despliegue
 - TrueNAS (PC 2): 8 GB de RAM es el mínimo justo para ZFS — el segundo módulo DDR4 es muy recomendable. TrueNAS ocupa el disco de arranque en exclusiva: el SSD de 256 GB quedará solo como boot, los datos van en discos adicionales en los 3 SATA libres.
-- Lubuntu (PC 1): instalar en SSD si se añade uno; el i3-4160 + 8 GB lo mueve sobrado.
-- Pendiente: modelo del disco del PC 1 (lsblk -d -o NAME,MODEL,SIZE,ROTA) y MAC/IP de ambos cuando se configuren.
+- Lubuntu (PC 1): el i3-4160 + 8 GB lo mueve sobrado; el HDD de 7200 rpm es el cuello de botella más probable (arranque y VM de VirtualBox lentas). Un SSD mejoraría mucho el equipo.
+- Pendiente PC 1: versión de BIOS (sudo dmidecode -s bios-version), versión de Lubuntu (cat /etc/os-release) e IP. El estado de los discos y la velocidad de red salen de los diagnósticos de [02-inventari](02-inventari.md#5-diagnósticos-línea-base).
+- Pendiente PC 2: MAC e IP cuando se instale TrueNAS.
