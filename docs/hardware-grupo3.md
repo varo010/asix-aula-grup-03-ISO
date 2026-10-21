@@ -18,6 +18,21 @@
 - ether2–ether5: slaves de switch1 (ether2 con enlace)
 - Todos: advertise 10/100/1000 half+full, arp enabled, loop-protect default
 
+## Switches (TP-Link, no gestionables)
+| Campo | Switch grande | Switches pequeños |
+|---|---|---|
+| Modelo | TP-Link TL-SG116 | TP-Link LS1008G (LiteWave) |
+| Cantidad | 1 | _(por contar)_ |
+| Puertos | 16 × RJ45 Gigabit (auto-MDI/MDIX) | 8 × RJ45 Gigabit (auto-MDI/MDIX) |
+| Tipo | No gestionable (plug and play) | No gestionable (plug and play) |
+| Reenvío / tabla MAC | 23,8 Mpps / 8K | 11,9 Mpps / 4K |
+| Jumbo frames | 10 KB | 16 KB |
+| QoS | 802.1p/DSCP, IGMP snooping | — |
+| Carcasa | Metálica, sin ventilador, sobremesa | Plástico, sin ventilador, sobremesa |
+| Alimentación | Adaptador 12 V DC / 1 A (máx. 10 W) | Adaptador externo (máx. 3,9 W) |
+
+- Sin VLAN, sin gestión web/CLI/SNMP y sin SFP: la separación de redes se hace en el router (hEX) o en los propios equipos.
+
 ## PC 1 (sobremesa horizontal) — APD ALDA+ — rol: cliente Lubuntu
 | Componente | Detalle |
 |---|---|
