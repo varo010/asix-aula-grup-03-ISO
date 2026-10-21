@@ -17,10 +17,10 @@ Inventario del material que nos ha dado el profesorado y diagnóstico del estado
 | SW-02… | Switch no gestionable | TP-Link LS1008G | 8 puertos Gigabit, sin VLAN ni gestión | 2 | Funciona |
 | PC-01 | Ordenador de sobremesa | APD ALDA+ | Core i3-4160, 8 GB DDR3, HDD de 500 GB | 1 | Funciona |
 | PC-02 | Ordenador SFF | Ticnova E70 SFF | Core i3-8100, 8 GB DDR4, SSD de 256 GB | 1 | Funciona |
-| CAB | Latiguillos de red | RJ45 Cat6 | Hasta 1 Gb/s | 12 |Funciona|
+| CAB | Latiguillos de red | RJ45 Cat6 | Hasta 1 Gb/s | 12 | Funciona |
+| PER | Periféricos | — | 1 monitor, 1 teclado y 1 ratón, compartidos por los dos PC | 1 de cada | Funciona |
 
-
-
+Estado: *Funciona* · *Funciona con incidencias* · *Averiado* · *Pendiente de probar*.
 
 ## 2. Ordenadores
 
@@ -73,7 +73,7 @@ Los puertos, las conexiones y la configuración de red se documentan en la Tasca
 
 | ID | Tipo | Categoría | Conectores | Longitud | Cantidad | Estado |
 |---|---|---|---|---|---|---|
-| CAB-01… | Latiguillo (patch cord), gris | Cat6, 250 MHz | RJ45 | 80 m | 12 | |
+| CAB-01… | Latiguillo (patch cord), gris | Cat6, 250 MHz | RJ45 | 80 m | 12 | Funciona |
 
 Cat6 admite 1000BASE-T (1 Gb/s) hasta 100 m, suficiente para todos los puertos del material. El etiquetado y qué conecta cada cable se documentan en la Tasca 3.
 
