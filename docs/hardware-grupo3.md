@@ -72,5 +72,5 @@
 ### Notas para el despliegue
 - TrueNAS (PC 2): 8 GB de RAM es el mínimo justo para ZFS — el segundo módulo DDR4 es muy recomendable. TrueNAS ocupa el disco de arranque en exclusiva: el SSD de 256 GB quedará solo como boot, los datos van en discos adicionales en los 3 SATA libres.
 - Lubuntu (PC 1): el i3-4160 + 8 GB lo mueve sobrado; el HDD de 7200 rpm es el cuello de botella más probable (arranque y VM de VirtualBox lentas). Un SSD mejoraría mucho el equipo.
-- Pendiente PC 1: versión de BIOS (sudo dmidecode -s bios-version), versión de Lubuntu (cat /etc/os-release) e IP. El estado de los discos y la velocidad de red salen de los diagnósticos de [02-inventari](02-inventari.md#5-diagnósticos-línea-base).
+- Pendiente PC 1: versión de Lubuntu (cat /etc/os-release) e IP. El estado de los discos y la velocidad de red salen de los diagnósticos de [02-inventari](02-inventari.md#5-diagnósticos-línea-base).
 - Pendiente PC 2: MAC e IP cuando se instale TrueNAS.
