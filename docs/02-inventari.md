@@ -15,11 +15,12 @@ Inventario del material que nos ha dado el profesorado para el entorno de prueba
 | ID | Tipo | Fabricante y modelo | Características principales (ficha oficial) | Cantidad | Estado |
 |---|---|---|---|---|---|
 | RT-01 | Router | MikroTik hEX (RB750Gr3), revisión r4 | CPU MT7621 (MIPS 1004Kc, 880 MHz, MMIPS), 256 MiB de RAM, 16 MiB de flash, 5 puertos Gigabit, RouterOS 7.20.8 licencia nivel 4 | N/C (contar) | Funciona (datos medidos en el apartado 2) |
-| SW-01 | Switch gestionable | TP-Link Omada SG3428XMPP | 24 puertos Gigabit PoE+/PoE++ (500 W) + 4 SFP+ de 10 Gb, 4K VLAN, gestión web/CLI/SNMP, rack 1U | N/C (contar) | Pendiente de probar |
+| SW-01 | Switch no gestionable (grande) | TP-Link TL-SG116 | 16 puertos Gigabit, sin VLAN ni gestión, QoS 802.1p/DSCP, carcasa metálica sin ventilador | 1 | Pendiente de probar |
+| SW-02… | Switch no gestionable (pequeño) | TP-Link LS1008G (LiteWave) | 8 puertos Gigabit, sin VLAN ni gestión, carcasa de plástico sin ventilador | N/C (contar) | Pendiente de probar |
 | PC-01 | Ordenador de sobremesa (horizontal) | APD ALDA+ (ALDA+C), placa Gigabyte B85M-DS3H-A | Intel Core i3-4160 (2 núcleos / 4 hilos, 3,6 GHz, VT-x con EPT, sin VT-d), 8 GB DDR3-1600 (ampliable a 32 GB), disco de ~500 GB, DVD | 1 | Funciona (medido en el apartado 4) |
 | PC-02 | Ordenador (torre vertical) | Ticnova E70 SFF | Por confirmar en el equipo; un ejemplar público del modelo lleva Core i3-8100 y 8 GB DDR4-2400 | 1 | Pendiente de probar |
 | CAB | Latiguillos de red | Cable patch RJ45 Cat5e, 350 MHz, conector moldeado, gris | Hasta 1 Gb/s (1000BASE-T) | N/C (contar) | Pendiente de probar |
-| OTR | Otros materiales | — | Adaptador de corriente del hEX (24 V, 0,38 A), cables de alimentación y kit de rack del switch | N/C (contar) | Pendiente de probar |
+| OTR | Otros materiales | — | Adaptadores de corriente del hEX (24 V, 0,38 A) y de los switches, cables de alimentación de los PC | N/C (contar) | Pendiente de probar |
 
 Estado: *Funciona* · *Funciona con incidencias* · *Averiado* · *Pendiente de probar*.
 
@@ -84,55 +85,46 @@ Qué equipo hay al otro lado de ether1 y ether2: N/C (seguir el cable). Comandos
 
 Comandos: `/ip address print`, `/ip dhcp-client print`, `/ip route print`. Para la evidencia: `/export file=t2-mikrotik-config-inicial`, revisando antes que no contenga contraseñas.
 
-## 3. Switch: TP-Link Omada SG3428XMPP
+## 3. Switches: TP-Link TL-SG116 y LS1008G
+
+Corregido el 21/10/2026: antes figuraba un TP-Link Omada SG3428XMPP (gestionable), que no es el material del aula.
 
 ### Ficha del modelo
 
-| Dato | Valor (ficha oficial) |
-|---|---|
-| Tipo | Switch gestionable de capa 2+ (familia Omada) |
-| Puertos RJ45 | 24 × Gigabit: 1–8 con PoE++ (hasta 90 W por puerto) y 9–24 con PoE+ (hasta 30 W por puerto) |
-| Puertos SFP+ | 4 × 10 Gb/s |
-| Consola | 1 × RJ45 + 1 × micro-USB |
-| PoE | 802.3af/at/bt, presupuesto total de 500 W |
-| Capacidad de conmutación | 128 Gb/s |
-| Tasa de reenvío | 95,23 Mpps |
-| Tabla MAC | 16 K entradas |
-| Jumbo frames | 9 KB |
-| VLAN | Hasta 4K grupos de VLAN |
-| Gestión | Web, CLI (consola/Telnet), SNMP v1/v2c/v3; Omada SDN con controlador |
-| Ventilación | 3 ventiladores |
-| Montaje | Rack 19" (kit incluido), 1U |
-| Alimentación | 100–240 V AC, 50/60 Hz |
-| Consumo máximo | 605,5 W (con 500 W de PoE en uso) |
-| Dimensiones | 440 × 330 × 44 mm |
-
-### Datos de la unidad
-
-| Dato | Valor medido | Fuente |
+| Dato | TL-SG116 (grande) | LS1008G (pequeños) |
 |---|---|---|
-| Número de serie | | Etiqueta inferior |
-| Versión de hardware y firmware | | Interfaz web → *System Info* |
-| IP de gestión actual | | Interfaz web o consola (`show interface vlan 1`) |
-| Modo de gestión (independiente u Omada) | | Interfaz web |
-| VLAN configuradas | | `show vlan` |
+| Tipo | No gestionable, plug and play | No gestionable, plug and play (gama LiteWave) |
+| Puertos RJ45 | 16 × Gigabit, autonegociación y auto-MDI/MDIX | 8 × Gigabit, autonegociación y auto-MDI/MDIX |
+| Puertos SFP | No | No |
+| Tasa de reenvío | 23,8 Mpps | 11,9 Mpps |
+| Tabla MAC | 8K entradas | 4K entradas |
+| Jumbo frames | 10 KB | 16 KB |
+| QoS y otros | 802.1p/DSCP, IGMP snooping, control de flujo 802.3x | Control de flujo 802.3x |
+| VLAN y gestión | No | No |
+| Carcasa | Metálica, sin ventilador, con anclaje de seguridad | Plástico, sin ventilador |
+| Alimentación | Adaptador externo 12 V DC / 1 A; consumo máximo 10 W | Adaptador externo; consumo máximo 3,9 W |
+| Dimensiones | 286 × 111,7 × 25,4 mm | N/C |
+
+### Datos de cada unidad
+
+No son gestionables: no tienen IP, firmware configurable ni VLAN. Los datos salen de la etiqueta inferior y de los LED.
+
+| ID | Modelo | Número de serie | Versión de hardware | Estado |
+|---|---|---|---|---|
+| SW-01 | TL-SG116 | | | |
+| SW-02 | LS1008G | | | |
+| SW-0x | LS1008G | | | |
 
 ### Puertos ocupados y libres
 
-| Puerto | Conectado a | Velocidad del enlace | Estado | Observaciones |
-|---|---|---|---|---|
-| 1 | | | | |
-| 2 | | | | |
-| 3 | | | | |
-| 4 | | | | |
-| 5 | | | | |
-| 6 | | | | |
-| 7 | | | | |
-| 8 | | | | |
-| 9–24 | | | | |
-| SFP+ 25–28 | — | — | Sin módulos | Sin transceptores ni cables DAC en el material |
+Una tabla por switch. La velocidad se ve en el LED del puerto o con `ethtool <interfaz>` en el PC conectado.
 
-Total: ___ puertos ocupados · ___ puertos libres. Comando: `show interface status`.
+| Switch | Puerto | Conectado a | Velocidad del enlace | Estado | Observaciones |
+|---|---|---|---|---|---|
+| SW-01 | 1–16 | | | | |
+| SW-02 | 1–8 | | | | |
+
+Total: ___ puertos ocupados · ___ puertos libres.
 
 ## 4. Ordenadores
 
@@ -194,7 +186,6 @@ Una columna por equipo; se añaden columnas si hay más. PC-01 es el APD ALDA+ `
 | CAB-01… | Latiguillo (patch cord), gris | Cat5e, 350 MHz | RJ45 con protector moldeado | N/C (medir) | N/C (contar) | | |
 
 - Cat5e admite **1000BASE-T (1 Gb/s) hasta 100 m**, suficiente para todos los puertos RJ45 del material.
-- Los puertos SFP+ del switch necesitan módulos o cables DAC, que no están en el material.
 - El estado se comprueba con un comprobador de cables o con la velocidad negociada en los puertos (apartados 2 y 3).
 - Cada cable se etiqueta en sus dos extremos con su ID (Tasca 3).
 
@@ -203,8 +194,8 @@ Una columna por equipo; se añaden columnas si hay más. PC-01 es el APD ALDA+ `
 | ID | Material | Cantidad | Características | Estado |
 |---|---|---|---|---|
 | OTR-01 | Adaptador de corriente del hEX | N/C | 24 V, 0,38 A | |
-| OTR-02 | Cables de alimentación de los PC y del switch | N/C | IEC C13 | |
-| OTR-03 | Kit de montaje en rack del switch | N/C | Incluido con el SG3428XMPP | |
+| OTR-02 | Cables de alimentación de los PC | N/C | IEC C13 | |
+| OTR-03 | Adaptadores de corriente de los switches | N/C | TL-SG116: 12 V DC, 1 A; LS1008G: el suyo | |
 | OTR-04 | Teclados, ratones y monitores | N/C | | |
 | OTR-05 | Regletas | N/C | | |
 
@@ -226,7 +217,7 @@ Con los sistemas operativos instalados, se ejecutan pruebas para conocer el **es
 | RT-01 | CPU y RAM | Uso en reposo | `/system resource print` | Sin tráfico, 1 semana encendido | CPU 0 %; 199,8 MiB libres de 256 MiB; 27 °C | Sobra capacidad en reposo para RouterOS | N/C |
 | RT-01 | Red | Estado y velocidad de los puertos | `/interface ethernet monitor` | Enlaces conectados | ether1: link-ok, 1 Gb/s full dúplex; ether2 con enlace; ether3–5 sin enlace | Cableado y puerto ether1 correctos a velocidad máxima | N/C |
 | RT-01 | Red | Rendimiento de NAT | `iperf3` de un PC de la LAN a uno de la WAN de pruebas | Banco aislado | | | |
-| SW-01 | Red | Enlaces y velocidad | `show interface status` | Todos los equipos conectados | | | |
+| SW-01, SW-02… | Red | Enlaces y velocidad | LED de cada puerto y `ethtool` en el PC conectado (no son gestionables) | Todos los equipos conectados | | | |
 
 ### Cuellos de botella previstos (a confirmar con las pruebas)
 
@@ -248,13 +239,13 @@ Lo que el inventario obliga a revisar de las decisiones de la Tasca 1:
 | El hEX es MMIPS (no x86) con 256 MiB de RAM y 16 MiB de flash | MikroTik, medido | [D-01 Comunicaciones](../decisions/D-01-comunicaciones.md) | OPNsense y el GNU/Linux con nftables (x86-64) no pueden ir en el hEX: van en un PC del aula o en una VM de Proxmox |
 | PC-01: 8 GB de RAM (ampliable a 32 GB, 3 ranuras libres) y 2 núcleos; VT-x con EPT pero sin VT-d | Intel, `dmidecode` | [D-02 Virtualización](../decisions/D-02-virtualizacion.md) | Proxmox funciona, pero cada nodo admite muy pocas VM a la vez; la Tasca 4 debe reservar memoria para el anfitrión y no puede pasar dispositivos PCI a las VM |
 | 8 GB de RAM en PC-01 (y quizá en PC-02): justo el mínimo oficial de TrueNAS | Medido, TrueNAS | [D-05 Datos](../decisions/D-05-datos.md) | TrueNAS cabe solo en un PC dedicado (no en una VM de 8 GB); hay que comprobar los discos disponibles para el espejo |
-| El switch tiene VLAN, gestión y PoE de sobra | TP-Link | [D-01 Comunicaciones](../decisions/D-01-comunicaciones.md) | Permite separar redes de gestión, clúster y clientes por VLAN (Tasca 4) |
+| Los switches (TL-SG116 y LS1008G) **no son gestionables**: sin VLAN, sin gestión ni SNMP, sin SFP | TP-Link | [D-01 Comunicaciones](../decisions/D-01-comunicaciones.md) | No se pueden separar redes de gestión, clúster y clientes por VLAN en el switch; la separación se hace con segmentos físicos (un switch por red, conectado a un puerto distinto del hEX) o con VLAN en el hEX y en Proxmox, sabiendo que el switch no aísla el tráfico (Tasca 4) |
 
 | Material que falta | Por qué hace falta | Alternativa | Comunicado al profesorado |
 |---|---|---|---|
 | Discos para el espejo de TrueNAS (cada unidad trae un solo disco de ~500 GB, a confirmar) | Necesidad N3: tolerar la caída de un disco | Discos virtuales en una VM de TrueNAS (simulación identificada) | |
-| Segunda tarjeta de red por nodo | Separar el tráfico de clúster y almacenamiento del de las VM | VLAN en la única tarjeta | |
-| Módulos SFP+ o cables DAC | Usar los enlaces de 10 Gb del switch | Puertos Gigabit | |
+| Segunda tarjeta de red por nodo | Separar el tráfico de clúster y almacenamiento del de las VM | VLAN etiquetadas en la única tarjeta (sin aislamiento en el switch) | |
+| Switch gestionable con VLAN | Separar redes por VLAN y supervisarlas (SNMP) | Un switch no gestionable por segmento, enrutados por el hEX | |
 | Segundo módulo DDR3-1600 para PC-01 (la placa admite 32 GB y tiene 3 ranuras libres) | Más VM por nodo y doble canal de memoria | Repartir las VM entre más nodos | |
 | SSD SATA para PC-01 | Arranque y VM más rápidos que en el disco actual | Disco actual | |
 | Equipos que cumplan los requisitos de Windows 11 | Clientes con soporte oficial | Instalación sin soporte en el aula, marcada como limitación | |
@@ -264,7 +255,8 @@ Lo que el inventario obliga a revisar de las decisiones de la Tasca 1:
 | Material | URL | Fecha de consulta |
 |---|---|---|
 | MikroTik hEX (RB750Gr3) – ficha | https://mikrotik.com/product/RB750Gr3 | 19/10/2026 |
-| TP-Link Omada SG3428XMPP – ficha | https://www.omadanetworks.com/es/business-networking/omada-switch-access-plus/sg3428xmpp/ | 19/10/2026 |
+| TP-Link TL-SG116 – ficha | https://www.tp-link.com/es/business-networking/unmanaged-switch/tl-sg116/ | 21/10/2026 |
+| TP-Link LS1008G – ficha | https://www.tp-link.com/es/home-networking/soho-switch/ls1008g/ | 21/10/2026 |
 | Intel Core i3-4160 – especificaciones | https://www.intel.com/content/www/us/en/products/sku/77488/intel-core-i34160-processor-3m-cache-3-60-ghz/specifications.html | 20/10/2026 |
 | MikroTik hEX y APD ALDA+ (pc33-t226) – datos medidos en el aula | Salidas de RouterOS, `dmidecode` y del sistema del PC; resumen en [hardware-grupo3](hardware-grupo3.md) | 20/10/2026 |
 | Ticnova E70 SFF – ejemplar público del modelo (no es nuestro equipo) | Geekbench | 20/10/2026 |
