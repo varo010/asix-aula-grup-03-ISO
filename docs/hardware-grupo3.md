@@ -22,7 +22,7 @@
 | Campo | Switch grande | Switches pequeños |
 |---|---|---|
 | Modelo | TP-Link TL-SG116 | TP-Link LS1008G (LiteWave) |
-| Cantidad | 1 | _(por contar)_ |
+| Cantidad | 1 | 2 |
 | Puertos | 16 × RJ45 Gigabit (auto-MDI/MDIX) | 8 × RJ45 Gigabit (auto-MDI/MDIX) |
 | Tipo | No gestionable (plug and play) | No gestionable (plug and play) |
 | Reenvío / tabla MAC | 23,8 Mpps / 8K | 11,9 Mpps / 4K |
