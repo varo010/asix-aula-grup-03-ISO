@@ -1,5 +1,7 @@
 # 03 · Comparativa de sistemas
 
+Tasca 1 «Necessitats i sistemes» · RA principales: ISO RA1 a-c y FDM RA4 a-c.
+
 Cada opción: función, arquitectura, versión, soporte, origen de la descarga, requisitos mínimos oficiales, recursos propuestos, licencia, administración, actualizaciones, compatibilidad, ventajas y limitaciones. Cada sistema con **fuente oficial, URL y fecha de consulta**.
 
 Cada función se analiza en cuatro pasos: **necesidades**, **comparación**, **contraste** con fuentes oficiales y **justificación** de la elección. Los datos no confirmados se marcan **N/C** y tienen su propuesta de comprobación en [Datos pendientes](#datos-pendientes-nc); las hipótesis de trabajo se marcan como **supuesto**. No se afirma que una opción sea «más segura» o «más rápida» sin indicar las condiciones y la prueba que lo demuestra.
@@ -40,7 +42,7 @@ Responsable: Iván.
 | Origen de la descarga | mikrotik.com/download | opnsense.org/download | Instalador oficial de Netgate (netgate.com) |
 | Requisitos mínimos oficiales | CHR: 256 MB de RAM (recomienda 1024 MiB) y 128 MB de disco | CPU de doble núcleo a 1 GHz, 3 GB de RAM y 4 GB de almacenamiento | CPU amd64, 1 GB de RAM y disco de 8 GB |
 | Requisitos recomendados | — | CPU multinúcleo a 1,5 GHz, 8 GB de RAM y SSD de 120 GB | — |
-| Recursos propuestos para el laboratorio | Routers MikroTik del aula (supuesto, según Tarea 0) | VM con 8 GB de RAM (supuesto; depende del inventario de la Tarea 2) | — |
+| Recursos propuestos para el laboratorio | Routers MikroTik del aula (supuesto, según Tasca 0) | VM con 8 GB de RAM (supuesto; depende del inventario de la Tasca 2) | — |
 | Licencia y precio | Pago único: en routers va incluida; CHR gratuito limitado a 1 Mbps, P1 (1 Gbps) 45 $, P10 (10 Gbps) 95 $, ilimitada 250 $ | Open source, sin coste de software | CE gratuito; varias funciones solo en pfSense Plus |
 | Administración | Winbox, web y CLI; curva de aprendizaje pronunciada | Interfaz web | Interfaz web |
 | Actualizaciones | Canales *stable* y *long-term* | Dos versiones mayores al año (enero y julio) y menores cada dos semanas | Irregulares: 2.7.2 (12/2023), 2.8.0 (05/2025), 2.9.0 (08/2026) |
@@ -58,7 +60,7 @@ Responsable: Iván.
 
 ### 4. Justificación
 
-Se elige una **topología mixta**: MikroTik se encarga del enrutamiento y las VPN, y OPNsense de la seguridad perimetral. Cada sistema cubre la carencia del otro: MikroTik no tiene NGFW y OPNsense aporta IDS/IPS e inspección de capa 7 sin coste de licencia. El rendimiento de cada equipo se medirá en la Tarea 7 antes de afirmar nada sobre él.
+Se elige una **topología mixta**: MikroTik se encarga del enrutamiento y las VPN, y OPNsense de la seguridad perimetral. Cada sistema cubre la carencia del otro: MikroTik no tiene NGFW y OPNsense aporta IDS/IPS e inspección de capa 7 sin coste de licencia. El rendimiento de cada equipo se medirá en la Tasca 7 antes de afirmar nada sobre él.
 
 - **Inconveniente aceptado:** administrar dos plataformas distintas en lugar de una centralizada.
 - **Descartados:**
@@ -225,10 +227,10 @@ Responsable: Álvaro.
 |---|---|---|
 | N1 | Compartir carpetas por departamento con clientes Windows (SMB) y Linux (NFS) | Supuesto: depende del SO de los clientes |
 | N2 | Usar los mismos usuarios que el Domain Controller con Windows Server | — |
-| N3 | Tolerar la caída de un disco, simular un disco degradado y reconstruirlo | Tarea 6 |
-| N4 | Aplicar cuotas de espacio por departamento y por usuario | Tarea 6 |
-| N5 | Hacer copias automáticas y restaurarlas en un destino alternativo | Tarea 6 |
-| N6 | Avisar del estado de los discos y del volumen | Tarea 7 |
+| N3 | Tolerar la caída de un disco, simular un disco degradado y reconstruirlo | Tasca 6 |
+| N4 | Aplicar cuotas de espacio por departamento y por usuario | — |
+| N5 | Hacer copias automáticas y restaurarlas en un destino alternativo | Tasca 6 |
+| N6 | Avisar del estado de los discos y del volumen | Tasca 7 |
 | N7 | Ofrecer almacenamiento NFS a Proxmox para copias de VM e ISOs | Supuesto |
 | N8 | Sin coste de licencias | Supuesto: presupuesto N/C |
 
@@ -253,7 +255,7 @@ Hardware disponible: PC dedicado con 16 GB de RAM (supuesto de la Tasca 1). **Me
 
 Fuentes oficiales consultadas el 13/10/2026 (detalle en [Fuentes](#fuentes)).
 
-No se afirma que ninguna opción sea «más segura» o «más rápida». La integridad y la recuperación de TrueNAS se comprobarán con evidencias en la Tarea 6 (prueba de disco degradado y restauración).
+No se afirma que ninguna opción sea «más segura» o «más rápida». La integridad y la recuperación de TrueNAS se comprobarán con evidencias en la Tasca 6 (prueba de disco degradado y restauración).
 
 ### 4. Justificación
 
@@ -281,15 +283,15 @@ Con el supuesto de 16 GB, el PC tendría el doble del mínimo oficial; el PC ver
 
 ## Datos pendientes (N/C)
 
-Todos los datos de la Tarea 1 están contrastados. Los siguientes solo se pueden obtener sobre el material del aula y se completan en las tareas indicadas:
+Todos los datos de la Tasca 1 están contrastados. Los siguientes solo se pueden obtener sobre el material del aula y se completan en las tareas indicadas:
 
-| Dato | Función | Tarea | Propuesta de comprobación |
+| Dato | Función | Tasca | Propuesta de comprobación |
 |---|---|---|---|
-| Versión de RouterOS instalada en los routers del aula | Comunicaciones | Tarea 2 | Ejecutar `/system resource print` en cada router |
-| Soporte de VT-x/AMD-V y SLAT en los PC del aula | Virtualización | Tarea 2 | Comprobar en la BIOS/UEFI y con `lscpu` (Linux) o `systeminfo` (Windows) |
-| TPM 2.0 y arranque seguro en los equipos cliente | Clientes | Tarea 2 | `tpm.msc` y `msinfo32` en Windows; `ls /dev/tpm*` y `mokutil --sb-state` en Linux |
-| CPU, número y tamaño de discos del PC de datos | Datos | Tarea 2 | Inventario con `lsblk`, `smartctl -a` y la ficha del fabricante |
-| Hash de las ISO descargadas | Todas | Tarea 5 (instalación) | Comparar el SHA-256 publicado con el calculado con `sha256sum` |
+| Versión de RouterOS instalada en los routers del aula | Comunicaciones | Tasca 2 | Ejecutar `/system resource print` en cada router |
+| Soporte de VT-x/AMD-V y SLAT en los PC del aula | Virtualización | Tasca 2 | Comprobar en la BIOS/UEFI y con `lscpu` (Linux) o `systeminfo` (Windows) |
+| TPM 2.0 y arranque seguro en los equipos cliente | Clientes | Tasca 2 | `tpm.msc` y `msinfo32` en Windows; `ls /dev/tpm*` y `mokutil --sb-state` en Linux |
+| CPU, número y tamaño de discos del PC de datos | Datos | Tasca 2 | Inventario con `lsblk`, `smartctl -a` y la ficha del fabricante |
+| Hash de las ISO descargadas | Todas | Tasca 5 (instalación) | Comparar el SHA-256 publicado con el calculado con `sha256sum` |
 
 ## Fuentes
 
