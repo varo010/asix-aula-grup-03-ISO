@@ -1,5 +1,7 @@
 # 01 · Requisitos
 
+Tasca 1 «Necessitats i sistemes» · RA principales: ISO RA1 a-c y FDM RA4 a-c.
+
 Los datos no confirmados se marcan **N/C** con una propuesta de comprobación. Cualquier ejemplo es un **supuesto**.
 
 Las necesidades se definen **antes** de elegir productos; la comparación y la elección están en [03-sistemes](03-sistemes.md).
@@ -19,13 +21,13 @@ Las necesidades se definen **antes** de elegir productos; la comparación y la e
 
 | Función | Necesidad | Supuesto / N/C |
 |---|---|---|
-| Comunicaciones | Conectar la LAN con la WAN, filtrar tráfico con IDS/IPS e inspección de capa 7 y dar VPN a los portátiles de Comercial | Varias WAN o BGP: supuesto. Ancho de banda N/C (medir en la Tarea 7) |
-| Virtualización | Ejecutar los servidores en VM, hacer instantáneas y copias, y preparar un clúster de 3 nodos con almacenamiento compartido | Soporte VT-x/AMD-V de los PC del aula: N/C (Tarea 2) |
+| Comunicaciones | Conectar la LAN con la WAN, filtrar tráfico con IDS/IPS e inspección de capa 7 y dar VPN a los portátiles de Comercial | Varias WAN o BGP: supuesto. Ancho de banda N/C (medir en la Tasca 7) |
+| Virtualización | Ejecutar los servidores en VM, hacer instantáneas y copias, y preparar un clúster de 3 nodos con almacenamiento compartido | Soporte VT-x/AMD-V de los PC del aula: N/C (Tasca 2) |
 | Gestión centralizada | Directorio único de usuarios, equipos y grupos; GPO en clientes Windows; DNS interno; clientes Linux unidos al dominio | Implantación completa en fases posteriores (RA4 y RA5 de ISO) |
 | Clientes | Ejecutar las aplicaciones de cada departamento, unirse al dominio, recibir actualizaciones automáticas y cifrar el disco | Aplicaciones concretas: supuesto (tabla siguiente) |
 | Datos | Carpetas por departamento por SMB y NFS con los usuarios del dominio, cuotas por departamento y usuario, y almacenamiento NFS para Proxmox | Volumen N/C |
-| Recuperación | Tolerar la caída de un disco, copias automáticas en un destino independiente del NAS y restauración comprobada (un cliente vuelve a abrir el fichero con contenido y permisos correctos) | Objetivos de tiempo de recuperación: se fijan en el plan de contingencia (Tarea 8) |
-| Supervisión | Avisos del estado de discos y volúmenes, registros de los servidores y monitorización de recursos frente a la línea base | Umbrales de alerta: se fijan en la Tarea 7 |
+| Recuperación | Tolerar la caída de un disco, copias automáticas en un destino independiente del NAS y restauración comprobada (un cliente vuelve a abrir el fichero con contenido y permisos correctos) | Objetivos de tiempo de recuperación: se fijan en el plan de contingencia (Tasca 8) |
+| Supervisión | Avisos del estado de discos y volúmenes, registros de los servidores y monitorización de recursos frente a la línea base | Umbrales de alerta: se fijan en la Tasca 7 |
 
 ## Necesidades por departamento
 

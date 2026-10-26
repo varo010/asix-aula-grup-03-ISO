@@ -1,6 +1,6 @@
 # 02 · Inventario y diagnóstico
 
-Tasca 2 · RA principales: FDM RA1 a-h y RA4 h-i.
+Tasca 2 «Equips i perifèrics» · RA principales: FDM RA1 a-h y RA4 h-i.
 
 Inventario del material que nos ha dado el profesorado y diagnóstico del estado inicial (línea base) de cada equipo, para poder compararlo más adelante si cambian las condiciones.
 
