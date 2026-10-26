@@ -60,4 +60,7 @@ Evidencia: foto de los equipos y los cables etiquetados en `evidencies/t3-adhesi
 
 ## 4. Ampliación: sala de servidores o CPD pequeño
 
-Pendiente: lo redacta el grupo. ¿Qué elementos tendría que tener una sala de servidores pequeña para la empresa del enunciado y para qué serviría cada uno? Cada elemento, con su justificación.
+Si estuviéramos en una sala de servidores o en un CPD, deberíamos tener:
+
+- **Un SAI:** si se fuera la luz, deberíamos tener una alternativa para que no se apague ningún servidor y, a causa de ello, perder información.
+- **Un servidor de copias de seguridad**, tanto físicas como lógicas, por si pasara alguna catástrofe natural.
