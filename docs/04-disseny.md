@@ -3,33 +3,47 @@
 Tasca 4 «Disseny físic i lògic» · RA principales: FDM RA4; ISO RA1 y RA3.
 
 ## Esquema físico
-Ver [diagrames/](../diagrames/).
+Esquema de la Tasca 3 completado con la configuración de red de cada interfaz: [arquitectura-red-tasca4.drawio](../diagrames/arquitectura-red-tasca4.drawio).
 
 ## Esquema lógico
-Ver [diagrames/](../diagrames/).
+Ver el mismo esquema.
 
 ## Direccionamiento
 
-Datos del esquema [arquitectura-red](../diagrames/arquitectura-red.drawio). Red LAN 192.168.30.0/24.
+Red LAN del grupo: 192.168.30.0/24. Todas las máscaras son 255.255.255.0 (/24). «—» indica un dato pendiente; las IP WAN las asigna el profesorado.
 
-| Equipo | Interfaz | IP | Máscara | Puerta de enlace | DNS | Método |
+| Rango | Uso |
+|---|---|
+| .1 – .15 | Servidores de comunicaciones y VM del PC-01 |
+| .16 – .100 | Servidores y servicios |
+| .101 – .254 | Clientes (.101 – .106 portátiles de clase; desde .107, clientes virtuales) |
+
+MikroTik, OPNsense y Ubuntu Server son las alternativas de servidor de comunicaciones. La puerta de enlace de la LAN es la del MikroTik (192.168.30.1).
+
+| Equipo | Físico o virtual | Interfaz | IP | Puerta de enlace | DNS | Método |
 |---|---|---|---|---|---|---|
-| Servidor de comunicaciones | WAN | 172.16.222.30 (la asigna el profesorado) | 255.255.255.0 | N/C | N/C | Fija |
-| Servidor de comunicaciones | LAN | 192.168.30.1 | 255.255.255.0 | — | N/C | Fija |
-| Switch LAN (principal) | N/C | 192.168.30.2 | 255.255.255.0 | 192.168.30.1 | N/C | N/C |
-| Switch LAN (puestos de trabajo) | N/C | 192.168.30.3 | 255.255.255.0 | 192.168.30.1 | N/C | N/C |
-| NAS / SAN | N/C | 192.168.30.5 | 255.255.255.0 | 192.168.30.1 | N/C | N/C |
-| Nodo 1 Proxmox VE | N/C | 192.168.30.11 | 255.255.255.0 | 192.168.30.1 | N/C | N/C |
-| Nodo 2 Proxmox VE | N/C | 192.168.30.12 | 255.255.255.0 | 192.168.30.1 | N/C | N/C |
-| Nodo 3 Proxmox VE | N/C | 192.168.30.13 | 255.255.255.0 | 192.168.30.1 | N/C | N/C |
-| VM Windows Server 2025 | N/C | 192.168.30.21 | 255.255.255.0 | 192.168.30.1 | N/C | N/C |
-| VM Debian · servicios | N/C | 192.168.30.22 | 255.255.255.0 | 192.168.30.1 | N/C | N/C |
-| VM Debian · datos | N/C | 192.168.30.23 | 255.255.255.0 | 192.168.30.1 | N/C | N/C |
-| Dirección | N/C | 192.168.30.101 | 255.255.255.0 | 192.168.30.1 | N/C | N/C |
-| Administración | N/C | 192.168.30.102 | 255.255.255.0 | 192.168.30.1 | N/C | N/C |
-| Comercial | N/C | 192.168.30.103 | 255.255.255.0 | 192.168.30.1 | N/C | N/C |
-| Producción | N/C | 192.168.30.104 | 255.255.255.0 | 192.168.30.1 | N/C | N/C |
-| Informática | N/C | 192.168.30.105 | 255.255.255.0 | 192.168.30.1 | N/C | N/C |
+| MikroTik hEX | Físico | WAN | — | — | 8.8.8.8 | Fija |
+| MikroTik hEX | Físico | LAN | 192.168.30.1 | — | 8.8.8.8 | Fija |
+| OPNsense | VM en el PC-01 | WAN (puente NIC USB) | — | — | 8.8.8.8 | Fija |
+| OPNsense | VM en el PC-01 | LAN (puente `enp2s0`) | 192.168.30.2 | — | 8.8.8.8 | Fija |
+| Ubuntu Server (enrutamiento) | VM en el PC-01 | Puente `enp2s0` | 192.168.30.3 | 192.168.30.1 | 8.8.8.8 | Fija |
+| Debian (reserva de Ubuntu Server, solo instalada) | VM en el PC-01 | Puente `enp2s0` | 192.168.30.4 | 192.168.30.1 | 8.8.8.8 | Fija |
+| PC-01 · Lubuntu (anfitrión) | Físico | `enp2s0` | 192.168.30.15 | 192.168.30.1 | 8.8.8.8 | Fija |
+| PC-01 · Lubuntu (anfitrión) | Físico | NIC USB `enxb44bd6c64adc` | Sin IP (puente WAN de OPNsense) | — | — | — |
+| NAS / SAN · TrueNAS (PC-02) | Físico | — | 192.168.30.20 | 192.168.30.1 | 8.8.8.8 | Fija |
+| VM Windows Server 2025 | Virtual (nodo 1) | — | 192.168.30.21 | 192.168.30.1 | 8.8.8.8 | Fija |
+| VM Debian · servicios | Virtual (nodo 2) | — | 192.168.30.22 | 192.168.30.1 | 8.8.8.8 | Fija |
+| VM Debian · datos | Virtual (nodo 3) | — | 192.168.30.23 | 192.168.30.1 | 8.8.8.8 | Fija |
+| Nodo 1 Proxmox VE | Físico | — | 192.168.30.31 | 192.168.30.1 | 8.8.8.8 | Fija |
+| Nodo 2 Proxmox VE | Físico | — | 192.168.30.32 | 192.168.30.1 | 8.8.8.8 | Fija |
+| Nodo 3 Proxmox VE | Físico | — | 192.168.30.33 | 192.168.30.1 | 8.8.8.8 | Fija |
+| Dirección (Windows 11) | Físico | — | 192.168.30.101 | 192.168.30.1 | 8.8.8.8 | Fija |
+| Administración (Windows 11) | Físico | — | 192.168.30.102 | 192.168.30.1 | 8.8.8.8 | Fija |
+| Comercial (Windows 11) | Físico | — | 192.168.30.103 | 192.168.30.1 | 8.8.8.8 | Fija |
+| Producción (Linux) | Físico | — | 192.168.30.104 | 192.168.30.1 | 8.8.8.8 | Fija |
+| Informática (Linux) | Físico | — | 192.168.30.105 | 192.168.30.1 | 8.8.8.8 | Fija |
+| Portátil 6 (Linux) | Físico | — | 192.168.30.106 | 192.168.30.1 | 8.8.8.8 | Fija |
+| Switch projecte, Switch LAN principal (TL-SG116) y de puestos (LS1008G) | Físicos | — | Sin IP (no gestionables) | — | — | — |
 
 ## Camino del tráfico y aislamiento entre LAN
 
