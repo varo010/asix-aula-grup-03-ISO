@@ -15,18 +15,18 @@ Servidor de comunicaciones, virtualización (Proxmox VE), servidores empresarial
 
 ## Estado
 
-| Bloque | Documento | Estado | Responsable |
+| Tarea del enunciado | Documento | Estado | Responsable |
 |---|---|---|---|
-| Predicciones | [00-prediccions](docs/00-prediccions.md) | Pendiente | Todos |
-| Requisitos | [01-requisits](docs/01-requisits.md) | Ejecutado | Todos |
-| Inventario | [02-inventari](docs/02-inventari.md) | En curso | Mauro |
-| Sistemas | [03-sistemes](docs/03-sistemes.md) | Ejecutado | Todos |
-| Red del aula | [xarxa-aula](docs/xarxa-aula.md) | En curso | |
-| Diseño | [04-disseny](docs/04-disseny.md) | Pendiente | Mauro |
-| Recursos | [05-recursos](docs/05-recursos.md) | Pendiente | Mauro |
-| Instalaciones | [06-installacions](docs/06-installacions.md) | Pendiente | |
-| Recuperación | [07-recuperacio](docs/07-recuperacio.md) | Pendiente | |
-| Rendimiento | [08-rendiment](docs/08-rendiment.md) | Pendiente | |
+| PREDIU | [00-prediccions](docs/00-prediccions.md) | Pendiente | Todos |
+| Tasca 0 «Muntatge de l'entorn de proves a l'aula» | [Planificación](lliuraments/Planificacion_Grupo3.pdf) | En curso | Todos |
+| Tasca 1 «Necessitats i sistemes» | [01-requisits](docs/01-requisits.md), [03-sistemes](docs/03-sistemes.md), [decisions/](decisions/) | Ejecutado | Todos |
+| Tasca 2 «Equips i perifèrics» | [02-inventari](docs/02-inventari.md) | En curso | Mauro |
+| Tasca 3 «Rack i interconnexió» | [xarxa-aula](docs/xarxa-aula.md), [diagrames/](diagrames/) | En curso | |
+| Tasca 4 «Disseny físic i lògic» | [04-disseny](docs/04-disseny.md), [05-recursos](docs/05-recursos.md), [diagrames/](diagrames/) | En curso | Mauro |
+| Tasca 5 «Instal·lació i comunicacions» | [06-installacions](docs/06-installacions.md) | Pendiente | |
+| Tasca 6 «Emmagatzematge i recuperació» | [07-recuperacio](docs/07-recuperacio.md) | Pendiente | |
+| Tasca 7 «Rendiment i diagnòstic» | [08-rendiment](docs/08-rendiment.md) | Pendiente | |
+| Tasca 8 (Final) | — | Pendiente | |
 
 Estados posibles: Pendiente · En curso · Ejecutado · Simulado · Pendiente de material.
 

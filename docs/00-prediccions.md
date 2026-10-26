@@ -1,5 +1,7 @@
 # 00 · Predicciones
 
+PREDIU (antes de la Tasca 0).
+
 Cada integrante responde **antes de buscar información** y no edita después su respuesta inicial: la revisión va en el apartado final.
 
 Preguntas: ¿qué sistema pondrías en un cliente, en un servidor de datos y en un equipo de comunicaciones? ¿Qué comprobarías en el hardware? ¿Qué pasaría si se pierde un disco?
