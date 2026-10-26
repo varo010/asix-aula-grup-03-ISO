@@ -1,34 +1,40 @@
 # Red del entorno de pruebas del aula
 
-Tasca 3 · RA principales: FDM RA1 c y h; RA4 a-d y g-i.
+Tasca 3 «Rack i interconnexió» · RA principales: FDM RA1 c y h; RA4 a-d y g-i.
 
 Un dato no comprobado todavía se marca **N/C**.
 
 ## 1. Esquema de la red
 
-Hecho con draw.io. Editable: [t3-xarxa-aula.drawio](../diagrames/t3-xarxa-aula.drawio). Exportación:
+Hecho con draw.io. Editable: [arquitectura-red.drawio](../diagrames/arquitectura-red.drawio). Exportación:
 
-![Esquema de la red del aula](../diagrames/t3-xarxa-aula.svg)
-
-Borrador: las conexiones, los puertos y las IP se confirman en el aula.
+![Arquitectura de red del grupo 3](../diagrames/arquitectura-red.png)
 
 ## 2. Elementos de la red
 
-| ID | Elemento | Físico o virtual | Finalidad o uso | Conectado a | IP |
-|---|---|---|---|---|---|
-| — | Red del rack 172.16.222.0/24 | Física | Red compartida por los 4 grupos; da salida a la WAN | G3-RT-01 (puerto N/C) | — |
-| G3-RT-01 | Router MikroTik hEX RB750Gr3 | Físico | Enrutar el tráfico entre la red del rack y la LAN del grupo | Red del rack y G3-SW-01 (puertos N/C) | WAN: N/C (la asigna el profesorado) · LAN: N/C |
-| G3-FW | Cortafuegos OPNsense | Virtual | Filtrar el tráfico entre la WAN y la LAN | N/C | N/C |
-| G3-SW-01 | Switch TP-Link TL-SG116 | Físico | Conectar los equipos de la LAN 192.168.30.0/24 | G3-RT-01, G3-PC-01 y G3-PC-02 (puertos N/C) | — (no gestionable) |
-| G3-SW-02 | Switch TP-Link LS1008G | Físico | N/C | N/C | — (no gestionable) |
-| G3-SW-03 | Switch TP-Link LS1008G | Físico | N/C | N/C | — (no gestionable) |
-| G3-PC-01 | PC APD ALDA+ (`PCG3`) | Físico | Cliente Lubuntu; anfitrión de VM con VirtualBox | G3-SW-01 (puerto N/C) | N/C |
-| G3-PC-02 | PC Ticnova E70 SFF | Físico | Servidor de datos TrueNAS (previsto) | G3-SW-01 (puerto N/C) | N/C |
-| G3-CAB-01… | Latiguillos RJ45 Cat6 | Físicos | Unir los equipos | Ver [apartado 3](#3-identificación-con-adhesivos) | — |
+| Elemento del esquema | Físico o virtual | Finalidad o uso | IP | En el aula |
+|---|---|---|---|---|
+| Red del aula 172.16.222.0/24 | Física | Red compartida por los grupos; salida al exterior | — | Red del rack |
+| Switch projecte | Físico | Une la red del aula con el servidor de comunicaciones del grupo | — | N/C |
+| Servidor de comunicaciones / cortafuegos | Físico (MikroTik) y virtual (OPNsense, Debian + nftables) | Enrutar y filtrar el tráfico entre la WAN y la LAN | WAN 172.16.222.30 · LAN 192.168.30.1 | MikroTik: G3-RT-01 (hEX). OPNsense: VM en G3-PC-01. Debian + nftables: N/C |
+| Switch LAN (principal) | Físico | Conecta el clúster, el NAS/SAN y el switch de puestos de trabajo | 192.168.30.2 | N/C |
+| Switch LAN (puestos de trabajo) | Físico | Conecta los cinco clientes | 192.168.30.3 | N/C |
+| Nodo 1, 2 y 3 Proxmox VE | Físicos | Clúster de virtualización donde se ejecutan los servidores | 192.168.30.11 · .12 · .13 | N/C |
+| VM Windows Server 2025 | Virtual (nodo 1) | Servidor de dominio | 192.168.30.21 | N/C |
+| VM Debian · servicios | Virtual (nodo 2) | Servidor de servicios | 192.168.30.22 | N/C |
+| VM Debian · datos | Virtual (nodo 3) | Servidor de datos | 192.168.30.23 | N/C |
+| NAS / SAN | Físico | Copias, imágenes y datos | 192.168.30.5 | G3-PC-02 (TrueNAS) |
+| Dirección | Físico | Cliente Windows 11 | 192.168.30.101 | N/C |
+| Administración | Físico | Cliente Windows 11 | 192.168.30.102 | N/C |
+| Comercial | Físico | Cliente Windows 11 | 192.168.30.103 | N/C |
+| Producción | Físico | Cliente Linux | 192.168.30.104 | N/C |
+| Informática | Físico | Cliente Linux | 192.168.30.105 | N/C |
+
+Todos los equipos de la LAN usan la máscara 255.255.255.0 y la puerta de enlace 192.168.30.1. La configuración completa de cada interfaz está en [04-disseny](04-disseny.md#direccionamiento).
 
 ## 3. Identificación con adhesivos
 
-Cada equipo lleva un adhesivo con su ID, el mismo del esquema y del [inventario](02-inventari.md). Cada cable lleva un adhesivo en **cada extremo** con su ID y lo que une.
+Cada equipo lleva un adhesivo con su ID, el mismo del [inventario](02-inventari.md). Cada cable lleva un adhesivo en **cada extremo** con su ID y lo que une.
 
 **Equipos**
 
