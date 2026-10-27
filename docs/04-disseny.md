@@ -15,8 +15,9 @@ Red LAN del grupo: 192.168.30.0/24. Todas las máscaras son 255.255.255.0 (/24).
 | Rango | Uso |
 |---|---|
 | .1 – .15 | Servidores de comunicaciones y VM del PC-01 |
-| .16 – .100 | Servidores y servicios |
-| .101 – .254 | Clientes (.101 – .106 portátiles de clase; desde .107, clientes virtuales) |
+| .16 – .99 | Servidores y servicios (IP fija) |
+| .100 – .200 | PC físicos (portátiles de clase) y virtuales: IP dinámica por DHCP |
+| .201 – .254 | Libres (reserva) |
 
 MikroTik, OPNsense y Ubuntu Server son las alternativas de servidor de comunicaciones. La puerta de enlace de la LAN es la del MikroTik (192.168.30.1).
 
@@ -37,12 +38,13 @@ MikroTik, OPNsense y Ubuntu Server son las alternativas de servidor de comunicac
 | Nodo 1 Proxmox VE | Físico | — | 192.168.30.31 | 192.168.30.1 | 8.8.8.8 | Fija |
 | Nodo 2 Proxmox VE | Físico | — | 192.168.30.32 | 192.168.30.1 | 8.8.8.8 | Fija |
 | Nodo 3 Proxmox VE | Físico | — | 192.168.30.33 | 192.168.30.1 | 8.8.8.8 | Fija |
-| Dirección (Windows 11) | Físico | — | 192.168.30.101 | 192.168.30.1 | 8.8.8.8 | Fija |
-| Administración (Windows 11) | Físico | — | 192.168.30.102 | 192.168.30.1 | 8.8.8.8 | Fija |
-| Comercial (Windows 11) | Físico | — | 192.168.30.103 | 192.168.30.1 | 8.8.8.8 | Fija |
-| Producción (Linux) | Físico | — | 192.168.30.104 | 192.168.30.1 | 8.8.8.8 | Fija |
-| Informática (Linux) | Físico | — | 192.168.30.105 | 192.168.30.1 | 8.8.8.8 | Fija |
-| Portátil 6 (Linux) | Físico | — | 192.168.30.106 | 192.168.30.1 | 8.8.8.8 | Fija |
+| Dirección (Windows 11) | Físico | — | Dinámica (.100 – .200) | 192.168.30.1 (por DHCP) | 8.8.8.8 (por DHCP) | DHCP |
+| Administración (Windows 11) | Físico | — | Dinámica (.100 – .200) | 192.168.30.1 (por DHCP) | 8.8.8.8 (por DHCP) | DHCP |
+| Comercial (Windows 11) | Físico | — | Dinámica (.100 – .200) | 192.168.30.1 (por DHCP) | 8.8.8.8 (por DHCP) | DHCP |
+| Producción (Linux) | Físico | — | Dinámica (.100 – .200) | 192.168.30.1 (por DHCP) | 8.8.8.8 (por DHCP) | DHCP |
+| Informática (Linux) | Físico | — | Dinámica (.100 – .200) | 192.168.30.1 (por DHCP) | 8.8.8.8 (por DHCP) | DHCP |
+| Portátil 6 (Linux) | Físico | — | Dinámica (.100 – .200) | 192.168.30.1 (por DHCP) | 8.8.8.8 (por DHCP) | DHCP |
+| Clientes virtuales | Virtual | — | Dinámica (.100 – .200) | 192.168.30.1 (por DHCP) | 8.8.8.8 (por DHCP) | DHCP |
 | Switch projecte, Switch LAN principal (TL-SG116) y de puestos (LS1008G) | Físicos | — | Sin IP (no gestionables) | — | — | — |
 
 ## Camino del tráfico y aislamiento entre LAN
