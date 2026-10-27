@@ -3,7 +3,9 @@
 Tasca 4 «Disseny físic i lògic» · RA principales: FDM RA4; ISO RA1 y RA3.
 
 ## Esquema físico
-Esquema de la Tasca 3 completado con la configuración de red de cada interfaz: [arquitectura-red-tasca4.drawio](../diagrames/arquitectura-red-tasca4.drawio).
+Esquema de la Tasca 3 completado con la configuración de red de cada interfaz. Editable: [arquitectura-red-tasca4.drawio](../diagrames/arquitectura-red-tasca4.drawio). Exportación:
+
+![Arquitectura de red del grupo 3 con la configuración de cada interfaz](../diagrames/arquitectura-red-tasca4.png)
 
 ## Esquema lógico
 Ver el mismo esquema.
