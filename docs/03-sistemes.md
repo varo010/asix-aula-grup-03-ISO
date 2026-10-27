@@ -107,7 +107,7 @@ Responsable: Juan Pablo.
 
 ### 4. Justificación
 
-Se elige **Proxmox VE** por su coste nulo de licencias, por reunir todas las funciones necesarias y porque sus requisitos de alta disponibilidad (3 nodos y almacenamiento compartido) coinciden con el diseño del enunciado.
+Se elige **Proxmox VE** por su coste nulo de licencias, por reunir todas las funciones necesarias en una sola plataforma sin depender de software aparte. Sus planes de contigencia son apropiados para nuestros requisitos.
 
 - **Inconveniente aceptado:** el soporte oficial es de pago.
 - **Descartados:**
