@@ -6,9 +6,7 @@ Un dato no comprobado todavía se marca **N/C**.
 
 ## 1. Esquema de la red
 
-Hecho con draw.io. Editable: [arquitectura-red.drawio](../diagrames/arquitectura-red.drawio). Exportación:
-
-![Arquitectura de red del grupo 3](../diagrames/arquitectura-red.png)
+Hecho con draw.io. Editable: [arquitectura-red.drawio](../diagrames/arquitectura-red.drawio). El direccionamiento definitivo de cada interfaz (TrueNAS en 192.168.30.20) está en [04-disseny](04-disseny.md) y en [arquitectura-red-tasca4.drawio](../diagrames/arquitectura-red-tasca4.drawio).
 
 ## 2. Elementos de la red
 
