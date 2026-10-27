@@ -44,7 +44,7 @@ Disponemos de dos PCs extra para el proyecto. Resumen en [hardware-grupo3](hardw
 | Gráficos | Intel HD Graphics 4400 integrada | Intel UHD Graphics 630 integrada | `lspci \| grep VGA` |
 | Periféricos | Monitor, teclado y ratón compartidos | Ninguno: se administra por la web de TrueNAS | Inspección |
 | Alimentación | Fuente de ~300 W (estimada para el formato); consumo real ~30–65 W | Fuente de ~180–300 W (estimada para un SFF); consumo real ~30–65 W | Etiqueta de la fuente |
-| Sistema operativo (configuración inicial) | Lubuntu (versión N/C) con VirtualBox; usuario `admin`; IP pendiente | TrueNAS (previsto); IP pendiente | `cat /etc/os-release`, `ip -br a` |
+| Sistema operativo (configuración inicial) | Lubuntu (versión N/C) con VirtualBox; usuario `admin`; IP pendiente | TrueNAS (previsto); IP fija 192.168.30.20/24 (ver [04-disseny](04-disseny.md)) | `cat /etc/os-release`, `ip -br a` |
 
 ## 3. Router y switches
 

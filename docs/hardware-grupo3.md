@@ -60,7 +60,7 @@
 | Gráficos | Intel UHD 630 integrada |
 | SO | TrueNAS (previsto) |
 | MAC | _(por rellenar)_ |
-| IP | _(por rellenar)_ |
+| IP | 192.168.30.20/24, fija (GW 192.168.30.1, DNS 8.8.8.8; ver [04-disseny](04-disseny.md)) |
 | Conectividad | USB 3.0 frontal, Realtek Gigabit con arranque PXE |
 | Fuente de alimentación | ~180–300 W (estimada para un SFF; consumo real ~30–65 W) |
 | BIOS | Fecha corregida a 21/10/2026 (marcaba 2019); vigilar pila CMOS CR2032 |
@@ -73,4 +73,4 @@
 - TrueNAS (PC 2): 8 GB de RAM es el mínimo justo para ZFS — el segundo módulo DDR4 es muy recomendable. TrueNAS ocupa el disco de arranque en exclusiva: el SSD de 256 GB quedará solo como boot, los datos van en discos adicionales en los 3 SATA libres.
 - Lubuntu (PC 1): el i3-4160 + 8 GB lo mueve sobrado; el HDD de 7200 rpm es el cuello de botella más probable (arranque y VM de VirtualBox lentas). Un SSD mejoraría mucho el equipo.
 - Pendiente PC 1: versión de Lubuntu (cat /etc/os-release) e IP. El estado de los discos y la velocidad de red salen de los diagnósticos de [02-inventari](02-inventari.md#5-diagnósticos-línea-base).
-- Pendiente PC 2: MAC e IP cuando se instale TrueNAS.
+- Pendiente PC 2: MAC cuando se instale TrueNAS (la IP ya está asignada: 192.168.30.20).
