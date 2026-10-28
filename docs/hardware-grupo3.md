@@ -60,7 +60,7 @@
 | Gráficos | Intel UHD 630 integrada |
 | SO | TrueNAS (previsto) |
 | MAC | _(por rellenar)_ |
-| IP | 192.168.30.20/24, fija (GW 192.168.30.1, DNS 8.8.8.8; ver [04-disseny](04-disseny.md)) |
+| IP | 192.168.30.20/24, fija (GW 192.168.30.1, DNS 172.16.222.1; ver [04-disseny](04-disseny.md)) |
 | Conectividad | USB 3.0 frontal, Realtek Gigabit con arranque PXE |
 | Fuente de alimentación | ~180–300 W (estimada para un SFF; consumo real ~30–65 W) |
 | BIOS | Fecha corregida a 21/10/2026 (marcaba 2019); vigilar pila CMOS CR2032 |
