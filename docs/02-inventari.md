@@ -79,38 +79,21 @@ Cat6 admite 1000BASE-T (1 Gb/s) hasta 100 m, suficiente para todos los puertos d
 
 ## 5. Diagnósticos (línea base)
 
-Con los sistemas operativos instalados y los equipos en reposo, se mide su **estado inicial**; la Tasca 7 lo compara con los equipos trabajando. Si aparece una avería, se anota la causa probable y una prueba que la distinga de otra causa.
+Con los sistemas operativos instalados y los equipos en reposo, se mide su **estado inicial**; la Tasca 7 lo compara con los equipos trabajando.
+
+> Cuando hagáis los diagnósticos de memoria, disco y red de los PC, escribid aquí cómo y qué habéis hecho: herramienta, condiciones, resultado e interpretación. Si sale una avería, la causa probable y una prueba que la distinga de otra causa.
 
 | Equipo | Recurso | Prueba | Herramienta | Condiciones | Resultado | Interpretación | Evidencia |
 |---|---|---|---|---|---|---|---|
-| PC-01 | Memoria | Total, usada y disponible | `free -h` | En reposo, sin VM | | | |
-| PC-01 | Memoria | Test de memoria | MemTest86+ | Arranque desde USB, 1 pasada | | | |
-| PC-01 | Disco | Estado SMART | `sudo smartctl -H -A /dev/sda` | — | | | |
-| PC-01 | Disco | Lectura y escritura | `fio` | Sin otras cargas | | | |
-| PC-01 | Red | Velocidad del enlace | `ethtool enp2s0` | Conectado al switch | | | |
-| PC-01 | Red | Conectividad y rendimiento | `ping` e `iperf3` con PC-02 | Mismo switch, sin otro tráfico | | | |
-| PC-02 | Memoria | Total, usada y disponible | `free -h` (shell de TrueNAS) | En reposo | | | |
-| PC-02 | Memoria | Test de memoria | MemTest86+ | Arranque desde USB, 1 pasada | | | |
-| PC-02 | Disco | Estado SMART | `smartctl -H -A` (TrueNAS) | — | | | |
-| PC-02 | Disco | Lectura y escritura | `fio` | Sin otras cargas | | | |
-| PC-02 | Red | Velocidad del enlace | `ethtool` | Conectado al switch | | | |
-| PC-02 | Red | Conectividad y rendimiento | `ping` e `iperf3` con PC-01 | Mismo switch, sin otro tráfico | | | |
 | RT-01 | Memoria y CPU | Uso en reposo | `/system resource print` | Sin tráfico, 1 semana encendido | CPU 0 %; 199,8 MiB libres de 256 MiB; 27 °C | Sobra capacidad en reposo para RouterOS | |
 | RT-01 | Red | Estado de los puertos | `/interface ethernet monitor` | Enlaces conectados | ether1 a 1 Gb/s full dúplex; ether2 con enlace | Cableado y ether1 correctos a velocidad máxima | |
 
-## 6. Cuellos de botella previstos
+## 6. Cuellos de botella
 
-A confirmar con los diagnósticos.
+> Cuando encontréis cuellos de botella con los diagnósticos, escribid aquí cómo y qué habéis hecho: equipo, recurso, por qué limita, la prueba que lo confirma y la mejora posible.
 
-| Equipo | Recurso | Por qué puede limitar | Prueba que lo confirma | Mejora posible |
+| Equipo | Recurso | Por qué limita | Prueba que lo confirma | Mejora posible |
 |---|---|---|---|---|
-| PC-01 | Disco | HDD de 7200 rpm: arranque, aplicaciones y VM de VirtualBox lentos con accesos aleatorios | `fio` (aleatorio 4K) | SSD SATA |
-| PC-01 | RAM | 8 GB en un solo módulo, sin doble canal: poca memoria para las VM | `free -h` con las VM arrancadas | Segundo módulo DDR3-1600 |
-| PC-01 | CPU | 2 núcleos / 4 hilos: pocas vCPU para repartir entre VM | `top` con las VM arrancadas | Limitar las VM simultáneas |
-| PC-02 | RAM | 8 GB es el mínimo de TrueNAS; ZFS usa la RAM libre como caché | `free -h` y ARC de TrueNAS | Segundo módulo DDR4-2400 |
-| PC-02 | Disco | Un solo disco, que TrueNAS usa entero para arrancar: no queda disco para datos ni para el espejo | `lsblk` | Dos discos en los SATA libres |
-| PC-02 | Red | Una sola tarjeta Gigabit para la gestión y los datos | `iperf3` y copia de ficheros al NAS | Segunda tarjeta de red |
-| RT-01 | CPU | 880 MHz MIPS: con NAT, cortafuegos o VPN puede no llegar al Gigabit | `iperf3` a través del router | Filtrado en un equipo x86 |
 
 ## 7. Impacto en las decisiones
 
