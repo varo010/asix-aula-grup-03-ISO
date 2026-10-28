@@ -41,7 +41,7 @@ El MikroTik hEX (RB750Gr3) es el router del grupo: une nuestra red interna (LAN,
 
 | Puerto | Papel | Dirección | Qué hay conectado |
 |---|---|---|---|
-| `ether1` | WAN (salida) | 172.16.222.30/24 | Red del aula (rack) |
+| `ether1` | WAN (salida) | 172.16.222.216/24 | Red del aula (rack) |
 | `ether2`–`ether5` | LAN, unidos en el puente `bridge_grupo3` | 192.168.30.1/24 (en el puente) | Nuestros equipos |
 
 Un **puente** (*bridge*) hace que los cuatro puertos funcionen como uno solo, igual que un switch. Así, conectes un equipo en `ether2` o en `ether5`, está en la misma red y el router tiene una sola dirección para todos: 192.168.30.1.
@@ -73,12 +73,12 @@ En el primero debe salir **una sola** 192.168.30.1/24, en `bridge_grupo3`. En el
 
 **2. Dirección de la WAN**
 
-- **Qué:** dimos a `ether1` la dirección 172.16.222.30/24.
+- **Qué:** dimos a `ether1` la dirección 172.16.222.216/24.
 - **Por qué:** para salir a Internet, el router necesita una dirección dentro de la red del aula, que es la que conecta con el exterior. Las direcciones de esa red las asigna el profesorado para que no se repitan entre grupos.
 - **Cómo:**
 
 ```
-/ip address add address=172.16.222.30/24 interface=ether1
+/ip address add address=172.16.222.216/24 interface=ether1
 ```
 
 **3. Ruta por defecto**
@@ -96,7 +96,7 @@ La ruta `0.0.0.0/0` hacia 172.16.222.1 debe salir activa (`As`).
 **4. NAT**
 
 - **Qué:** activamos el NAT de salida (*masquerade*) por `ether1`.
-- **Por qué:** las direcciones 192.168.30.x son privadas y la red del aula no sabe volver a ellas. Con NAT, el router cambia la dirección del equipo por la suya (172.16.222.30) al salir y la deshace cuando vuelve la respuesta.
+- **Por qué:** las direcciones 192.168.30.x son privadas y la red del aula no sabe volver a ellas. Con NAT, el router cambia la dirección del equipo por la suya (172.16.222.216) al salir y la deshace cuando vuelve la respuesta.
 
 **5. DNS**
 
@@ -122,7 +122,7 @@ Devolvió 216.239.38.120, así que la cadena LAN → router → DNS del centro �
 
 | Síntoma | Causa | Solución |
 |---|---|---|
-| `invalid value for argument address` al poner la IP de la WAN | Pegamos el comando del ejemplo con la `X` literal (`172.16.222.X`) en lugar del número | Repetir el comando con la dirección real: 172.16.222.30 |
+| `invalid value for argument address` al poner la IP de la WAN | Pegamos el comando del ejemplo con la `X` literal (`172.16.222.X`) en lugar del número | Repetir el comando con la dirección real: 172.16.222.216 |
 | En `/ip route print` salían dos rutas a 192.168.30.0/24 marcadas con `+` | La 192.168.30.1/24 estaba dos veces, en el puente y en `ether1`, por un intento anterior con *Quick Set*. El router no sabía por cuál de las dos ir a la LAN | Borrar la de `ether1`: `/ip address remove [find interface=ether1 address="192.168.30.1/24"]`. Comprobado con `/ip route print`: la LAN ya solo sale por `bridge_grupo3` |
 | El terminal mostraba `Line 1 of 2>` y se quedaba esperando | Pulsamos Intro con un corchete `[` sin cerrar y RouterOS esperaba el resto del comando | Ctrl+C para cancelar y repetir el comando completo en una sola línea |
 | `/tool fetch` fallaba con `not allowed by device-mode` | Desde RouterOS 7.17, el router trae bloqueadas por seguridad herramientas como `fetch`. No es un fallo de red | Comprobar Internet de otra forma (`:resolve` y el navegador de un portátil) |
