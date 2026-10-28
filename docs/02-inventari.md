@@ -81,7 +81,7 @@ Cat6 admite 1000BASE-T (1 Gb/s) hasta 100 m, suficiente para todos los puertos d
 
 Con los sistemas operativos instalados y los equipos en reposo, se mide su **estado inicial**; la Tasca 7 lo compara con los equipos trabajando.
 
-> **Qué poner aquí:** los diagnósticos de memoria, disco y red de los PC cuando los hagamos: herramienta, condiciones, resultado e interpretación. Si sale una avería, la causa probable y una prueba que la distinga de otra causa.
+> Cuando hagáis los diagnósticos de memoria, disco y red de los PC, escribid aquí cómo y qué habéis hecho: herramienta, condiciones, resultado e interpretación. Si sale una avería, la causa probable y una prueba que la distinga de otra causa.
 
 | Equipo | Recurso | Prueba | Herramienta | Condiciones | Resultado | Interpretación | Evidencia |
 |---|---|---|---|---|---|---|---|
@@ -90,7 +90,7 @@ Con los sistemas operativos instalados y los equipos en reposo, se mide su **est
 
 ## 6. Cuellos de botella
 
-> **Qué poner aquí:** los cuellos de botella que encontremos con los diagnósticos: equipo, recurso, por qué limita, la prueba que lo confirma y la mejora posible.
+> Cuando encontréis cuellos de botella con los diagnósticos, escribid aquí cómo y qué habéis hecho: equipo, recurso, por qué limita, la prueba que lo confirma y la mejora posible.
 
 | Equipo | Recurso | Por qué limita | Prueba que lo confirma | Mejora posible |
 |---|---|---|---|---|

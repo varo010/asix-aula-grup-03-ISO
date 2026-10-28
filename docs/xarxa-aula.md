@@ -32,7 +32,7 @@ La configuración de red de cada interfaz (Tasca 4) está en [04-disseny](04-dis
 
 ## 3. Identificación con adhesivos
 
-> **Qué poner aquí:** cuando pongamos los adhesivos, qué lleva cada equipo y cada cable (en los dos extremos del cable) y una foto como evidencia en `evidencies/`.
+> Cuando pongáis los adhesivos, escribid aquí cómo y qué habéis hecho: qué lleva cada equipo y cada cable (en los dos extremos) y una foto como evidencia en `evidencies/`.
 
 **Equipos**
 

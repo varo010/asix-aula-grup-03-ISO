@@ -51,8 +51,8 @@ MikroTik, OPNsense y Ubuntu Server son las alternativas de servidor de comunicac
 
 ## Camino del tráfico y aislamiento entre LAN
 
-> **Qué poner aquí:** por qué interfaces pasa el tráfico desde un cliente hasta Internet y cómo queda separada nuestra LAN de las de los otros grupos (equipos de comunicaciones y reglas de filtrado).
+> Cuando configuréis el servidor de comunicaciones y el filtrado, escribid aquí cómo y qué habéis hecho: por qué interfaces pasa el tráfico desde un cliente hasta Internet y cómo queda separada nuestra LAN de las de los otros grupos.
 
 ## Clúster: nodos, quórum, red y almacenamiento
 
-> **Qué poner aquí:** cuántos nodos tiene el clúster, cómo funciona el quórum, qué red y qué almacenamiento usa, y la diferencia entre gestión conjunta, migración y alta disponibilidad. Si no tenemos nodos suficientes, indicar que queda como diseño o simulación.
+> Cuando diseñéis el clúster, escribid aquí cómo y qué habéis hecho: cuántos nodos tiene, cómo funciona el quórum, qué red y qué almacenamiento usa, y la diferencia entre gestión conjunta, migración y alta disponibilidad. Si no hay nodos suficientes, indicad que queda como diseño o simulación.
