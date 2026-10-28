@@ -31,21 +31,10 @@ Hecho con draw.io. Editable: [arquitectura-red.drawio](../diagrames/arquitectura
 La configuración de red de cada interfaz (Tasca 4) está en [04-disseny](04-disseny.md#direccionamiento).
 
 ## 3. Identificación con adhesivos
-
-> Cuando pongáis los adhesivos, escribid aquí cómo y qué habéis hecho: qué lleva cada equipo y cada cable (en los dos extremos) y una foto como evidencia en `evidencies/`.
-
-**Equipos**
-
-| Adhesivo | Equipo |
-|---|---|
-
-**Cables**
-
-| Adhesivo | Extremo A (equipo/puerto) | Extremo B (equipo/puerto) |
-|---|---|---|
-
+En clase, hemos etiquetado cada cable ethernet en nuestros hosts de clase (PC 1,2,3,5 y 6)<br>
+Además, hemos etiquetado nuestro Mikrotik, TrueNAS y nuestro ordenador con Lubuntu.
+Por último, hemos etiquetado también nuestros switches.
 ## 4. Ampliación: sala de servidores o CPD pequeño
-
 Si estuviéramos en una sala de servidores o en un CPD, deberíamos tener:
 
 - **Un SAI:** si se fuera la luz, deberíamos tener una alternativa para que no se apague ningún servidor y, a causa de ello, perder información.
