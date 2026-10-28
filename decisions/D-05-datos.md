@@ -7,5 +7,4 @@
 - **Opción escogida:** TrueNAS Community Edition 25.10.7.
 - **Limitaciones aceptadas:** disco de arranque dedicado, soporte solo de comunidad, RAM sin ECC en el laboratorio, curva de aprendizaje de ZFS.
 - **Qué obligaría a revisarla:** que el PC no tenga discos suficientes para el espejo, o que falle la unión al dominio o la prueba de disco degradado.
-- **Uso de IA (si lo hubo):** solo formato.
-- **Revisión por el inventario (Tasca 2, 20/10/2026):** el PC verificado (APD ALDA+) tiene 8 GB de RAM, justo el mínimo oficial de TrueNAS, y un solo disco de ~500 GB; admite hasta 32 GB. La decisión se mantiene, pero TrueNAS necesita un PC dedicado (no una VM) y discos adicionales para el espejo, o se simulará con discos virtuales. Ver [02-inventari](../docs/02-inventari.md#7-impacto-en-las-decisiones).
+- **Uso de IA (si lo hubo):**

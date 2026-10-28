@@ -95,16 +95,6 @@ Con los sistemas operativos instalados y los equipos en reposo, se mide su **est
 | Equipo | Recurso | Por qué limita | Prueba que lo confirma | Mejora posible |
 |---|---|---|---|---|
 
-## 7. Impacto en las decisiones
-
-| Hallazgo | Decisión afectada | Consecuencia |
-|---|---|---|
-| El i3-4160 de PC-01 no está admitido por Windows 11 (PC-02, con i3-8100, sí) | [D-04 Clientes](../decisions/D-04-clientes.md) | En el aula, Windows 11 solo se podría instalar sin soporte oficial |
-| El hEX es MMIPS (no x86) con 256 MiB de RAM | [D-01 Comunicaciones](../decisions/D-01-comunicaciones.md) | OPNsense y nftables no pueden ir en el hEX: van en un PC o en una VM |
-| PC-01: 8 GB de RAM y 2 núcleos | [D-02 Virtualización](../decisions/D-02-virtualizacion.md) | Pocas VM a la vez |
-| PC-02: 8 GB de RAM y un solo disco | [D-05 Datos](../decisions/D-05-datos.md) | TrueNAS en PC-02 dedicado; faltan discos para el espejo |
-| Los switches no son gestionables | [D-01 Comunicaciones](../decisions/D-01-comunicaciones.md) | Sin VLAN en el switch: separación de redes por segmentos físicos o en el hEX |
-
 ## Fuentes
 
 | Material | URL o fuente | Fecha de consulta |
@@ -119,4 +109,4 @@ Con los sistemas operativos instalados y los equipos en reposo, se mide su **est
 
 ## Uso de IA
 
-La lista de material sale de una conversación con ChatGPT sobre la Tasca 2. Los datos medidos en el aula corrigieron dos errores: los PC no eran Dell OptiPlex 790 y el switch no era un SG3428XMPP gestionable. Claude (asistente de IA) completó las características con las fichas oficiales de cada fabricante, detectó el impacto en las decisiones de la Tasca 1 y redujo el documento a lo que pide el enunciado. Las potencias de las fuentes de alimentación son estimaciones.
+La lista de material sale de una conversación con ChatGPT sobre la Tasca 2. Los datos medidos en el aula corrigieron dos errores: los PC no eran Dell OptiPlex 790 y el switch no era un SG3428XMPP gestionable. Claude (asistente de IA) completó las características con las fichas oficiales de cada fabricante y redujo el documento a lo que pide el enunciado. Las potencias de las fuentes de alimentación son estimaciones.
