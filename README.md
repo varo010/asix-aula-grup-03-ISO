@@ -23,7 +23,7 @@ Servidor de comunicaciones, virtualización (Proxmox VE), servidores empresarial
 | Tasca 2 «Equips i perifèrics» | [02-inventari](docs/02-inventari.md) | En curso | Mauro |
 | Tasca 3 «Rack i interconnexió» | [xarxa-aula](docs/xarxa-aula.md), [diagrames/](diagrames/) | En curso | |
 | Tasca 4 «Disseny físic i lògic» | [04-disseny](docs/04-disseny.md), [05-recursos](docs/05-recursos.md), [diagrames/](diagrames/) | Ejecutado | Mauro |
-| Tasca 5 «Instal·lació i comunicacions» | [06-installacions](docs/06-installacions.md) | Pendiente | |
+| Tasca 5 «Instal·lació i comunicacions» | [06-installacions](docs/06-installacions.md) | En curso | MikroTik configurado; TrueNAS, Lubuntu y las VM de OPNsense y Debian instalados |
 | Tasca 6 «Emmagatzematge i recuperació» | [07-recuperacio](docs/07-recuperacio.md) | Pendiente | |
 | Tasca 7 «Rendiment i diagnòstic» | [08-rendiment](docs/08-rendiment.md) | Pendiente | |
 | Tasca 8 (Final) | — | Pendiente | |

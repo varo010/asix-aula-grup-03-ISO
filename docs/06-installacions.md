@@ -8,6 +8,10 @@ Tasca 5 «Instal·lació i comunicacions» · RA principales: ISO RA1 d-h y FDM 
 
 | Sistema | Versión | Origen | SHA256 verificado | Ubicación |
 |---|---|---|---|---|
+| TrueNAS | 25.10.7 (Goldeye) | N/C | N/C | G3-PC-02 (Ticnova), instalado en el equipo |
+| Lubuntu | N/C | N/C | N/C | G3-PC-01, sistema operativo principal |
+| OPNsense | N/C | N/C | N/C | VM de VirtualBox en G3-PC-01 |
+| Debian | N/C | N/C | N/C | VM de VirtualBox en G3-PC-01 |
 
 ## 2. Firmware, arranque, particionado y sistema de ficheros
 
@@ -16,6 +20,13 @@ Tasca 5 «Instal·lació i comunicacions» · RA principales: ISO RA1 d-h y FDM 
 ## 3. Instalaciones
 
 > Cuando instaléis cada sistema, escribid aquí cómo y qué habéis hecho: opciones elegidas, versión, dispositivos y software instalado con su origen.
+
+| Equipo | Qué hemos instalado | Estado |
+|---|---|---|
+| G3-PC-02 (Ticnova) | TrueNAS como sistema del equipo | Instalado; accedemos a su interfaz web por la URL desde un equipo de nuestra red |
+| G3-PC-01 | Lubuntu como sistema operativo principal, con VirtualBox | Instalado |
+| G3-PC-01 (VM) | OPNsense en una máquina virtual de VirtualBox | Instalado, sin configurar |
+| G3-PC-01 (VM) | Debian en una máquina virtual de VirtualBox | Instalado, sin configurar |
 
 ## 4. Actualización y vía de recuperación
 
@@ -141,13 +152,19 @@ Devolvió 216.239.38.120, así que la cadena LAN → router → DNS del centro �
 
 ### OPNsense
 
+Instalado en una máquina virtual de VirtualBox dentro del Lubuntu de G3-PC-01. Todavía no está configurado.
+
 > Cuando instaléis y configuréis OPNsense, escribid aquí cómo y qué habéis hecho: usuario de administración, red WAN y LAN, salida a Internet de la LAN, copia de la configuración y prueba de fallo con su recuperación.
 
 ### GNU/Linux con nftables
 
+Debian instalado en una máquina virtual de VirtualBox dentro del Lubuntu de G3-PC-01. Todavía no está configurado.
+
 > Cuando instaléis y configuréis el GNU/Linux con nftables, escribid aquí cómo y qué habéis hecho: usuario de administración, red WAN y LAN, salida a Internet de la LAN, copia de la configuración y prueba de fallo con su recuperación.
 
 ## Servidor NAS/SAN: TrueNAS
+
+TrueNAS 25.10.7 (Goldeye) está instalado en G3-PC-02 (Ticnova). Desde cualquier equipo de nuestra red entramos a su interfaz web escribiendo su URL en el navegador.
 
 > Cuando instaléis y configuréis TrueNAS, escribid aquí cómo y qué habéis hecho: instalación, usuarios de administración, parámetros de red y el disco adicional (o la partición) para las copias de configuraciones e imágenes de los equipos críticos.
 
@@ -168,6 +185,8 @@ Devolvió 216.239.38.120, así que la cadena LAN → router → DNS del centro �
 > Cuando instaléis y configuréis cada servidor de infraestructura, escribid aquí cómo y qué habéis hecho: usuarios de administración, parámetros de red, software instalado para su función y su configuración, y la copia de su configuración o imagen.
 
 ## Clientes: Windows 11 y GNU/Linux
+
+G3-PC-01 tiene Lubuntu como sistema operativo principal y VirtualBox para las máquinas virtuales de OPNsense y Debian.
 
 > Cuando instaléis y configuréis cada cliente, escribid aquí cómo y qué habéis hecho: usuario de administración, parámetros de red, si lo unís al dominio (y por qué) y la copia de su configuración o imagen.
 
