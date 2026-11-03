@@ -1,0 +1,106 @@
+Evidencia Tasca 5 · TrueNAS (G3-PC-02) · consultada el 03/11/2026 por la API de TrueNAS (solo lectura)
+Fuente: /api/v2.0 (system/info, pool, pool/dataset, disk, sharing/smb, user, service, smb, network, filesystem/getacl, audit/query)
+Las contraseñas no aparecen: TrueNAS no las devuelve y en el historial se han sustituido por ***.
+
+== Sistema ==
+Versión: TrueNAS 25.10.7 · hostname: truenas
+
+== Discos ==
+sda  SPCC_Solid_State_Disk  256 GB  serie C63807991B6A00225529
+sdb  ST2000NE0025-2FL101  2000 GB  serie ZDS16MKR
+sdc  Storage_Device  0 GB  serie 125D20140310
+Pool de arranque (sistema): boot-pool en sda
+
+== Pool de datos ==
+Pool_Principal  estado ONLINE  sano True  tamaño 1.81 TiB  libre 1.81 TiB
+  vdev DISK: sdb
+
+== Datasets ==
+Pool_Principal  compresión LZ4  usado 26.49 MiB  ACL POSIX  cifrado False  creado Tue Nov 03 11:42 2026
+Pool_Principal/Documentos  compresión LZ4  usado 96 KiB  ACL POSIX  cifrado False  creado Tue Nov 03 11:44 2026
+Pool_Principal/Configuraciones  compresión LZ4  usado 128 KiB  ACL POSIX  cifrado False  creado Tue Nov 03 11:44 2026
+
+== Permisos de las carpetas ==
+/mnt/Pool_Principal/Documentos       dueño userred (3000) · grupo root · modo 777 (rwxrwxrwx)
+/mnt/Pool_Principal/Configuraciones  dueño userred (3000) · grupo root · modo 777 (rwxrwxrwx)
+
+== Usuarios creados (no del sistema) ==
+truenas_admin  uid 950  'Local Administrator'  usuario SMB False  shell /usr/bin/zsh  home /home/truenas_admin
+userred  uid 3000  'Usuario de red'  usuario SMB True  shell /usr/sbin/nologin  home /var/empty
+userred: grupo principal userred (3000), grupo auxiliar builtin_users
+
+== Recursos compartidos SMB ==
+\\192.168.30.20\documentos  ->  /mnt/Pool_Principal/Documentos  activo True  visible True
+\\192.168.30.20\configuraciones  ->  /mnt/Pool_Principal/Configuraciones  activo True  visible True
+Config SMB: netbios truenas · grupo WORKGROUP · SMB1 True · invitado nobody
+Servicio SMB (cifs): RUNNING · arranque automático True
+
+== Red ==
+enp1s0  DHCP False  IP ['192.168.30.20/24']  enlace LINK_STATE_UP
+hostname truenas · dominio local · gateway '' · DNS ''
+Rutas por defecto: ninguna · Servidores DNS: ninguno
+
+Tareas de snapshots: 0 · réplicas: 0 · copias en la nube: 0
+
+== Historial de cambios (registro de auditoría de TrueNAS) ==
+Origen 127.0.0.1 = menú de consola del propio equipo · 192.168.30.x = interfaz web desde ese equipo
+27/10/2026 10:42:32  127.0.0.1  root  interface.update  OK
+    ["enp1s0", {"name": "enp1s0", "description": "", "ipv4_dhcp": false, "ipv6_auto": false, "aliases": [], "mtu": null}]
+27/10/2026 10:44:10  127.0.0.1  root  interface.update  OK
+    ["enp1s0", {"name": "enp1s0", "description": "", "ipv4_dhcp": false, "ipv6_auto": false, "aliases": [], "mtu": null}]
+27/10/2026 10:44:17  127.0.0.1  root  interface.commit  OK
+    []
+27/10/2026 10:44:25  127.0.0.1  root  interface.update  OK
+    ["enp1s0", {"name": "enp1s0", "description": "", "ipv4_dhcp": false, "ipv6_auto": false, "aliases": [], "mtu": null}]
+27/10/2026 10:45:30  127.0.0.1  root  network.configuration.update  FALLO
+    [{"hostname": "truenas_g3", "domain": "local", "ipv4gateway": "", "ipv6gateway": "", "nameserver1": "", "nameserver2": "", "nameserver3": ""}]
+27/10/2026 10:45:37  127.0.0.1  root  network.configuration.update  FALLO
+    [{"hostname": "truenas_g3", "domain": "local", "ipv4gateway": "", "ipv6gateway": "", "nameserver1": "", "nameserver2": "", "nameserver3": ""}]
+27/10/2026 10:50:15  127.0.0.1  root  interface.update  OK
+    ["enp1s0", {"name": "enp1s0", "description": "", "ipv4_dhcp": false, "ipv6_auto": false, "aliases": [{"type": "INET", "address": "192.168.30.20", "netmask": 24}], "mtu": null}]
+27/10/2026 10:50:18  127.0.0.1  root  interface.commit  OK
+    []
+27/10/2026 15:46:54  192.168.30.198  truenas_admin  system.general.update  OK
+    [{"kbdmap": "es", "timezone": "Europe/Madrid"}]
+03/11/2026 11:43:02  192.168.30.197  truenas_admin  pool.create  OK
+    [{"name": "Pool_Principal", "encryption": false, "topology": {"data": [{"type": "STRIPE", "disks": ["sdb"]}], "special": [], "dedup": [], "cache": [], "log": [], "spares": []}, "allow_duplicate_serials": false}]
+03/11/2026 11:43:48  192.168.30.197  truenas_admin  pool.dataset.create  OK
+    [{"name": "Pool_Principal/Configuraciones", "comments": "", "sync": "INHERIT", "snapdev": "INHERIT", "compression": "INHERIT", "exec": "INHERIT", "special_small_block_size": "INHERIT", "copies": 1, "deduplication": "INHERIT", "checksum": "INHERIT", "readonly": "INHERIT", "share_type": "GENERIC", "aclmode": "INHERIT", "acltype": "INHERIT", "atime": "INHERIT", "casesensitivity": "SENSITIVE", "recordsize": "INHERIT"}]
+03/11/2026 11:44:12  192.168.30.197  truenas_admin  pool.dataset.delete  OK
+    ["Pool_Principal/Configuraciones", {"recursive": true}]
+03/11/2026 11:44:46  192.168.30.197  truenas_admin  pool.dataset.create  OK
+    [{"name": "Pool_Principal/Configuraciones", "comments": "", "sync": "INHERIT", "snapdev": "INHERIT", "compression": "INHERIT", "exec": "INHERIT", "special_small_block_size": "INHERIT", "copies": 1, "deduplication": "INHERIT", "checksum": "INHERIT", "readonly": "INHERIT", "share_type": "GENERIC", "aclmode": "INHERIT", "acltype": "INHERIT", "atime": "INHERIT", "casesensitivity": "SENSITIVE", "recordsize": "INHERIT"}]
+03/11/2026 11:44:54  192.168.30.197  truenas_admin  pool.dataset.create  OK
+    [{"name": "Pool_Principal/Documentos", "comments": "", "sync": "INHERIT", "snapdev": "INHERIT", "compression": "INHERIT", "exec": "INHERIT", "special_small_block_size": "INHERIT", "copies": 1, "deduplication": "INHERIT", "checksum": "INHERIT", "readonly": "INHERIT", "share_type": "GENERIC", "aclmode": "INHERIT", "acltype": "INHERIT", "atime": "INHERIT", "casesensitivity": "SENSITIVE", "recordsize": "INHERIT"}]
+03/11/2026 11:48:21  192.168.30.197  truenas_admin  user.create  OK
+    [{"uid": null, "username": "userred", "home": "/var/empty", "shell": "/usr/sbin/nologin", "full_name": "Usuario de red", "smb": true, "group": null, "groups": [], "password_disabled": false, "ssh_password_enabled": false, "sshpubkey": "", "sudo_commands": [], "sudo_commands_nopasswd": [], "email": null, "group_create": true, "home_create": false, "home_mode": "700", "password": "***"}]
+03/11/2026 11:49:21  192.168.30.197  truenas_admin  sharing.smb.create  OK
+    [{"purpose": "DEFAULT_SHARE", "name": "documentos", "path": "/mnt/Pool_Principal/Documentos", "enabled": true, "comment": "", "readonly": false, "browsable": true, "access_based_share_enumeration": false, "audit": {"enable": false, "watch_list": [], "ignore_list": []}, "options": {"aapl_name_mangling": false, "hostsallow": [], "hostsdeny": []}}]
+03/11/2026 11:49:23  192.168.30.197  truenas_admin  service.update  OK
+    [4, {"enable": true}]
+03/11/2026 11:49:23  192.168.30.197  truenas_admin  service.control  OK
+    ["START", "cifs", {"silent": false}]
+03/11/2026 11:49:31  192.168.30.197  truenas_admin  sharing.smb.create  OK
+    [{"purpose": "DEFAULT_SHARE", "name": "configuraciones", "path": "/mnt/Pool_Principal/Configuraciones", "enabled": true, "comment": "", "readonly": false, "browsable": true, "access_based_share_enumeration": false, "audit": {"enable": false, "watch_list": [], "ignore_list": []}, "options": {"aapl_name_mangling": false, "hostsallow": [], "hostsdeny": []}}]
+03/11/2026 11:51:40  192.168.30.197  truenas_admin  user.update  OK
+    [71, {"username": "userred", "home": "/var/empty", "shell": "/usr/sbin/nologin", "full_name": "Usuario de red", "smb": true, "group": 110, "groups": [91], "password_disabled": false, "ssh_password_enabled": false, "sshpubkey": "", "locked": false, "sudo_commands": [], "sudo_commands_nopasswd": [], "email": null, "home_create": false, "home_mode": "700"}]
+03/11/2026 11:51:40  192.168.30.197  truenas_admin  user.update  OK
+    [71, {"username": "userred", "home": "/var/empty", "shell": "/usr/sbin/nologin", "full_name": "Usuario de red", "smb": true, "group": 110, "groups": [91], "password_disabled": false, "ssh_password_enabled": false, "sshpubkey": "", "locked": false, "sudo_commands": [], "sudo_commands_nopasswd": [], "email": null, "home_create": false, "home_mode": "700"}]
+03/11/2026 12:13:59  192.168.30.197  truenas_admin  filesystem.setacl  FALLO
+    [{"path": "/mnt/Pool_Principal/Configuraciones", "dacl": [{"tag": "USER", "perms": {"READ": true, "WRITE": true, "EXECUTE": true}, "default": false, "who": "userred"}, {"tag": "GROUP_OBJ", "perms": {"READ": true, "WRITE": false, "EXECUTE": true}, "default": false, "who": "root"}, {"tag": "OTHER", "perms": {"READ": true, "WRITE": false, "EXECUTE": true}, "default": false, "id": -1, "who": null}], "options": {"recursive": false, "traverse": false, "validate_effective_acl": true}, "acltype": "POSIX1E"}]
+03/11/2026 12:14:11  192.168.30.197  truenas_admin  filesystem.setacl  FALLO
+    [{"path": "/mnt/Pool_Principal/Configuraciones", "dacl": [{"tag": "USER", "perms": {"READ": true, "WRITE": true, "EXECUTE": true}, "default": false, "who": "userred"}, {"tag": "GROUP_OBJ", "perms": {"READ": true, "WRITE": false, "EXECUTE": true}, "default": false, "who": "root"}, {"tag": "OTHER", "perms": {"READ": true, "WRITE": false, "EXECUTE": true}, "default": false, "id": -1, "who": null}], "options": {"recursive": false, "traverse": false, "validate_effective_acl": true}, "user": "root", "acltype": "POSIX1E"}]
+03/11/2026 12:14:17  192.168.30.197  truenas_admin  filesystem.setacl  FALLO
+    [{"path": "/mnt/Pool_Principal/Configuraciones", "dacl": [{"tag": "USER", "perms": {"READ": true, "WRITE": true, "EXECUTE": true}, "default": false, "who": "userred"}, {"tag": "GROUP_OBJ", "perms": {"READ": true, "WRITE": false, "EXECUTE": true}, "default": false, "who": "root"}, {"tag": "OTHER", "perms": {"READ": true, "WRITE": false, "EXECUTE": true}, "default": false, "id": -1, "who": null}], "options": {"recursive": true, "traverse": false, "validate_effective_acl": true}, "user": "root", "acltype": "POSIX1E"}]
+03/11/2026 12:17:11  192.168.30.197  truenas_admin  smb.update  OK
+    [{"netbiosname": "truenas", "netbiosalias": [], "workgroup": "WORKGROUP", "description": "TrueNAS Server", "enable_smb1": true, "unixcharset": "UTF-8", "localmaster": true, "syslog": false, "aapl_extensions": false, "admin_group": null, "guest": "nobody", "filemask": "DEFAULT", "dirmask": "DEFAULT", "ntlmv1_auth": false, "multichannel": false, "encryption": "DEFAULT", "bindip": [], "debug": false}]
+03/11/2026 12:17:54  192.168.30.197  truenas_admin  sharing.smb.update  OK
+    [2, {"purpose": "DEFAULT_SHARE", "name": "configuraciones", "path": "/mnt/Pool_Principal/Configuraciones", "enabled": true, "comment": "", "readonly": false, "browsable": true, "access_based_share_enumeration": false, "audit": {"enable": false, "watch_list": [], "ignore_list": []}, "options": {"aapl_name_mangling": false, "hostsallow": [], "hostsdeny": []}}]
+03/11/2026 12:18:57  192.168.30.197  truenas_admin  filesystem.setacl  FALLO
+    [{"path": "/mnt/Pool_Principal/Configuraciones", "dacl": [{"tag": "USER_OBJ", "perms": {"READ": true, "WRITE": true, "EXECUTE": true}, "default": true, "who": "root"}, {"tag": "GROUP_OBJ", "perms": {"READ": true, "WRITE": true, "EXECUTE": true}, "default": true, "who": "root"}, {"tag": "OTHER", "perms": {"READ": true, "WRITE": true, "EXECUTE": true}, "default": true, "id": -1, "who": null}, {"tag": "USER_OBJ", "perms": {"READ": true, "WRITE": true, "EXECUTE": true}, "default": false, "who": "root"}, {"tag": "GROUP_OBJ", "perms": {"READ": true, "WRITE": true, "EXECUTE": true}, "default": false, "who": "root"}, {"tag": "OTHER", "perms": {"READ": true, "WRITE": true, "EXECUTE": true}, "default": false, "id": -1, "who": null}, {"tag": "USER", "perms": {"READ": true, "WRITE": true, "EXECUTE": true}, "default": false, "who": "userred"}], "options": {"recursive": false, "traverse": false, "validate_effective_acl": true}, "acltype": "POSIX1E"}]
+03/11/2026 12:19:08  192.168.30.197  truenas_admin  filesystem.setacl  FALLO
+    [{"path": "/mnt/Pool_Principal/Configuraciones", "dacl": [{"tag": "USER_OBJ", "perms": {"READ": true, "WRITE": true, "EXECUTE": true}, "default": true, "who": "root"}, {"tag": "GROUP_OBJ", "perms": {"READ": true, "WRITE": true, "EXECUTE": true}, "default": true, "who": "root"}, {"tag": "OTHER", "perms": {"READ": true, "WRITE": true, "EXECUTE": true}, "default": true, "id": -1, "who": null}, {"tag": "USER_OBJ", "perms": {"READ": true, "WRITE": true, "EXECUTE": true}, "default": false, "who": "root"}, {"tag": "GROUP_OBJ", "perms": {"READ": true, "WRITE": true, "EXECUTE": true}, "default": false, "who": "root"}, {"tag": "OTHER", "perms": {"READ": true, "WRITE": true, "EXECUTE": true}, "default": false, "id": -1, "who": null}, {"tag": "USER", "perms": {"READ": true, "WRITE": true, "EXECUTE": true}, "default": false, "who": "userred"}], "options": {"recursive": false, "traverse": false, "validate_effective_acl": true}, "acltype": "POSIX1E"}]
+03/11/2026 12:19:51  192.168.30.197  truenas_admin  filesystem.setperm  OK
+    [{"path": "/mnt/Pool_Principal/Documentos", "user": "userred", "mode": "777", "options": {"recursive": false, "traverse": false, "stripacl": false}}]
+03/11/2026 12:20:07  192.168.30.197  truenas_admin  filesystem.setperm  OK
+    [{"path": "/mnt/Pool_Principal/Configuraciones", "user": "userred", "group": "root", "mode": "777", "options": {"recursive": false, "traverse": false, "stripacl": false}}]
