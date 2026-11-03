@@ -8,7 +8,7 @@ Tasca 5 «Instal·lació i comunicacions» · RA principales: ISO RA1 d-h y FDM 
 
 | Sistema | Versión | Origen | SHA256 verificado | Ubicación |
 |---|---|---|---|---|
-| TrueNAS | 25.10.7 (Goldeye) | N/C | N/C | G3-PC-02 (Ticnova), instalado en el equipo |
+| TrueNAS | 25.10.7 (Goldeye) | N/C | N/C | G3-PC-02 (Ticnova), instalado en el SSD de 256 GB |
 | Lubuntu | N/C | N/C | N/C | G3-PC-01, sistema operativo principal |
 | OPNsense | N/C | N/C | N/C | VM de VirtualBox en G3-PC-01 |
 | Debian | N/C | N/C | N/C | VM de VirtualBox en G3-PC-01 |
@@ -23,7 +23,7 @@ Tasca 5 «Instal·lació i comunicacions» · RA principales: ISO RA1 d-h y FDM 
 
 | Equipo | Qué hemos instalado | Estado |
 |---|---|---|
-| G3-PC-02 (Ticnova) | TrueNAS como sistema del equipo | Instalado; accedemos a su interfaz web por la URL desde un equipo de nuestra red |
+| G3-PC-02 (Ticnova) | TrueNAS como sistema del equipo | Instalado y configurado: pool, datasets, usuario y carpetas SMB (ver [TrueNAS](#servidor-nassan-truenas)) |
 | G3-PC-01 | Lubuntu como sistema operativo principal, con VirtualBox | Instalado |
 | G3-PC-01 (VM) | OPNsense en una máquina virtual de VirtualBox | Instalado, sin configurar |
 | G3-PC-01 (VM) | Debian en una máquina virtual de VirtualBox | Instalado, sin configurar |
@@ -166,9 +166,83 @@ Debian instalado en una máquina virtual de VirtualBox dentro del Lubuntu de G3-
 
 ## Servidor NAS/SAN: TrueNAS
 
-TrueNAS 25.10.7 (Goldeye) está instalado en G3-PC-02 (Ticnova). Desde cualquier equipo de nuestra red entramos a su interfaz web escribiendo su URL en el navegador.
+TrueNAS Community Edition 25.10.7 (Goldeye) está instalado en G3-PC-02 (Ticnova). Lo configuramos el 27/10 y el 03/11 siguiendo los apartados 7 y 8 de la guía de Iván, adaptados a nuestro hardware: usamos el disco real de 2 TB en lugar de un disco virtual de 15 GB.
 
-> Cuando instaléis y configuréis TrueNAS, escribid aquí cómo y qué habéis hecho: instalación, usuarios de administración, parámetros de red y el disco adicional (o la partición) para las copias de configuraciones e imágenes de los equipos críticos.
+Los pasos y las horas salen del **registro de auditoría** de TrueNAS, que apunta cada cambio que se hace en el equipo. El estado actual y el registro completo están en [`evidencies/t5-truenas-configuracion-20261103.txt`](../evidencies/t5-truenas-configuracion-20261103.txt). Las contraseñas no se escriben en el repositorio.
+
+### Cómo queda
+
+| Qué | Valor |
+|---|---|
+| Acceso web | `https://192.168.30.20` con el usuario `truenas_admin` |
+| Red | `enp1s0` con la IP fija 192.168.30.20/24, sin DHCP |
+| Disco del sistema | SSD de 256 GB (`sda`), pool `boot-pool`: solo guarda TrueNAS |
+| Disco de datos | HDD Seagate de 2 TB (`sdb`), pool `Pool_Principal`: 1,76 TiB libres |
+| Carpetas (datasets) | `Documentos` y `Configuraciones`, con compresión LZ4 |
+| Usuario para las carpetas | `userred` («Usuario de red»): solo sirve para entrar por SMB |
+| Carpetas compartidas | `\\192.168.30.20\documentos` y `\\192.168.30.20\configuraciones` |
+| Servicio SMB | En marcha y con arranque automático |
+
+### Las palabras que hay que entender
+
+- **Pool:** ZFS (el sistema de ficheros de TrueNAS) junta uno o varios discos en un solo «disco grande», que es el pool. Los datos se guardan siempre dentro de un pool.
+- **Stripe:** es la forma de montar un pool con un solo disco. Tiene todo el espacio, pero **ninguna protección**: si el disco se estropea, se pierde todo. Para tener protección hacen falta al menos dos discos (*Mirror*, que es como un RAID 1).
+- **Dataset:** es una carpeta especial dentro del pool, con sus propias opciones (compresión, límite de espacio, permisos, instantáneas). Hacemos uno por cada tipo de datos.
+- **LZ4:** es una compresión rápida que TrueNAS activa por defecto. Ocupa menos espacio y casi no gasta CPU.
+- **SMB:** es el protocolo para compartir carpetas en red. Es el que usa el explorador de Windows, y Linux y macOS también lo entienden. Una carpeta compartida por SMB se abre como si fuera un disco de red.
+- **Usuario SMB:** es un usuario que solo sirve para entrar a las carpetas compartidas. No entra a la web de administración ni por SSH. Así, si alguien conoce su contraseña, no puede tocar la configuración del NAS.
+- **Permisos 777:** el dueño, el grupo y *todos los demás* pueden leer, escribir y entrar (`rwx` tres veces).
+
+### Paso a paso: los clics que hicimos
+
+#### 27/10 · Red, desde la pantalla del propio TrueNAS
+
+Al terminar la instalación, TrueNAS muestra un menú de texto con opciones numeradas en su propio monitor.
+
+1. Opción **1) Configure network interfaces** → elegimos la tarjeta `enp1s0` → quitamos el DHCP (`ipv4_dhcp: No`) → añadimos el alias **192.168.30.20/24** → guardamos y aplicamos los cambios (*commit*). Tuvimos que repetirlo varias veces hasta que quedó bien guardado (10:42–10:50).
+2. Opción **2) Configure network settings** → intentamos cambiar el nombre del equipo a `truenas_g3`. **Falló dos veces**, porque un nombre de equipo no puede tener guion bajo (`_`): solo letras, números y guion (`-`). Por eso el equipo se sigue llamando `truenas`. En esa misma pantalla dejamos vacíos la puerta de enlace y los DNS.
+3. Desde un portátil de la red, entramos en el navegador a `https://192.168.30.20` con el usuario `truenas_admin`.
+4. **System → General Settings → Localization → Settings:** zona horaria **Europe/Madrid** y teclado **es** (15:46).
+
+#### 03/11 · Pool y datasets (apartado 7 de la guía)
+
+5. **Storage → Create Pool** → *Name*: `Pool_Principal` → en *Data* elegimos el disco **sdb** (el HDD de 2 TB) con el diseño **Stripe** → TrueNAS avisa de que sin redundancia se pierden los datos si falla el disco → marcamos que lo entendemos → **Create Pool** (11:43).
+6. **Datasets** → seleccionamos `Pool_Principal` → **Add Dataset** → *Name*: `Configuraciones` → **Save** (11:43). Lo borramos (**Delete**, 11:44) y lo volvimos a crear igual (11:44).
+7. **Add Dataset** otra vez → *Name*: `Documentos` → resto de opciones por defecto (preset *Generic*, compresión heredada LZ4) → **Save** (11:44).
+
+#### 03/11 · Usuario y carpetas compartidas (apartado 8 de la guía)
+
+8. **Credentials → Users → Add:**
+   - *Full Name*: `Usuario de red`; *Username*: `userred`; *Password*: la del grupo.
+   - Marcado **SMB User** y **Create New Primary Group**.
+   - Sin carpeta personal (`/var/empty`) y sin consola (`nologin`).
+   - **Save** (11:48).
+9. **Shares → Windows (SMB) Shares → Add** → *Path*: `/mnt/Pool_Principal/Documentos` → *Name*: `documentos` → *Purpose*: por defecto → **Save** (11:49).
+10. Sale el aviso de que el servicio SMB está apagado → **Enable Service**. TrueNAS lo arranca y lo deja en arranque automático (11:49). Esto es lo que pide el apartado 8.3 de la guía (*Running* + *Start Automatically*).
+11. **Add** otra vez → *Path*: `/mnt/Pool_Principal/Configuraciones` → *Name*: `configuraciones` → **Save** (11:49).
+12. **Credentials → Users** → `userred` → **Edit** → *Auxiliary Groups*: `builtin_users` → **Save** (11:51).
+
+#### 03/11 · Problema con los permisos
+
+13. **Datasets → Configuraciones → Permissions → Edit** → en el editor de ACL añadimos el usuario `userred` con lectura, escritura y ejecución → **Save Access Control List**. **Falló**, y lo volvimos a intentar marcando *Apply permissions recursively*. Lo probamos 5 veces entre las 12:13 y las 12:19, y no se guardó ninguna.
+14. Mientras tanto, **Shares → Windows (SMB) Shares → Config Service** → marcamos **Enable SMB1 support** → **Save** (12:17). También abrimos y guardamos la carpeta `configuraciones` sin cambiar nada (12:17).
+15. Al final usamos el editor sencillo de permisos (Unix): **Datasets → Documentos → Permissions → Edit** → *User*: `userred` → todas las casillas marcadas (**777**) → **Save** (12:19). Lo mismo en `Configuraciones`, con *Group*: `root` (12:20). Esto sí funcionó.
+
+> Cuando reviséis este problema, escribid aquí con vuestras palabras qué error salía al entrar a la carpeta o al guardar la ACL. Por el registro creemos que la ACL falló porque en las ACL POSIX, al añadir un usuario concreto, hace falta también una entrada **MASK**, pero no lo vimos en pantalla.
+
+> Cuando comprobéis la conexión desde un cliente, escribid aquí cómo y qué habéis hecho: desde qué equipo, qué dirección escribisteis (`\\192.168.30.20\documentos` en Windows o `smb://192.168.30.20/documentos` en Linux), con qué usuario y si pudisteis crear y abrir un fichero.
+
+### Qué falta o hay que mejorar
+
+1. **Puerta de enlace y DNS vacíos.** El NAS funciona dentro de nuestra red, pero no puede salir: ni actualizaciones, ni hora por NTP, ni avisos por correo. Se pone en **Network → Global Configuration → Settings**, con gateway `192.168.30.1` y DNS `192.168.30.1` (el router).
+   > Cuando lo configuréis, escribid aquí cómo y qué habéis hecho y cómo comprobasteis que el NAS sale a Internet.
+2. **SMB1 activado.** Es la versión antigua del protocolo, la que aprovechó el virus WannaCry. Los clientes actuales usan SMB2/3, así que hay que desactivarlo salvo que un equipo lo necesite de verdad.
+   > Cuando lo desactivéis (o si decidís dejarlo), escribid aquí cómo y por qué.
+3. **Permisos 777.** Ahora cualquier usuario del NAS puede escribir en las dos carpetas. Por red sigue pidiendo usuario y contraseña, porque el acceso de invitado no está activado, pero no separa departamentos. Para la Tasca 6 hay que cambiarlo por ACL con un grupo por departamento.
+4. **Un solo disco (Stripe).** Si el HDD de 2 TB falla, se pierden los datos. En la Tasca 2 vimos que ya lleva casi 5 años encendido. Lo aceptamos para el laboratorio, pero en la empresa harían falta dos discos en *Mirror*.
+5. **Sin copias automáticas.** No hay instantáneas (*snapshots*) ni réplicas programadas. El apartado 9 de la guía de Iván explica las instantáneas.
+
+> Cuando uséis el dataset `Configuraciones`, escribid aquí qué guardáis en él (por ejemplo, las copias `/export` y `/system backup` del MikroTik) y cómo lo copiáis.
 
 ## Servidor de virtualización: Proxmox
 
