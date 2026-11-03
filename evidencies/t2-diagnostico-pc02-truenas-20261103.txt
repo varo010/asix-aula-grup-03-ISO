@@ -1,0 +1,118 @@
+# Tasca 2 · Línea base del PC-02 (TrueNAS 25.10.7) · 03/11/2026, ~10:39
+# Dónde: web de TrueNAS (http://192.168.30.20) -> System -> Shell, usuario truenas_admin
+# Condiciones: equipo recién arrancado (3 min encendido), sin clientes ni pools de datos, en reposo
+# fio con --readonly: solo lectura, no modifica los discos
+# Órdenes: ver docs/02-inventari.md, apartado 5
+
+===== SISTEMA
+25.10.7          <- /etc/version (salía pegado a la línea del kernel)
+6.12.105-production+truenas
+ 10:39:18 up 3 min,  2 users,  load average: 0.12, 0.21, 0.09
+===== CPU
+CPU(s):                                  4
+Model name:                              Intel(R) Core(TM) i3-8100 CPU @ 3.60GHz
+Thread(s) per core:                      1
+Core(s) per socket:                      4
+CPU(s) scaling MHz:                      100%
+CPU max MHz:                             3600.0000
+Virtualization:                          VT-x
+===== CPU en reposo
+top - 10:39:18 up 3 min,  2 users,  load average: 0.12, 0.21, 0.09
+Tasks: 235 total,   1 running, 234 sleeping,   0 stopped,   0 zombie
+%Cpu(s): 33.3 us,  0.0 sy,  0.0 ni, 66.7 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem :   7622.0 total,   6203.9 free,   1483.0 used,    145.4 buff/cache
+MiB Swap:      0.0 total,      0.0 free,      0.0 used.   6139.1 avail Mem
+===== CPU test (openssl speed -multi 4 -seconds 3 sha256; columnas = bloques de 16, 64, 256, 1024, 8192 y 16384 bytes, en kB/s)
+sha256          206551.26k   551735.04k  1189888.60k  1644370.26k  1843011.58k  1857563.31k
+===== MEMORIA
+               total        used        free      shared  buff/cache   available
+Mem:           7.4Gi       1.4Gi       6.1Gi       3.0Mi       145Mi       6.0Gi
+Swap:             0B          0B          0B
+===== ARC (cache ZFS)
+        Min target size:                                3.1 %  238.2 MiB
+        Max target size:                               86.6 %    6.4 GiB
+        Target size (adaptive):                         3.7 %  282.1 MiB
+===== DISCOS
+NAME     SIZE MODEL                 ROTA FSTYPE
+sda    238.5G SPCC Solid State Disk    0
+├─sda1     1M                          0
+├─sda2   512M                          0 vfat
+└─sda3   238G                          0 zfs_member
+sdb      1.8T ST2000NE0025-2FL101      1 ext4
+sdc        0B Storage Device           0
+NAME        SIZE  ALLOC   FREE  CKPOINT  EXPANDSZ   FRAG    CAP  DEDUP    HEALTH  ALTROOT
+boot-pool   236G  3.46G   233G        -         -     0%     1%  1.00x    ONLINE  -
+===== SMART sda (SSD de arranque)
+SMART overall-health self-assessment test result: PASSED
+ID# ATTRIBUTE_NAME          FLAG     VALUE WORST THRESH TYPE      UPDATED  WHEN_FAILED RAW_VALUE
+  1 Raw_Read_Error_Rate     0x000b   100   100   050    Pre-fail  Always       -       0
+  9 Power_On_Hours          0x0012   100   100   000    Old_age   Always       -       3610
+ 12 Power_Cycle_Count       0x0012   100   100   000    Old_age   Always       -       281
+168 SATA_Phy_Error_Count    0x0012   100   100   000    Old_age   Always       -       0
+170 Bad_Blk_Ct_Lat/Erl      0x0003   100   100   000    Pre-fail  Always       -       0/114
+173 MaxAvgErase_Ct          0x0012   100   100   000    Old_age   Always       -       12 (Average 6)
+192 Unsafe_Shutdown_Count   0x0012   100   100   000    Old_age   Always       -       109
+194 Temperature_Celsius     0x0023   067   067   000    Pre-fail  Always       -       33 (Min/Max 33/33)
+218 CRC_Error_Count         0x000b   100   100   050    Pre-fail  Always       -       0
+231 SSD_Life_Left           0x0013   100   100   000    Pre-fail  Always       -       99
+241 Lifetime_Writes_GiB     0x0012   100   100   000    Old_age   Always       -       1354
+===== fio sda lectura secuencial (bs=1M, iodepth=16, 20 s)
+  read: IOPS=466, BW=466MiB/s (489MB/s)(9337MiB/20035msec)
+===== fio sda lectura aleatoria 4K (iodepth=32, 20 s)
+  read: IOPS=63.8k, BW=249MiB/s (261MB/s)(4987MiB/20001msec)
+===== RED
+lo               UNKNOWN        127.0.0.1/8 ::1/128
+enp1s0           UP             192.168.30.20/24 fe80::aaa1:59ff:fe02:b695/64
+-- enp1s0
+        Speed: 1000Mb/s
+        Duplex: Full
+        Link detected: yes
+
+===== SMART sdb (HDD) — smartctl -i -H -A /dev/sdb
+Model Family:     Seagate IronWolf Pro
+Device Model:     ST2000NE0025-2FL101
+Serial Number:    ZDS16MKR
+Firmware Version: EN02
+User Capacity:    2,000,398,934,016 bytes [2.00 TB]
+Sector Size:      512 bytes logical/physical
+Rotation Rate:    7200 rpm
+Form Factor:      3.5 inches
+SATA Version is:  SATA 3.1, 6.0 Gb/s (current: 6.0 Gb/s)
+SMART overall-health self-assessment test result: PASSED
+ID# ATTRIBUTE_NAME          FLAG     VALUE WORST THRESH TYPE      UPDATED  WHEN_FAILED RAW_VALUE
+  1 Raw_Read_Error_Rate     0x000f   064   063   044    Pre-fail  Always       -       2631685
+  3 Spin_Up_Time            0x0003   096   095   000    Pre-fail  Always       -       0
+  4 Start_Stop_Count        0x0032   100   100   020    Old_age   Always       -       53
+  5 Reallocated_Sector_Ct   0x0033   100   100   010    Pre-fail  Always       -       0
+  7 Seek_Error_Rate         0x000f   081   060   045    Pre-fail  Always       -       129238651
+  9 Power_On_Hours          0x0032   053   053   000    Old_age   Always       -       41623 (227 100 0)
+ 10 Spin_Retry_Count        0x0013   100   100   097    Pre-fail  Always       -       0
+ 12 Power_Cycle_Count       0x0032   100   100   020    Old_age   Always       -       53
+184 End-to-End_Error        0x0032   100   100   099    Old_age   Always       -       0
+187 Reported_Uncorrect      0x0032   100   100   000    Old_age   Always       -       0
+188 Command_Timeout         0x0032   100   100   000    Old_age   Always       -       0
+189 High_Fly_Writes         0x003a   100   100   000    Old_age   Always       -       0
+190 Airflow_Temperature_Cel 0x0022   071   056   040    Old_age   Always       -       29 (Min/Max 24/29)
+191 G-Sense_Error_Rate      0x0032   100   100   000    Old_age   Always       -       0
+192 Power-Off_Retract_Count 0x0032   100   100   000    Old_age   Always       -       1487
+193 Load_Cycle_Count        0x0032   100   100   000    Old_age   Always       -       1801
+194 Temperature_Celsius     0x0022   029   044   000    Old_age   Always       -       29 (0 7 0 0 0)
+195 Hardware_ECC_Recovered  0x001a   064   063   000    Old_age   Always       -       2631685
+197 Current_Pending_Sector  0x0012   100   100   000    Old_age   Always       -       0
+198 Offline_Uncorrectable   0x0010   100   100   000    Old_age   Offline      -       0
+199 UDMA_CRC_Error_Count    0x003e   200   200   000    Old_age   Always       -       0
+240 Head_Flying_Hours       0x0000   100   253   000    Old_age   Offline      -       41243h+49m+21.614s
+241 Total_LBAs_Written      0x0000   100   253   000    Old_age   Offline      -       8666179496
+242 Total_LBAs_Read         0x0000   100   253   000    Old_age   Offline      -       174446371686
+===== fio sdb lectura secuencial (bs=1M, iodepth=16, 20 s)
+  read: IOPS=189, BW=189MiB/s (198MB/s)(3799MiB/20082msec)
+===== fio sdb lectura aleatoria 4K (iodepth=32, 20 s)
+  read: IOPS=179, BW=717KiB/s (734kB/s)(14.2MiB/20261msec)
+===== zpool status
+  pool: boot-pool
+ state: ONLINE
+  scan: scrub repaired 0B in 00:00:10 with 0 errors on Tue Nov  3 03:45:11 2026
+        NAME        STATE     READ WRITE CKSUM
+        boot-pool   ONLINE       0     0     0
+          sda3      ONLINE       0     0     0
+errors: No known data errors
