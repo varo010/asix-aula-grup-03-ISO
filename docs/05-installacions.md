@@ -1,4 +1,4 @@
-# 06 · Instalaciones y comunicaciones
+# 05 · Instalaciones y comunicaciones
 
 Tasca 5 «Instal·lació i comunicacions» · RA principales: ISO RA1 d-h y FDM RA1 b-d.
 

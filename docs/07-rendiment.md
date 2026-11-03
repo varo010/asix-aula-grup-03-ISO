@@ -1,4 +1,4 @@
-# 08 · Rendimiento y diagnóstico
+# 07 · Rendimiento y diagnóstico
 
 Tasca 7 «Rendiment i diagnòstic» · RA principales: ISO RA6 a-h y FDM RA1 e-g.
 
