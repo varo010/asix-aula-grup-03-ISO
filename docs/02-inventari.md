@@ -81,8 +81,6 @@ Cat6 admite 1000BASE-T (1 Gb/s) hasta 100 m, suficiente para todos los puertos d
 
 Con los sistemas operativos instalados y los equipos en reposo, se mide su **estado inicial**; la Tasca 7 lo compara con los equipos trabajando.
 
-> Cuando hagáis los diagnósticos de memoria, disco y red de los PC, escribid aquí cómo y qué habéis hecho: herramienta, condiciones, resultado e interpretación. Si sale una avería, la causa probable y una prueba que la distinga de otra causa.
-
 | Equipo | Recurso | Prueba | Herramienta | Condiciones | Resultado | Interpretación | Evidencia |
 |---|---|---|---|---|---|---|---|
 | RT-01 | Memoria y CPU | Uso en reposo | `/system resource print` | Sin tráfico, 1 semana encendido | CPU 0 %; 199,8 MiB libres de 256 MiB; 27 °C | Sobra capacidad en reposo para RouterOS | |
