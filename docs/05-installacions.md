@@ -1,4 +1,4 @@
-# 06 · Instalaciones y comunicaciones
+# 05 · Instalaciones y comunicaciones
 
 Tasca 5 «Instal·lació i comunicacions» · RA principales: ISO RA1 d-h y FDM RA1 b-d.
 
@@ -47,6 +47,8 @@ Las tres soluciones (MikroTik, OPNsense y GNU/Linux con nftables) se prueban una
 ### MikroTik
 
 El MikroTik hEX (RB750Gr3) es el router del grupo: une nuestra red interna (LAN, 192.168.30.0/24) con la red del aula (172.16.222.0/24), que es la que tiene salida a Internet. Lo configuramos desde el terminal de WinBox con comandos de RouterOS.
+
+Explicación sencilla, con el esquema y los problemas que tuvimos: [Tasca5_MikroTik_Configuracion_Grupo3.pdf](../lliuraments/Tasca5_MikroTik_Configuracion_Grupo3.pdf).
 
 #### Cómo quedan los puertos
 

@@ -1,0 +1,10 @@
+# Tasca 2 · ping de PC-01 (PCG3, 192.168.30.200 en ese momento) a PC-02 TrueNAS (192.168.30.20) · 27/10/2026
+# Orden: ping -c 10 192.168.30.20
+# Transcrito de una foto de la pantalla: las líneas de cada paquete salieron
+# desordenadas al copiarlas; se conservan los tiempos y las estadísticas finales.
+
+icmp_seq  1..10   time (ms): 0.141 0.143 0.145 0.151 0.169 0.168 0.158 0.138 0.138 0.156
+
+--- 192.168.30.20 ping statistics ---
+10 packets transmitted, 10 received, 0% packet loss, time 9238ms
+rtt min/avg/max/mdev = 0.138/0.150/0.169/0.011 ms
