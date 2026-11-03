@@ -28,7 +28,7 @@ Disponemos de dos PCs extra para el proyecto. Resumen en [hardware-grupo3](hardw
 
 | Dato | PC-01: APD ALDA+ (hostname `PCG3`) | PC-02: Ticnova E70 SFF | Comprobación |
 |---|---|---|---|
-| Uso | Cliente Lubuntu con VirtualBox | Servidor TrueNAS (previsto) | Diseño |
+| Uso | Cliente Lubuntu con VirtualBox | Servidor TrueNAS | Diseño |
 | Formato | Sobremesa horizontal | SFF, en vertical | Inspección |
 | Placa base | Gigabyte B85M-DS3H-A (Intel B85, LGA1150) | ASRock H310CM-HDV (Intel H310, LGA1151 v2) | `sudo dmidecode -t baseboard` |
 | Número de serie | N/C | 1720408949 | `sudo dmidecode -s system-serial-number` |
@@ -44,7 +44,7 @@ Disponemos de dos PCs extra para el proyecto. Resumen en [hardware-grupo3](hardw
 | Gráficos | Intel HD Graphics 4400 integrada | Intel UHD Graphics 630 integrada | `lspci \| grep VGA` |
 | Periféricos | Monitor, teclado y ratón compartidos | Ninguno: se administra por la web de TrueNAS | Inspección |
 | Alimentación | Fuente de ~300 W (estimada para el formato); consumo real ~30–65 W | Fuente de ~180–300 W (estimada para un SFF); consumo real ~30–65 W | Etiqueta de la fuente |
-| Sistema operativo (configuración inicial) | Lubuntu (versión N/C) con VirtualBox; usuario `admin`; IP pendiente | TrueNAS (previsto); IP fija 192.168.30.20/24 (ver [04-disseny](04-disseny.md)) | `cat /etc/os-release`, `ip -br a` |
+| Sistema operativo (configuración inicial) | Lubuntu (versión N/C) con VirtualBox; usuario `admin`; IP fija 192.168.30.15/24 (ver [04-disseny](04-disseny.md)) | TrueNAS 25.10.7 «Goldeye»; IP fija 192.168.30.20/24 (ver [04-disseny](04-disseny.md)) | `cat /etc/os-release`, `ip -br a`, web de TrueNAS |
 
 ## 3. Router y switches
 
@@ -87,6 +87,8 @@ Con los sistemas operativos instalados y los equipos en reposo, se mide su **est
 |---|---|---|---|---|---|---|---|
 | RT-01 | Memoria y CPU | Uso en reposo | `/system resource print` | Sin tráfico, 1 semana encendido | CPU 0 %; 199,8 MiB libres de 256 MiB; 27 °C | Sobra capacidad en reposo para RouterOS | |
 | RT-01 | Red | Estado de los puertos | `/interface ethernet monitor` | Enlaces conectados | ether1 a 1 Gb/s full dúplex; ether2 con enlace | Cableado y ether1 correctos a velocidad máxima | |
+| PC-01 → PC-02 | Red | Latencia y pérdida | `ping -c 10 192.168.30.20` desde PC-01 | 27/10/2026; los dos PC en el mismo switch, sin otro tráfico; PC-01 aún con IP .200 por DHCP | 10 enviados, 10 recibidos (0 % de pérdida); media 0,150 ms (mín. 0,138, máx. 0,169, mdev 0,011) | Conexión sin pérdidas y casi instantánea (en el mismo switch, por debajo de 1 ms es bueno); casi no varía, así que el switch no se satura | [ping](../evidencies/t2-ping-pc01-truenas-20261027.txt) |
+| PC-01 ↔ PC-02 | Red | Velocidad real de transferencia | `iperf3 -s` en TrueNAS (System → Shell); `iperf3 -c 192.168.30.20` y `iperf3 -c 192.168.30.20 -R` en PC-01 | Mismas condiciones; 10 s por sentido. La primera prueba se cortó a los 3 s y se descarta | PC-01 → NAS: 941 Mbit/s. NAS → PC-01: 942 Mbit/s, 0 retransmisiones. Estable entre 926 y 955 Mbit/s | Es el máximo real de una red Gigabit: el ~6 % que falta hasta 1000 son las cabeceras de Ethernet, IP y TCP. 941 Mbit/s ÷ 8 ≈ **112 MB/s**. Igual en los dos sentidos y 0 retransmisiones: cables, puertos y switch en buen estado | [iperf3](../evidencies/t2-iperf3-pc01-truenas-20261027.txt) |
 
 ## 6. Cuellos de botella
 
@@ -94,6 +96,15 @@ Con los sistemas operativos instalados y los equipos en reposo, se mide su **est
 
 | Equipo | Recurso | Por qué limita | Prueba que lo confirma | Mejora posible |
 |---|---|---|---|---|
+| PC-02 (TrueNAS) | Red | Todo lo que el NAS sirva o reciba (ficheros, copias de seguridad) pasa por su única tarjeta Gigabit, que como mucho da **112 MB/s**, y esos 112 MB/s los **comparten** todos los equipos que usen el NAS a la vez. Por ejemplo, con 6 portátiles copiando a la vez tocaría a unos 112 ÷ 6 ≈ 19 MB/s cada uno | `iperf3` en los dos sentidos: 941–942 Mbit/s, el máximo de Gigabit (apartado 5) | Segunda tarjeta de red en PC-02 |
+
+**Cómo lo hemos buscado.** Cuando un cliente lee un fichero del NAS, los datos hacen el camino **disco → memoria → red → cliente**. El cuello de botella es la pieza más lenta de ese camino: frena a las demás aunque vayan sobradas. Por eso se mide cada pieza por separado y se comparan las cifras en MB/s.
+
+- **Red (medida):** el enlace está sano y al máximo, así que no hay ninguna avería. El límite son los 112 MB/s del Gigabit, no un fallo.
+- **El ping no sirve para esto:** mide cuánto **tarda** un paquete, no cuántos **datos** pasan por segundo. Ha servido para descartar pérdidas y retardos.
+- **Disco:** si el SSD del PC-02 lee a más de 112 MB/s, el límite es la red y cambiar el disco no mejoraría nada. Si lee a menos, el límite es el disco. Con esa comparación se confirma qué pieza manda.
+
+> Cuando midáis el disco (`fio`) y la memoria (`free -h`, `arc_summary`) del PC-02, escribid aquí cómo y qué habéis hecho, y si confirma o cambia el cuello de botella de la red.
 
 ## Fuentes
 
@@ -106,7 +117,10 @@ Con los sistemas operativos instalados y los equipos en reposo, se mide su **est
 | Intel Core i3-8100 – especificaciones | https://www.intel.com/content/www/us/en/products/sku/126688/intel-core-i38100-processor-6m-cache-3-60-ghz/specifications.html | 21/10/2026 |
 | Windows 11 – procesadores Intel admitidos | https://learn.microsoft.com/en-us/windows-hardware/design/minimum/supported/windows-11-supported-intel-processors | 19/10/2026 |
 | Datos medidos en el aula | Salidas de RouterOS, `dmidecode`, `lsblk`, `ip` y BIOS de los equipos | 20–21/10/2026 |
+| Diagnóstico de red entre PC-01 y PC-02 | Salidas de `ping` e `iperf3` (ver [`evidencies/`](../evidencies/)) | 27/10/2026 |
 
 ## Uso de IA
 
 La lista de material sale de una conversación con ChatGPT sobre la Tasca 2. Los datos medidos en el aula corrigieron dos errores: los PC no eran Dell OptiPlex 790 y el switch no era un SG3428XMPP gestionable. Claude (asistente de IA) completó las características con las fichas oficiales de cada fabricante y redujo el documento a lo que pide el enunciado. Las potencias de las fuentes de alimentación son estimaciones.
+
+En los diagnósticos de red (27/10), Claude nos indicó las órdenes y nos ayudó a interpretar las salidas. Las pruebas las hicimos nosotros en el aula. La primera prueba de `iperf3` la descartamos porque se cortó a los 3 segundos.
