@@ -1,0 +1,83 @@
+# Tasca 2 · Línea base del PC-01 (PCG3, Lubuntu) · 03/11/2026, ~08:51
+# Dónde: terminal del propio PC-01, usuario admin
+# Condiciones: 15 min encendido, VirtualBox y aplicaciones cerradas
+# fio con --readonly: solo lee, no modifica el disco
+# El sistema está en español: lscpu no mostró las líneas de hilos ni de virtualización (el filtro buscaba los nombres en inglés)
+
+===== SISTEMA
+NAME="Ubuntu"
+VERSION="24.04.4 LTS (Noble Numbat)"
+7.0.0-38-generic
+ 08:51:17 up 15 min,  2 users,  load average: 2,50, 1,20, 0,64
+===== CPU
+CPU(s):                                   4
+Nombre del modelo:                        Intel(R) Core(TM) i3-4160 CPU @ 3.60GHz
+CPU(s) factor de escala MHz:              29%
+CPU(s) del nodo NUMA 0:                   0-3
+===== CPU en reposo
+top - 08:51:17 up 15 min,  2 users,  load average: 2,50, 1,20, 0,64
+Tareas: 211 total,   1 ejecutar,  210 hibernar,    0 detener,    0 zombie
+%Cpu(s): 14,3 us,  2,0 sy,  0,0 ni, 44,9 id, 38,8 wa,  0,0 hi,  0,0 si,  0,0 st
+MiB Mem :   7826,2 total,   3657,8 libre,   1091,0 usado,   3439,2 búf/caché
+MiB Intercambio:    512,0 total,    512,0 libre,      0,0 usado.   6735,1 dispon
+===== CPU test (openssl speed -multi 4 -seconds 3 sha256; columnas = bloques de 16, 64, 256, 1024, 8192 y 16384 bytes, en kB/s)
+sha256           71723.35k   248199.49k   563740.93k   803824.64k   915346.77k   925712.38k
+===== MEMORIA
+               total       usado       libre  compartido   búf/caché  disponible
+Mem:           7,6Gi       1,1Gi       3,6Gi        79Mi       3,4Gi       6,6Gi
+Inter:         511Mi          0B       511Mi
+===== DISCOS (sin las líneas loop de los snaps)
+NAME     SIZE MODEL              ROTA FSTYPE   MOUNTPOINT
+sda    465,8G TOSHIBA DT01ACA050    1
+├─sda1   300M                       1 vfat     /boot/efi
+└─sda2 465,5G                       1 ext4     /
+sr0     1024M ATAPI iHAS124 F       0
+S.ficheros     Tamaño Usados  Disp Uso% Montado en
+/dev/sda2        458G    22G  413G   5% /
+===== SMART sda
+SMART overall-health self-assessment test result: PASSED
+ID# ATTRIBUTE_NAME          FLAG     VALUE WORST THRESH TYPE      UPDATED  WHEN_FAILED RAW_VALUE
+  1 Raw_Read_Error_Rate     0x000b   100   100   016    Pre-fail  Always       -       0
+  2 Throughput_Performance  0x0005   142   142   054    Pre-fail  Offline      -       69
+  3 Spin_Up_Time            0x0007   125   125   024    Pre-fail  Always       -       183 (Average 184)
+  4 Start_Stop_Count        0x0012   100   100   000    Old_age   Always       -       3418
+  5 Reallocated_Sector_Ct   0x0033   100   100   005    Pre-fail  Always       -       0
+  7 Seek_Error_Rate         0x000b   100   100   067    Pre-fail  Always       -       0
+  8 Seek_Time_Performance   0x0005   110   110   020    Pre-fail  Offline      -       36
+  9 Power_On_Hours          0x0012   099   099   000    Old_age   Always       -       9173
+ 10 Spin_Retry_Count        0x0013   100   100   060    Pre-fail  Always       -       0
+ 12 Power_Cycle_Count       0x0032   100   100   000    Old_age   Always       -       3417
+192 Power-Off_Retract_Count 0x0032   098   098   000    Old_age   Always       -       3465
+193 Load_Cycle_Count        0x0012   098   098   000    Old_age   Always       -       3465
+194 Temperature_Celsius     0x0002   193   193   000    Old_age   Always       -       31 (Min/Max 10/48)
+196 Reallocated_Event_Count 0x0032   100   100   000    Old_age   Always       -       0
+197 Current_Pending_Sector  0x0022   100   100   000    Old_age   Always       -       0
+198 Offline_Uncorrectable   0x0008   100   100   000    Old_age   Offline      -       0
+199 UDMA_CRC_Error_Count    0x000a   200   200   000    Old_age   Always       -       1
+===== fio sda lectura secuencial (bs=1M, iodepth=16, 20 s)
+  read: IOPS=181, BW=181MiB/s (190MB/s)(3637MiB/20083msec)
+===== fio sda lectura aleatoria 4K (iodepth=32, 20 s)
+  read: IOPS=107, BW=432KiB/s (442kB/s)(8764KiB/20308msec)
+===== RED
+lo               UNKNOWN        127.0.0.1/8 ::1/128
+enp2s0           UP             192.168.30.15/24 fe80::b5cf:8564:dd4b:315d/64
+enxb44bd6c64adc  UP             172.16.222.103/24 fe80::84e8:1d3b:bf45:f3d3/64
+-- enp2s0
+    Speed: 1000Mb/s
+    Duplex: Full
+    Link detected: yes
+-- enxb44bd6c64adc
+    Speed: 1000Mb/s
+    Duplex: Full
+    Link detected: yes
+===== lsusb -t
+/:  Bus 001.Port 001: Dev 001, Class=root_hub, Driver=xhci_hcd/12p, 480M
+    |__ Port 005: Dev 002, If 0, Class=Human Interface Device, Driver=usbhid, 1.5M
+    |__ Port 007: Dev 003, If 0, Class=Human Interface Device, Driver=usbhid, 12M
+    |__ Port 007: Dev 003, If 1, Class=Chip/SmartCard, Driver=[none], 12M
+/:  Bus 002.Port 001: Dev 001, Class=root_hub, Driver=ehci-pci/2p, 480M
+    |__ Port 001: Dev 002, If 0, Class=Hub, Driver=hub/6p, 480M
+/:  Bus 003.Port 001: Dev 001, Class=root_hub, Driver=xhci_hcd/6p, 5000M
+    |__ Port 005: Dev 002, If 0, Class=Vendor Specific Class, Driver=r8152, 5000M   <- adaptador de red USB (USB 3.0)
+/:  Bus 004.Port 001: Dev 001, Class=root_hub, Driver=ehci-pci/2p, 480M
+    |__ Port 001: Dev 002, If 0, Class=Hub, Driver=hub/6p, 480M
