@@ -1,4 +1,4 @@
-# 07 · Almacenamiento y recuperación
+# 06 · Almacenamiento y recuperación
 
 Tasca 6 «Emmagatzematge i recuperació» · RA principal: ISO RA3 a-h. Discos virtuales y datos ficticios.
 
