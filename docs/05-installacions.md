@@ -26,7 +26,7 @@ Tasca 5 «Instal·lació i comunicacions» · RA principales: ISO RA1 d-h y FDM 
 | G3-PC-02 (Ticnova) | TrueNAS como sistema del equipo | Instalado y configurado: pool, datasets, usuario y carpetas SMB (ver [TrueNAS](#servidor-nassan-truenas)) |
 | G3-PC-01 | Lubuntu como sistema operativo principal, con VirtualBox | Instalado |
 | G3-PC-01 (VM) | OPNsense en una máquina virtual de VirtualBox | Instalado, sin configurar |
-| G3-PC-01 (VM) | Debian en una máquina virtual de VirtualBox | Instalado, sin configurar |
+| G3-PC-01 (VM) | Debian en una máquina virtual de VirtualBox | Instalado y configurado como router con nftables (ver [GNU/Linux con nftables](#gnulinux-con-nftables)) |
 
 ## 4. Actualización y vía de recuperación
 
@@ -160,9 +160,187 @@ Instalado en una máquina virtual de VirtualBox dentro del Lubuntu de G3-PC-01. 
 
 ### GNU/Linux con nftables
 
-Debian instalado en una máquina virtual de VirtualBox dentro del Lubuntu de G3-PC-01. Todavía no está configurado.
+Hemos convertido una máquina virtual con Debian (sin escritorio, solo texto) en un **router**: un equipo que hace de puerta de salida a Internet para nuestra red interna, igual que el MikroTik pero hecho con un Linux normal. La máquina se llama `debian-enrutador` y funciona dentro de VirtualBox, en el Lubuntu de G3-PC-01.
 
-> Cuando instaléis y configuréis el GNU/Linux con nftables, escribid aquí cómo y qué habéis hecho: usuario de administración, red WAN y LAN, salida a Internet de la LAN, copia de la configuración y prueba de fallo con su recuperación.
+Documento original del grupo, con todos los comandos: [Tasca5_Debian_nftables_Configuracion_Grupo3.pdf](../lliuraments/Tasca5_Debian_nftables_Configuracion_Grupo3.pdf).
+
+#### La idea en pocas palabras
+
+Una casa con dos puertas: una da a la calle (Internet) y otra al pasillo interior (nuestra red). El Debian está en medio. Los equipos de dentro le pasan lo que quieren enviar fuera, él lo saca por la puerta de la calle **con su propio nombre** y, cuando llega la respuesta, se la devuelve a quien la pidió. Además, hace de **portero**: desde fuera no deja entrar a nadie que no haya sido invitado desde dentro.
+
+```
+Equipo de la red interna (192.168.30.x)
+        │
+        ▼
+ [ Debian · puerta interior 192.168.30.3 ]
+ [ Debian · puerta a la calle 172.16.222.134 ]
+        │
+        ▼
+     Internet
+```
+
+#### Las dos «puertas» (tarjetas de red)
+
+| Puerta | Nombre en Debian | Dirección | Qué hace |
+|---|---|---|---|
+| Hacia fuera (WAN) | `enp0s3` | 172.16.222.134, la da automáticamente la red del centro | Sale a Internet a través de la red del aula |
+| Hacia dentro (LAN) | `enp0s8` | 192.168.30.3, fija, puesta a mano | Es la puerta por la que entran los equipos de nuestra red |
+
+#### Paso a paso
+
+**1. Darle dos tarjetas de red en VirtualBox**
+
+- **Qué:** con la máquina apagada, en *Configuración › Red* activamos dos adaptadores:
+  - **Adaptador 1 en «Adaptador puente»** sobre la tarjeta física del PC: la máquina virtual aparece en la red del aula como un equipo más y recibe su dirección (172.16.222.134).
+  - **Adaptador 2 en «Red interna»**, con un nombre que comparten todas las máquinas de nuestra LAN: es como un cable que solo une a las máquinas virtuales que usan ese mismo nombre.
+- **Por qué:** un router necesita estar a la vez en las dos redes. El orden importa: el adaptador 1 aparece en Debian como `enp0s3` y el 2 como `enp0s8`; si se cambian, las reglas del paso 4 dejan de funcionar.
+- **Detalles que nos hicieron perder tiempo:** el adaptador 2 viene **desactivado** de fábrica (hay que marcar *Habilitar adaptador de red*) y en *Avanzadas* tiene que estar marcado *Cable conectado*. Si no, Debian ve la tarjeta «apagada».
+
+**2. Poner la dirección fija de la puerta interior**
+
+- **Qué:** le dijimos a Debian que la tarjeta `enp0s8` tenga siempre la dirección 192.168.30.3.
+- **Por qué:** los equipos de dentro tienen que saber siempre dónde está su puerta de salida; si la dirección cambiara, se perderían. La puerta de fuera no se toca porque ya recibe su dirección sola.
+- **Ojo:** a esta tarjeta **no** se le pone puerta de enlace. La salida a Internet ya la da la otra tarjeta; si tuviera dos salidas, Debian no sabría por cuál ir.
+
+<details><summary>Comandos</summary>
+
+Se añade al final del fichero `/etc/network/interfaces`:
+
+```
+auto enp0s8
+iface enp0s8 inet static
+    address 192.168.30.3/24
+```
+
+Y se enciende y comprueba con `ifup enp0s8` y `ip -br a` (deben salir las dos tarjetas `UP` con sus direcciones).
+
+</details>
+
+**3. Permitir que Debian pase tráfico de una puerta a otra**
+
+- **Qué:** activamos el «reenvío» (*IP forwarding*).
+- **Por qué:** por seguridad, Linux viene de fábrica sin pasar paquetes de una tarjeta a otra: lo que le llega por una puerta no lo saca por la otra. Un router tiene que hacer justo eso, así que hay que activarlo.
+
+<details><summary>Comandos</summary>
+
+```
+echo "net.ipv4.ip_forward=1" > /etc/sysctl.d/99-forward.conf
+sysctl --system
+sysctl net.ipv4.ip_forward
+```
+
+El último debe responder `net.ipv4.ip_forward = 1`.
+
+</details>
+
+**4. Poner las normas del portero y la salida con su nombre (nftables)**
+
+**nftables** es el programa de Linux que decide qué tráfico pasa y cuál no. Escribimos tres normas:
+
+- **Lo que va al propio Debian:** por defecto se rechaza todo, salvo: lo que viene de nuestra red interna, las respuestas a conexiones que él mismo ha abierto, el `ping` (para comprobar que está vivo) y la conexión remota por SSH.
+- **Lo que pasa a través de Debian:** por defecto se rechaza todo, salvo lo que va **de dentro hacia fuera** y sus respuestas. Desde Internet nadie puede iniciar una conexión hacia nuestros equipos.
+- **Salida con su nombre (NAT o *masquerade*):** todo lo que sale por la puerta de fuera lleva la dirección del Debian (172.16.222.134) en lugar de la del equipo interno. Hace falta porque las direcciones 192.168.30.x son privadas y la red del aula no sabría devolver las respuestas.
+
+<details><summary>Fichero <code>/etc/nftables.conf</code></summary>
+
+```
+#!/usr/sbin/nft -f
+
+flush ruleset
+
+table inet filter {
+        chain input {
+                type filter hook input priority filter; policy drop;
+                iif lo accept
+                ct state established,related accept
+                ct state invalid drop
+                icmp type echo-request accept
+                iifname "enp0s8" accept
+                tcp dport 22 accept
+        }
+        chain forward {
+                type filter hook forward priority filter; policy drop;
+                ct state established,related accept
+                iifname "enp0s8" oifname "enp0s3" accept
+        }
+        chain output {
+                type filter hook output priority filter; policy accept;
+        }
+}
+
+table ip nat {
+        chain postrouting {
+                type nat hook postrouting priority srcnat; policy accept;
+                oifname "enp0s3" masquerade
+        }
+}
+```
+
+Para revisarlo, aplicarlo y que se cargue solo al encender:
+
+```
+nft -c -f /etc/nftables.conf     # solo revisa que esté bien escrito
+nft -f /etc/nftables.conf        # lo aplica
+systemctl enable --now nftables  # lo deja activo en cada arranque
+nft list ruleset                 # muestra las normas cargadas
+```
+
+</details>
+
+**5. Configurar los equipos de la red interna**
+
+Cada equipo que quiera salir a Internet a través del Debian se configura así:
+
+| Dato | Valor | Qué significa |
+|---|---|---|
+| Dirección | Una libre de la red 192.168.30.x | Su «número de casa» en nuestra red |
+| Máscara | 255.255.255.0 | Indica que todos los 192.168.30.x son vecinos |
+| Puerta de enlace | 192.168.30.3 | A quién le pasa lo que va a Internet: el Debian |
+| DNS | 10.239.3.7, 10.239.3.8 y 172.16.20.1 | La «guía telefónica» que traduce nombres (google.com) en direcciones. Son los del centro, porque los públicos, como 1.1.1.1, pueden estar bloqueados en esta red |
+
+Las máquinas virtuales cliente tienen su adaptador en **«Red interna» con el mismo nombre** que el adaptador 2 del Debian; si no, no están «enchufadas» a él.
+
+**6. Comprobar que todo sigue igual después de reiniciar**
+
+Cada pieza queda guardada en un fichero para que no se pierda al apagar:
+
+| Qué | Dónde se guarda |
+|---|---|
+| Dirección fija de la puerta interior | `/etc/network/interfaces` |
+| Normas del portero y NAT | `/etc/nftables.conf` (y el servicio `nftables` activado) |
+| Reenvío de tráfico | `/etc/sysctl.d/99-forward.conf` |
+
+Tras `reboot` se comprueba con `ip -br a`, `sysctl net.ipv4.ip_forward` y `nft list ruleset`: la puerta interior con 192.168.30.3, el reenvío en 1 y la regla `masquerade` en la tabla `nat`.
+
+#### Cómo se comprueba desde un equipo de dentro
+
+Se prueba en este orden, porque así, si algo falla, se sabe en qué paso está el problema:
+
+| Prueba | Si funciona, quiere decir que… |
+|---|---|
+| `ping 192.168.30.3` | el equipo llega al Debian |
+| `ping 1.1.1.1` (o `ping 10.239.3.7` si el centro bloquea 1.1.1.1) | el Debian deja salir y hace el NAT |
+| `ping google.com` | además funcionan los nombres (DNS) |
+
+> Cuando hagáis las pruebas desde un cliente, escribid aquí cómo y qué habéis hecho: qué equipo usasteis y qué respondió cada prueba.
+
+#### Problemas que tuvimos y cómo los resolvimos
+
+| Síntoma | Causa | Solución |
+|---|---|---|
+| La tarjeta interior (`enp0s8`) salía apagada y sin dirección | El adaptador 2 no estaba activado en VirtualBox y Debian tampoco tenía configurada esa tarjeta | Habilitar el adaptador 2 (con *Cable conectado*) y añadir la tarjeta en `/etc/network/interfaces` |
+| Los equipos de dentro no salían a Internet | En las normas del NAT, la cadena estaba enganchada en `output` en vez de en `postrouting`, con la prioridad equivocada o sin la regla `masquerade` | Enganchar la cadena en `postrouting`, prioridad `srcnat`, y añadir `masquerade` |
+| Las teclas salían cambiadas al escribir en la máquina | No era cosa de Debian, sino de Remmina, el programa con el que nos conectamos en remoto al PC que tiene la máquina virtual | Corregir la distribución del teclado en Remmina |
+| `sudo` no funcionaba después de dar permisos al usuario | El permiso de administrador (grupo `sudo`) solo se aplica al volver a iniciar sesión | Cerrar sesión y volver a entrar |
+| Comandos como `sysctl` o `nft` no se encontraban | Se entró como administrador con `su` sin el guion, y no se cargaban las rutas de los programas de administración | Usar siempre `su -` (con guion) |
+
+Un aviso que sale al activar `nftables`, `Failed to query local AF_VSOCK CID`, es normal en máquinas virtuales y no afecta.
+
+#### Pendiente
+
+> Cuando hagáis la copia de la configuración del Debian y la guardéis en el TrueNAS, escribid aquí cómo y qué habéis hecho: qué ficheros copiáis y cómo se restauran.
+
+> Cuando provoquéis un fallo en el Debian y lo recuperéis, escribid aquí cómo y qué habéis hecho: qué fallo, cómo lo detectasteis, cómo lo recuperasteis con la copia y cuánto tardasteis.
 
 ## Servidor NAS/SAN: TrueNAS
 
