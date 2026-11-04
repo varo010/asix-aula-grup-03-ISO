@@ -8,10 +8,10 @@ Tasca 5 «Instal·lació i comunicacions» · RA principales: ISO RA1 d-h y FDM 
 
 | Sistema | Versión | Origen | SHA256 verificado | Ubicación |
 |---|---|---|---|---|
-| TrueNAS | 25.10.7 (Goldeye) | N/C | N/C | G3-PC-02 (Ticnova), instalado en el SSD de 256 GB |
-| Lubuntu | N/C | N/C | N/C | G3-PC-01, sistema operativo principal |
-| OPNsense | N/C | N/C | N/C | VM de VirtualBox en G3-PC-01 |
-| Debian | N/C | N/C | N/C | VM de VirtualBox en G3-PC-01 |
+| TrueNAS | 25.10.7 (Goldeye) | ISO de la página oficial de TrueNAS | N/C | G3-PC-02 (Ticnova), instalado en el SSD de 256 GB |
+| Lubuntu | N/C | ISO de la página oficial de Lubuntu | N/C | G3-PC-01, sistema operativo principal |
+| OPNsense | N/C | OVA de la página oficial de OPNsense | N/C | VM de VirtualBox en G3-PC-01 |
+| Debian | N/C | ISO del servidor de recursos del centro: http://deb.cipfpbatoi.lan/recursos/ISO/ | N/C | VM de VirtualBox en G3-PC-01 |
 
 ## 2. Firmware, arranque, particionado y sistema de ficheros
 
