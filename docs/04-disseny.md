@@ -38,7 +38,7 @@ MikroTik, OPNsense y Debian con nftables son las alternativas de servidor de com
 | VM Debian · servicios | Virtual (nodo 2) | — | 192.168.30.22 | 192.168.30.1 | 172.16.222.1 | Fija |
 | VM Debian · datos | Virtual (nodo 3) | — | 192.168.30.23 | 192.168.30.1 | 172.16.222.1 | Fija |
 | Servidor de clase `1asixb` (Proxmox VE, acceso web) | Físico (del centro) | — | 192.168.30.31 | — | — | Asignada por el profesor |
-| Nodo 1 Proxmox VE (`pve1`) | VM 301 en el servidor de clase `1asixb` | `vmbr0` (sobre `ens18`) | 192.168.30.32 | 192.168.30.1 | 172.16.222.1 | Fija |
+| Nodo 1 Proxmox VE (`pve`) | VM 301 en el servidor de clase `1asixb` | `vmbr0` (sobre `ens18`) | 192.168.30.32 | 192.168.30.1 | 172.16.222.1 | Fija |
 | Nodo 2 Proxmox VE (`pve2`) | VM 302 en el servidor de clase `1asixb` | `vmbr0` (sobre `ens18`) | 192.168.30.33 | 192.168.30.1 | 172.16.222.1 | Fija |
 | Nodo 3 Proxmox VE (`pve3`) | VM 303 en el servidor de clase `1asixb` | `vmbr0` (sobre `ens18`) | 192.168.30.34 | 192.168.30.1 | 172.16.222.1 | Fija |
 | Dirección (Windows 11) | Físico | — | Dinámica (.100 – .200) | 192.168.30.1 (por DHCP) | 192.168.30.1 (por DHCP) | DHCP |

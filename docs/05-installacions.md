@@ -131,7 +131,17 @@ La ruta `0.0.0.0/0` hacia 172.16.222.1 debe salir activa (`As`).
 
 Devolvió 216.239.38.120, así que la cadena LAN → router → DNS del centro → Internet funciona.
 
-#### Problemas que tuvimos y cómo los resolvimos
+##### 6. Crear el clúster (interfaz gráfica)
+
+1. Entramos a la web del nodo `pve` (`https://192.168.30.32:8006`) como `root` → **Centro de datos → Clúster → Crear clúster** → *Nombre del clúster*: `grupo3-cluster` → *Enlace 0*: 192.168.30.32 → **Crear**. Desde ese momento el árbol de la izquierda sale como *Centro de datos (grupo3-cluster)*.
+2. En el mismo sitio, **Información de unión** muestra los datos que necesitan los otros nodos para entrar: la IP del primer nodo, la huella digital de su certificado y un texto largo con todo junto. Con **Copiar información** se copia.
+3. En la web de **pve2** (`https://192.168.30.33:8006`) → **Centro de datos → Clúster → Unirse al clúster** → pegamos la información → contraseña de `root` del nodo `pve` → **Unirse**. Lo mismo en **pve3** (`https://192.168.30.34:8006`).
+4. El clúster quedó con los tres nodos: `pve`, `pve2` y `pve3`.
+
+> Cuando lo reviséis, añadid aquí una captura de **Centro de datos → Clúster** con los tres nodos y de **Centro de datos → Resumen** con el quórum.
+
+### Problemas que tuvimos y cómo los resolvimos
+
 
 | Síntoma | Causa | Solución |
 |---|---|---|
@@ -246,7 +256,7 @@ Al terminar la instalación, TrueNAS muestra un menú de texto con opciones nume
 
 ## Servidor de virtualización: Proxmox
 
-El 10/11 preparamos los **3 nodos** que formarán el clúster. Todavía no hemos creado el clúster: aquí solo está cómo dejamos cada nodo con su nombre y su IP.
+El 10/11 preparamos los **3 nodos** (nombre e IP de cada uno) y, después, creamos con ellos el clúster `grupo3-cluster` desde la interfaz gráfica de Proxmox.
 
 No tenemos tres ordenadores libres para los nodos. Por eso usamos el **servidor físico de clase**, llamado `1asixb`, que tiene instalado Proxmox VE 9.2.25. El profesor ha dado a cada grupo un usuario y tres VM. Dentro de cada una de nuestras VM ya hay otro Proxmox instalado, y cada uno de esos Proxmox es uno de nuestros nodos. Es decir, tenemos **Proxmox dentro de Proxmox**.
 
@@ -254,12 +264,12 @@ No tenemos tres ordenadores libres para los nodos. Por eso usamos el **servidor 
 
 | VM en `1asixb` | Nodo | IP | Gateway | DNS | Estado a 10/11 |
 |---|---|---|---|---|---|
-| 301 `g3-vm1` | `pve1` | 192.168.30.32/24 | 192.168.30.1 | — | Ya tenía la IP .32. Falta cambiarle el nombre |
+| 301 `g3-vm1` | `pve` | 192.168.30.32/24 | 192.168.30.1 | — | Hecho. Se quedó con el nombre de la plantilla (`pve`) |
 | 302 `g3-vm2` | `pve2` | 192.168.30.33/24 | 192.168.30.1 | 192.168.30.1 | Hecho |
 | 303 `g3-vm3` | `pve3` | 192.168.30.34/24 | 192.168.30.1 | — | Hecho |
 
 - **Servidor de clase:** `https://192.168.30.31:8006`, con el usuario `grupo3@pve`. La .31 es la dirección del servidor `1asixb` dentro de nuestra red, así que los nodos van de la .32 a la .34 (en el diseño estaban en .31–.33).
-- **Nuestros nodos:** `https://192.168.30.33:8006`, `https://192.168.30.34:8006` (y la .32 para pve1), con el usuario `root` y el realm *Linux PAM*.
+- **Nuestros nodos:** `https://192.168.30.33:8006`, `https://192.168.30.34:8006` y `https://192.168.30.32:8006` (nodo `pve`), con el usuario `root` y el realm *Linux PAM*.
 - El sistema de los nodos es Proxmox VE con el núcleo `7.0.14-19-pve`.
 - Las contraseñas no se escriben en el repositorio.
 
@@ -409,20 +419,32 @@ Después de reiniciar las dos:
 - En la web de cada nodo (`https://192.168.30.33:8006` y `https://192.168.30.34:8006`) el nodo sale como **pve2** y **pve3**.
 - Desde un PC de nuestra LAN responden al `ping` las .32, .33 y .34, y la web de los nodos (puerto 8006) carga.
 
+#### 6. Crear el clúster (interfaz gráfica)
+
+1. Entramos a la web del nodo `pve` (`https://192.168.30.32:8006`) como `root` → **Centro de datos → Clúster → Crear clúster** → *Nombre del clúster*: `grupo3-cluster` → *Enlace 0*: 192.168.30.32 → **Crear**. Desde ese momento el árbol de la izquierda sale como *Centro de datos (grupo3-cluster)*.
+2. En el mismo sitio, **Información de unión** muestra los datos que necesitan los otros nodos para entrar: la IP del primer nodo, la huella digital de su certificado y un texto largo con todo junto. Con **Copiar información** se copia.
+3. En la web de **pve2** (`https://192.168.30.33:8006`) → **Centro de datos → Clúster → Unirse al clúster** → pegamos la información → contraseña de `root` del nodo `pve` → **Unirse**. Lo mismo en **pve3** (`https://192.168.30.34:8006`).
+4. El clúster quedó con los tres nodos: `pve`, `pve2` y `pve3`.
+
+> Cuando lo reviséis, añadid aquí una captura de **Centro de datos → Clúster** con los tres nodos y de **Centro de datos → Resumen** con el quórum.
+
 ### Problemas que tuvimos y cómo los resolvimos
+
 
 - **No podíamos desconectar la red de una VM.** Nuestro usuario no tiene permiso sobre el bridge `vmbr300`. Lo resolvimos apagando la 301 y configurando las otras de una en una.
 - **El nodo no tenía red aunque tenía la IP.** El bridge `vmbr0` apuntaba a `nic0`, que en el clon no existe. Lo vimos con el error de `ifreload -a` y con `ip -br a`, y lo cambiamos por `ens18`.
+- **La «Información de unión» daba una IP de otra red (172.16.223.52).** Proxmox no saca esa IP de la configuración de red, sino de `/etc/hosts`: busca el nombre del nodo y copia la IP que tiene al lado. En la VM 301 se había cambiado la IP en `/etc/network/interfaces`, pero en `/etc/hosts` seguía la línea de la plantilla (`172.16.223.52 pve.example.lan pve`). Con esa IP, pve2 y pve3 no habrían podido unirse, porque esa dirección no existe en nuestra red.
+  > Escribid aquí cómo lo resolvisteis.
 - **Errores al escribir en la consola.** La consola del navegador (noVNC) no deja pegar texto, y al escribir a mano se colaron fallos: una `` ` `` en lugar de `/` en un `sed` (da *unknown option to `s'* y no hace nada), `:` en lugar de `.` en el nombre, y `ssh_hosts_*` en lugar de `ssh_host_*` (da *No such file or directory*). Para copiar y pegar se puede entrar por SSH desde un PC de la LAN (`ssh root@192.168.30.33`) o usar el botón **>_ Shell** en la web del propio nodo.
 
 ### Pendiente
 
-1. **pve1 (VM 301):** ya tiene la IP .32, pero hay que revisar su `/etc/network/interfaces` y su `/etc/hosts` y cambiarle el nombre a `pve1` igual que a los otros.
+1. **Nombre del nodo 1:** se quedó como `pve` en lugar de `pve1`. Ahora que está dentro del clúster ya no se puede cambiar sin sacarlo de él, así que lo dejamos así.
 2. **`/etc/hosts` de pve2:** dejar la línea bien escrita: `192.168.30.33 pve2.grup3.lan pve2`.
 3. **Identificador y claves SSH:** los tres nodos siguen teniendo el `machine-id` y las claves SSH de la plantilla. No impiden crear el clúster, pero lo correcto es que cada nodo tenga los suyos.
-4. **Certificado de la web de pve3:** sigue diciendo `pve3.example.lan`. Se renueva con `pvecm updatecerts --force` en el Shell del nodo.
+4. **Certificados de la web de `pve` y pve3:** siguen diciendo `pve.example.lan` y `pve3.example.lan`. Se renueva con `pvecm updatecerts --force` en el Shell del nodo.
 
-> Cuando creéis el clúster, escribid aquí cómo y qué habéis hecho: usuarios de administración, clúster con los nodos, almacenamiento compartido y servidores virtualizados de la empresa. Además, responded con vuestras palabras:
+> Cuando configuréis el almacenamiento compartido (NFS del TrueNAS) y creéis los servidores virtualizados de la empresa, escribid aquí cómo y qué habéis hecho, y también los usuarios de administración. Además, responded con vuestras palabras:
 > - ventajas e inconvenientes de virtualizar servidores;
 > - diferencia entre contenedores y máquinas virtuales, y cuándo usar cada uno;
 > - migración de un contenedor y de una VM entre nodos: tiempo, espacio en disco y si se puede mejorar;
