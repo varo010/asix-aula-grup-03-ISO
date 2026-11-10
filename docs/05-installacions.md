@@ -246,7 +246,183 @@ Al terminar la instalación, TrueNAS muestra un menú de texto con opciones nume
 
 ## Servidor de virtualización: Proxmox
 
-> Cuando instaléis y configuréis Proxmox, escribid aquí cómo y qué habéis hecho: usuarios de administración, parámetros de red, clúster con los nodos y servidores virtualizados de la empresa. Además, responded con vuestras palabras:
+El 10/11 preparamos los **3 nodos** que formarán el clúster. Todavía no hemos creado el clúster: aquí solo está cómo dejamos cada nodo con su nombre y su IP.
+
+No tenemos tres ordenadores libres para los nodos. Por eso usamos el **servidor físico de clase**, llamado `1asixb`, que tiene instalado Proxmox VE 9.2.25. El profesor ha dado a cada grupo un usuario y tres VM. Dentro de cada una de nuestras VM ya hay otro Proxmox instalado, y cada uno de esos Proxmox es uno de nuestros nodos. Es decir, tenemos **Proxmox dentro de Proxmox**.
+
+### Cómo queda
+
+| VM en `1asixb` | Nodo | IP | Gateway | DNS | Estado a 10/11 |
+|---|---|---|---|---|---|
+| 301 `g3-vm1` | `pve1` | 192.168.30.32/24 | 192.168.30.1 | — | Ya tenía la IP .32. Falta cambiarle el nombre |
+| 302 `g3-vm2` | `pve2` | 192.168.30.33/24 | 192.168.30.1 | 192.168.30.1 | Hecho |
+| 303 `g3-vm3` | `pve3` | 192.168.30.34/24 | 192.168.30.1 | — | Hecho |
+
+- **Servidor de clase:** `https://192.168.30.31:8006`, con el usuario `grupo3@pve`. La .31 es la dirección del servidor `1asixb` dentro de nuestra red, así que los nodos van de la .32 a la .34 (en el diseño estaban en .31–.33).
+- **Nuestros nodos:** `https://192.168.30.33:8006`, `https://192.168.30.34:8006` (y la .32 para pve1), con el usuario `root` y el realm *Linux PAM*.
+- El sistema de los nodos es Proxmox VE con el núcleo `7.0.14-19-pve`.
+- Las contraseñas no se escriben en el repositorio.
+
+Las tres VM tienen el mismo hardware (pestaña **Hardware** de cada VM en `1asixb`):
+
+| Elemento | Valor | Qué significa |
+|---|---|---|
+| Memoria | 3,95 GiB | La RAM de cada nodo. Las VM que pongamos dentro tendrán que repartirse esto |
+| Procesadores | 2 (1 socket, 2 núcleos), tipo **host** | El tipo *host* pasa la CPU real a la VM, con sus instrucciones de virtualización (VT-x). Sin esto, las VM que creemos dentro de los nodos no podrían arrancar |
+| BIOS y máquina | SeaBIOS, i440fx | Los valores por defecto |
+| Disco duro | `sata0`, 40 GB, `zfs-1asixb:base-9000-disk-0/vm-30X-disk-0` | Es un **clon** de la plantilla 9000 (ver abajo) |
+| CD/DVD | vacío | No hay ISO porque Proxmox ya viene instalado en el disco |
+| Red `net0` | `vmbr300`, con cortafuegos | Nuestra LAN 192.168.30.0/24. Dentro del nodo se llama `ens18` |
+| Red `net1` | `vmbr31` | Red interna del servidor de clase. Dentro del nodo, `ens19`. Aún no la usamos |
+| Red `net2` | `vmbr32` | Otra red interna. Dentro del nodo, `ens20`. Aún no la usamos |
+| Cloud-Init | No tiene («Dispositivo CloudInit no encontrado») | El profesor no les ha dado nombre ni IP de forma automática. Hay que ponerlos a mano |
+
+### Las palabras que hay que entender
+
+- **Nodo:** cada servidor Proxmox que formará parte del clúster.
+- **Virtualización anidada:** hacer funcionar un hipervisor (nuestro Proxmox) dentro de una VM de otro hipervisor (el Proxmox de clase).
+- **Plantilla y clon enlazado:** el profesor instaló Proxmox una vez en una VM, la convirtió en plantilla (la 9000) y de ella sacó nuestras tres VM. Un clon enlazado no copia el disco entero: guarda solo lo que cambia respecto a la plantilla. Por eso las tres VM arrancaron **idénticas**: mismo nombre (`pve`), misma IP (`172.16.223.52`, que no es de nuestra red) y mismo identificador.
+- **Bridge (`vmbr`):** es un switch virtual. En el servidor de clase, `vmbr300` conecta nuestras VM a nuestra LAN. Dentro de cada nodo, `vmbr0` conecta el propio nodo (y luego sus VM) con su tarjeta de red.
+- **Nombre de la tarjeta de red:** Linux pone nombre a cada tarjeta. La plantilla la tenía guardada como `nic0`, pero en nuestros clones las tarjetas se llaman `ens18`, `ens19` y `ens20`, porque tienen MAC distintas a la de la plantilla.
+- **`/etc/network/interfaces`:** el archivo donde Proxmox guarda la red: IP, gateway y a qué tarjeta va el bridge.
+- **`/etc/hosts`:** una lista local de «nombre → IP». Proxmox la necesita: busca ahí su propio nombre para saber cuál es su IP. Si no lo encuentra, no arrancan ni la web ni el clúster.
+- **`machine-id`:** un número que identifica la instalación de Linux. Al venir de la misma plantilla, los tres nodos tienen el mismo.
+
+### Paso a paso
+
+#### 1. Revisar las VM en el servidor de clase
+
+1. Entramos a `https://192.168.30.31:8006` con `grupo3@pve`. En el árbol salen el nodo `1asixb`, nuestro pool `pool-grupo3` y las VM 301, 302 y 303. La 301 ya estaba encendida.
+2. En cada VM miramos **Hardware** y **Cloud-Init** (tablas de arriba).
+3. En **Centro de datos** no sale la opción *Clúster*: nuestro usuario solo tiene permiso sobre nuestras VM, no sobre el servidor de clase. El clúster se crea más adelante desde la web de nuestros propios nodos.
+
+#### 2. Evitar que dos nodos tengan la misma IP
+
+Si encendíamos la 302 y la 303 a la vez, las dos arrancarían con la misma IP. Primero intentamos desconectar la red de la 302 (**Hardware → net0 → Editar → Desconectar**), pero **Aceptar** salía desactivado: el campo *Puente* (`vmbr300`) sale en rojo porque nuestro usuario no tiene permiso sobre ese bridge.
+
+Lo resolvimos así: **apagamos la 301**, y configuramos la 302 y la 303 **de una en una**, reiniciando cada una con su IP nueva antes de encender la siguiente.
+
+#### 3. Configurar la 302 como `pve2` (.33)
+
+Lo hicimos desde la **Consola** de la VM 302 en la web de clase, con el usuario `root`. Estos son los comandos en el orden en que los usamos:
+
+```bash
+# 1. Ver cómo venía la red de la plantilla (no cambia nada).
+#    Vimos: address 172.16.223.52/24, gateway 172.16.223.1 y bridge-ports nic0.
+cat /etc/network/interfaces
+
+# 2. Ver la tabla de nombres (no cambia nada).
+#    Vimos la línea: 172.16.223.52 pve.example.lan pve
+cat /etc/hosts
+
+# 3. Cambiar la IP de la plantilla por la nuestra.
+#    sed -i 's#A#B#' busca el texto A en el archivo y lo cambia por B; -i guarda el cambio en el propio archivo.
+#    La parte del gateway tenía un error de escritura y no cambió nada (se arregla en el paso 10).
+sed -i 's#172\.16\.223\.52/24#192.168.30.33/24#; s#gateway 172.\.16\.223\.1#gateway 192.168.30.1#' /etc/network/interfaces
+
+# 4. Hacer que el nombre del nodo apunte a la IP nueva en /etc/hosts.
+#    Quedó escrito "pve2:grup3:lan" (con dos puntos en vez de puntos). Aun así funciona,
+#    porque al final de la línea está "pve2", que es el nombre que busca Proxmox.
+sed -i 's/^172\.16\.223\.52 .*/192.168.30.33 pve2:grup3:lan pve2/' /etc/hosts
+
+# 5. Decir al nodo que pregunte los nombres de Internet (DNS) al MikroTik.
+#    El > sobrescribe el archivo entero con esta línea.
+echo "nameserver 192.168.30.1" > /etc/resolv.conf
+
+# 6. Cambiar el nombre del equipo (se guarda en /etc/hostname).
+#    Proxmox usa este nombre como nombre del nodo.
+hostnamectl set-hostname pve2
+
+# 7. Intentar crear un identificador nuevo (machine-id), distinto del de la plantilla.
+#    Respondió "Initializing machine ID from D-Bus machine ID": lo copió de una copia antigua
+#    guardada en /var/lib/dbus/, así que el identificador sigue siendo el de la plantilla.
+rm /etc/machine-id
+systemd-machine-id-setup
+
+#    Intento de borrar las claves SSH de la plantilla para generar otras nuevas.
+#    El nombre estaba mal escrito (es ssh_host_*), dio "No such file or directory" y no borró nada.
+rm /etc/ssh/ssh_hosts_*
+
+# 8. Aplicar la red nueva sin reiniciar.
+#    Dio el error "vmbr0: bridge port nic0 does not exist": el bridge apuntaba a una tarjeta que no existe en el clon.
+ifreload -a
+
+# 9. Ver las tarjetas de red, su estado y su IP en formato corto.
+#    Vimos que las tarjetas se llaman ens18, ens19 y ens20 (en DOWN) y que vmbr0 ya tenía 192.168.30.33/24.
+ip -br a
+
+# 10. Conectar el bridge a la tarjeta real (ens18 = net0 = nuestra LAN) y poner bien el gateway (el MikroTik).
+#     La g del final cambia todas las veces que aparece nic0 en el archivo.
+sed -i 's/nic0/ens18/g; s/gateway 172.16.223.1/gateway 192.168.30.1/' /etc/network/interfaces
+
+# 11. Volver a aplicar la red. Esta vez sin errores.
+ifreload -a
+
+# 12. Comprobar que llega al MikroTik.
+ping -c2 192.168.30.1
+
+# 13. Reiniciar para que todos los servicios de Proxmox arranquen con el nombre nuevo.
+reboot
+```
+
+Así queda `/etc/network/interfaces` en pve2:
+
+```
+auto lo
+iface lo inet loopback
+
+iface ens18 inet manual
+
+auto vmbr0
+iface vmbr0 inet static
+        address 192.168.30.33/24
+        gateway 192.168.30.1
+        bridge-ports ens18
+        bridge-stp off
+        bridge-fd 0
+
+source /etc/network/interfaces.d/*
+```
+
+#### 4. Configurar la 303 como `pve3` (.34)
+
+Con lo aprendido en la 302, en la **Consola** de la VM 303 hicimos todo con menos comandos:
+
+```bash
+# 1. En el archivo de red: cambiar la IP, cambiar el gateway y conectar el bridge a ens18, todo de una vez.
+sed -i 's/172.16.223.52/192.168.30.34/; s/gateway 172.16.223.1/gateway 192.168.30.1/; s/nic0/ens18/g' /etc/network/interfaces
+
+# 2. Hacer que el nombre pve3 apunte a la IP nueva.
+sed -i 's/^172.16.223.52 .*/192.168.30.34 pve3.grup3.lan pve3/' /etc/hosts
+
+# 3. Cambiar el nombre del equipo.
+hostnamectl set-hostname pve3
+
+# 4. Reiniciar con la configuración nueva.
+reboot
+```
+
+#### 5. Comprobación
+
+Después de reiniciar las dos:
+
+- En la web de cada nodo (`https://192.168.30.33:8006` y `https://192.168.30.34:8006`) el nodo sale como **pve2** y **pve3**.
+- Desde un PC de nuestra LAN responden al `ping` las .32, .33 y .34, y la web de los nodos (puerto 8006) carga.
+
+### Problemas que tuvimos y cómo los resolvimos
+
+- **No podíamos desconectar la red de una VM.** Nuestro usuario no tiene permiso sobre el bridge `vmbr300`. Lo resolvimos apagando la 301 y configurando las otras de una en una.
+- **El nodo no tenía red aunque tenía la IP.** El bridge `vmbr0` apuntaba a `nic0`, que en el clon no existe. Lo vimos con el error de `ifreload -a` y con `ip -br a`, y lo cambiamos por `ens18`.
+- **Errores al escribir en la consola.** La consola del navegador (noVNC) no deja pegar texto, y al escribir a mano se colaron fallos: una `` ` `` en lugar de `/` en un `sed` (da *unknown option to `s'* y no hace nada), `:` en lugar de `.` en el nombre, y `ssh_hosts_*` en lugar de `ssh_host_*` (da *No such file or directory*). Para copiar y pegar se puede entrar por SSH desde un PC de la LAN (`ssh root@192.168.30.33`) o usar el botón **>_ Shell** en la web del propio nodo.
+
+### Pendiente
+
+1. **pve1 (VM 301):** ya tiene la IP .32, pero hay que revisar su `/etc/network/interfaces` y su `/etc/hosts` y cambiarle el nombre a `pve1` igual que a los otros.
+2. **`/etc/hosts` de pve2:** dejar la línea bien escrita: `192.168.30.33 pve2.grup3.lan pve2`.
+3. **Identificador y claves SSH:** los tres nodos siguen teniendo el `machine-id` y las claves SSH de la plantilla. No impiden crear el clúster, pero lo correcto es que cada nodo tenga los suyos.
+4. **Certificado de la web de pve3:** sigue diciendo `pve3.example.lan`. Se renueva con `pvecm updatecerts --force` en el Shell del nodo.
+
+> Cuando creéis el clúster, escribid aquí cómo y qué habéis hecho: usuarios de administración, clúster con los nodos, almacenamiento compartido y servidores virtualizados de la empresa. Además, responded con vuestras palabras:
 > - ventajas e inconvenientes de virtualizar servidores;
 > - diferencia entre contenedores y máquinas virtuales, y cuándo usar cada uno;
 > - migración de un contenedor y de una VM entre nodos: tiempo, espacio en disco y si se puede mejorar;
