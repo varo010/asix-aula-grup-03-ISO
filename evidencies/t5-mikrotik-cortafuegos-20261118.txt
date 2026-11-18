@@ -1,0 +1,55 @@
+MikroTik del grupo (192.168.30.1). Leído el 18/11/2026 a las 12:41 (hora real) con el usuario admin. Solo lectura.
+Después de esta lectura se añadió una regla: ver el final del fichero.
+
+== Sistema
+RouterOS 7.20.8 (long-term) | hEX | encendido desde hace 3w1d3h23m59s
+nombre (identity): MikroTik | reloj del router: 2026-03-05 12:41:38 (mal: la fecha real era 2026-11-18)
+
+== Direcciones
+  192.168.30.1/24 bridge_grupo3
+  172.16.222.216/24 ether1
+
+== Usuarios
+  admin | grupo full
+  backup | grupo backupgrp
+
+== Cortafuegos: /ip firewall filter (en el orden en que se aplican)
+  0 action=accept chain=input dst-port=22 protocol=tcp src-address=192.168.30.20 | SSH backups TrueNAS | paquetes 109
+  1 action=passthrough chain=forward | special dummy rule to show fasttrack counters | paquetes 33143556
+  2 action=accept chain=forward dst-port=443 in-interface=bridge_grupo3 log=true log-prefix=PERMITIDO HTTPS protocol=tcp src-address=192.168.30.0/24 | Permitir HTTPS | paquetes 558125
+  3 action=drop chain=forward dst-port=80 in-interface=bridge_grupo3 log=true log-prefix=BLOQUEO HTTP protocol=tcp src-address=192.168.30.0/24 | BLOQUEAR HTTP | paquetes 104919
+  4 action=accept chain=input connection-state=established,related,untracked | defconf: accept established,related,untracked | paquetes 61052
+  5 action=drop chain=input connection-state=invalid | defconf: drop invalid | paquetes 140
+  6 action=accept chain=input protocol=icmp | defconf: accept ICMP | paquetes 14
+  7 action=accept chain=input dst-address=127.0.0.1 | defconf: accept to local loopback (for CAPsMAN) | paquetes 0
+  8 action=drop chain=input in-interface-list=!LAN | defconf: drop all not coming from LAN | paquetes 69299
+  9 action=accept chain=forward ipsec-policy=in,ipsec | defconf: accept in ipsec policy | paquetes 0
+ 10 action=accept chain=forward ipsec-policy=out,ipsec | defconf: accept out ipsec policy | paquetes 0
+ 11 action=fasttrack-connection chain=forward connection-state=established,related hw-offload=true | defconf: fasttrack | paquetes 541154
+ 12 action=accept chain=forward connection-state=established,related,untracked | defconf: accept established,related, untracked | paquetes 541154
+ 13 action=drop chain=forward connection-state=invalid | defconf: drop invalid | paquetes 43
+ 14 action=drop chain=forward connection-nat-state=!dstnat connection-state=new in-interface-list=WAN | defconf: drop all from WAN not DSTNATed | paquetes 0
+
+== NAT: /ip firewall nat
+   action=masquerade chain=srcnat ipsec-policy=out,none out-interface-list=WAN | defconf: masquerade
+   action=masquerade chain=srcnat out-interface=ether1 | 
+
+== Últimas líneas del registro con BLOQUEO HTTP o PERMITIDO HTTPS
+   2026-03-05 12:41:38 PERMITIDO HTTPS forward: in:bridge_grupo3 out:ether1, connection-state:established,snat src-mac 30:c5:99:2a:e4:df, proto TCP (ACK), 192.168.30.198:47256->64.233.166.139:4
+   2026-03-05 12:41:38 PERMITIDO HTTPS forward: in:bridge_grupo3 out:ether1, connection-state:established,snat src-mac 30:c5:99:2a:e4:cb, proto TCP (RST), 192.168.30.195:58072->172.253.156.94:4
+   2026-03-05 12:41:38 PERMITIDO HTTPS forward: in:bridge_grupo3 out:ether1, connection-state:established,snat src-mac 30:c5:99:2a:e4:cb, proto TCP (RST), 192.168.30.195:58056->172.253.156.94:4
+   2026-03-05 12:41:38 PERMITIDO HTTPS forward: in:bridge_grupo3 out:ether1, connection-state:established,snat src-mac 30:c5:99:2b:71:cc, proto TCP (ACK), 192.168.30.197:36286->35.190.46.17:443
+   2026-03-05 12:41:38 PERMITIDO HTTPS forward: in:bridge_grupo3 out:ether1, connection-state:established,snat src-mac 30:c5:99:2a:e4:df, proto TCP (ACK), 192.168.30.198:39790->34.149.66.165:44
+   2026-03-05 12:41:38 PERMITIDO HTTPS forward: in:bridge_grupo3 out:ether1, connection-state:established,snat src-mac 30:c5:99:2a:e4:df, proto TCP (ACK), 192.168.30.198:49698->3.92.129.183:443
+   2026-03-05 12:41:38 PERMITIDO HTTPS forward: in:bridge_grupo3 out:ether1, connection-state:established,snat src-mac 30:c5:99:2a:e4:df, proto TCP (ACK), 192.168.30.198:55596->160.79.104.10:44
+   2026-03-05 12:41:38 PERMITIDO HTTPS forward: in:bridge_grupo3 out:ether1, connection-state:established,snat src-mac 30:c5:99:2a:e4:df, proto TCP (ACK), 192.168.30.198:39996->34.149.66.165:44
+
+== Regla añadida el 18/11/2026 (hora real 12:43), justo encima de BLOQUEAR HTTP
+   chain=forward action=accept protocol=tcp dst-port=80 in-interface=bridge_grupo3 src-address=192.168.30.32-192.168.30.34
+   comentario: Permitir HTTP a los nodos Proxmox (actualizaciones)
+
+== Comprobación después de añadirla (curl a http://download.proxmox.com/debian/pve/dists/trixie/InRelease)
+   pve  (192.168.30.32): http 200
+   pve2 (192.168.30.33): http 200
+   pve3 (192.168.30.34): http 200
+   portátil de la LAN (192.168.30.198) a http://example.com: sin respuesta (sigue bloqueado)

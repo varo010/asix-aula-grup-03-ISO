@@ -1,0 +1,87 @@
+Registros de las copias de seguridad de Proxmox (vzdump) guardadas en truenas-nfs:dump el 18/11/2026.
+
+===== dump/vzdump-lxc-102-2026_11_18-12_31_43.log
+2026-11-18 12:31:43 INFO: Starting Backup of VM 102 (lxc)
+2026-11-18 12:31:43 INFO: status = running
+2026-11-18 12:31:43 INFO: backup mode: stop
+2026-11-18 12:31:43 INFO: ionice priority: 7
+2026-11-18 12:31:43 INFO: CT Name: ct-test
+2026-11-18 12:31:43 INFO: including mount point rootfs ('/') in backup
+2026-11-18 12:31:43 INFO: stopping virtual guest
+2026-11-18 12:31:45 INFO: creating vzdump archive '/mnt/pve/truenas-nfs/dump/vzdump-lxc-102-2026_11_18-12_31_43.tar.zst'
+2026-11-18 12:31:51 INFO: Total bytes written: 434800640 (415MiB, 65MiB/s)
+2026-11-18 12:31:53 INFO: archive file size: 123MB
+2026-11-18 12:31:53 INFO: adding notes to backup
+2026-11-18 12:31:54 INFO: restarting vm
+2026-11-18 12:31:54 INFO: guest is online again after 11 seconds
+2026-11-18 12:31:55 INFO: Finished Backup of VM 102 (00:00:12)
+
+===== dump/vzdump-qemu-103-2026_11_18-12_17_39.log
+2026-11-18 12:17:39 INFO: Starting Backup of VM 103 (qemu)
+2026-11-18 12:17:39 INFO: status = running
+2026-11-18 12:17:39 INFO: VM Name: vm-test
+2026-11-18 12:17:39 INFO: include disk 'scsi0' 'truenas-nfs:103/vm-103-disk-0.qcow2' 4G
+2026-11-18 12:17:39 INFO: backup mode: snapshot
+2026-11-18 12:17:39 INFO: ionice priority: 7
+2026-11-18 12:17:39 INFO: creating vzdump archive '/mnt/pve/truenas-nfs/dump/vzdump-qemu-103-2026_11_18-12_17_39.vma.zst'
+2026-11-18 12:17:39 INFO: skipping guest filesystem freeze - disabled in VM options
+2026-11-18 12:17:39 INFO: starting backup via QMP command
+2026-11-18 12:17:39 INFO: started backup task '251c33e3-a0ba-4fdf-b084-c6c7824e14f0'
+2026-11-18 12:17:39 INFO: resuming VM again
+2026-11-18 12:17:40 INFO: 100% (4.0 GiB of 4.0 GiB) in 1s, read: 4.0 GiB/s, write: 0 B/s
+2026-11-18 12:17:40 INFO: backup is sparse: 4.00 GiB (100%) total zero data
+2026-11-18 12:17:40 INFO: transferred 4.00 GiB in 1 seconds (4.0 GiB/s)
+2026-11-18 12:17:40 INFO: archive file size: 146KB
+2026-11-18 12:17:40 INFO: adding notes to backup
+2026-11-18 12:17:40 INFO: Finished Backup of VM 103 (00:00:01)
+
+===== ficheros
+config-cluster:
+drwxr-xr-x 2 root root    11 2026-11-18 12:15 .
+drwxr-xr-x 7 root root     7 2026-11-18 12:14 ..
+-rw-r--r-- 1 root root   102 2026-11-18 12:14 pve-config-pve-20261118-1214.sha256
+-rw-r--r-- 1 root root 11937 2026-11-18 12:14 pve-config-pve-20261118-1214.tar.gz
+-rw-r--r-- 1 root root   103 2026-11-18 12:14 pve-config-pve2-20261118-1214.sha256
+-rw-r--r-- 1 root root 11932 2026-11-18 12:14 pve-config-pve2-20261118-1214.tar.gz
+-rw-r--r-- 1 root root   103 2026-11-18 12:15 pve-config-pve3-20261118-1215.sha256
+-rw-r--r-- 1 root root 11929 2026-11-18 12:15 pve-config-pve3-20261118-1215.tar.gz
+-rw-r--r-- 1 root root  1648 2026-11-18 12:14 pveversion-pve-20261118-1214.txt
+-rw-r--r-- 1 root root  1648 2026-11-18 12:14 pveversion-pve2-20261118-1214.txt
+-rw-r--r-- 1 root root  1648 2026-11-18 12:15 pveversion-pve3-20261118-1215.txt
+
+dump:
+drwxr-xr-x  3 root   root           9 2026-11-18 12:31 .
+drwxr-xr-x  7 root   root           7 2026-11-18 12:14 ..
+drwxr-xr-x 14 100000 100000        18 2026-11-18 12:30 vzdump-lxc-102-2026_11_18-12_18_02.tmp
+-rw-r--r--  1 root   root         817 2026-11-18 12:31 vzdump-lxc-102-2026_11_18-12_31_43.log
+-rw-r--r--  1 root   root   129127495 2026-11-18 12:31 vzdump-lxc-102-2026_11_18-12_31_43.tar.zst
+-rw-r--r--  1 root   root           7 2026-11-18 12:31 vzdump-lxc-102-2026_11_18-12_31_43.tar.zst.notes
+-rw-r--r--  1 root   root        1119 2026-11-18 12:17 vzdump-qemu-103-2026_11_18-12_17_39.log
+-rw-r--r--  1 root   root      149823 2026-11-18 12:17 vzdump-qemu-103-2026_11_18-12_17_39.vma.zst
+-rw-r--r--  1 root   root           7 2026-11-18 12:17 vzdump-qemu-103-2026_11_18-12_17_39.vma.zst.notes
+
+===== contenido de config-cluster/pve-config-pve-20261118-1214.tar.gz (primer nivel)
+etc/pve/
+etc/pve/.debug
+etc/pve/.vmlist
+etc/pve/.members
+etc/pve/lxc
+etc/pve/local
+etc/pve/.rrd
+etc/pve/.version
+etc/pve/.clusterlog
+etc/pve/openvz
+etc/pve/qemu-server
+etc/pve/storage.cfg
+etc/pve/user.cfg
+etc/pve/pve-root-ca.pem
+etc/pve/vzdump.cron
+etc/pve/datacenter.cfg
+etc/pve/replication.cfg
+etc/pve/authkey.pub
+etc/pve/corosync.conf
+etc/pve/authkey.pub.old
+etc/network/interfaces
+etc/hosts
+etc/hostname
+etc/resolv.conf

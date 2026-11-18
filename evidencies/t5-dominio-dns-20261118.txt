@@ -1,0 +1,23 @@
+Preguntas al DNS del Windows Server (192.168.30.21) desde un portátil de la LAN (192.168.30.198). 18/11/2026, 13:00. Solo lectura.
+
+== dig @192.168.30.21 grupo3.lan SOA
+grupo3.lan.		3600	IN	SOA	dc-grupo3.grupo3.lan. hostmaster.grupo3.lan. 22 900 600 86400 3600
+
+== dig @192.168.30.21 grupo3.lan NS
+grupo3.lan.		3600	IN	NS	dc-grupo3.grupo3.lan.
+
+== dig @192.168.30.21 grupo3.lan A
+grupo3.lan.		600	IN	A	192.168.30.21
+
+== dig @192.168.30.21 dc-grupo3.grupo3.lan A
+dc-grupo3.grupo3.lan.	3600	IN	A	192.168.30.21
+
+== dig @192.168.30.21 _ldap._tcp.dc._msdcs.grupo3.lan SRV   (registro que usa un cliente para encontrar el controlador de dominio)
+_ldap._tcp.dc._msdcs.grupo3.lan. 600 IN	SRV	0 100 389 dc-grupo3.grupo3.lan.
+
+== dig @192.168.30.21 empresa.lan SOA   (sin respuesta: ese dominio no existe en el servidor)
+
+== dig @192.168.30.21 DC01.grupo3.lan A   (sin respuesta: no hay ningún equipo con ese nombre)
+
+== DNS que reparte el DHCP del MikroTik al portátil (nmcli)
+192.168.30.1

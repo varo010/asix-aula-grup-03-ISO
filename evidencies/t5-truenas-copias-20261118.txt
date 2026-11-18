@@ -1,0 +1,55 @@
+Qué hay guardado en los datasets del TrueNAS (192.168.30.20). Leído el 18/11/2026 a las 12:50 desde su API. Solo lectura.
+FILE = fichero, DIRE = carpeta. Los tamaños están en MiB.
+
+/mnt/Pool_Principal/Configuraciones
+   DIRE Debian Enrutador | 0.0 MiB
+     FILE debian enrutador.vdi | 1261.9 MiB
+   DIRE Mikrotik | 0.0 MiB
+     FILE Backup_mikrotik_10-11-2026.backup | 0.0 MiB
+     FILE backup-3-11-2026- MKT.backup | 0.0 MiB
+   DIRE OPNSense | 0.0 MiB
+     FILE config-OPNsense.internal-20261110123754.xml | 0.1 MiB
+   DIRE TrueNAS | 0.0 MiB
+     FILE freenas-v1.db | 0.8 MiB
+     FILE pwenc_secret | 0.0 MiB
+   DIRE cliente-linux | 0.0 MiB
+     FILE config-ClienteLinux-20261117-1113.sha256 | 0.0 MiB
+     FILE config-ClienteLinux-20261117-1113.tar.gz | 1.0 MiB
+     FILE config-ClienteLinux-20261117-1117.sha256 | 0.0 MiB
+     FILE config-ClienteLinux-20261117-1117.tar.gz | 1.0 MiB
+     FILE paquetes-ClienteLinux-20261117-1113.txt | 0.0 MiB
+     FILE paquetes-ClienteLinux-20261117-1117.txt | 0.0 MiB
+   DIRE cliente_windows | 0.0 MiB
+     FILE Windows11_ISO.ova | 14506.6 MiB
+/mnt/Pool_Principal/Documentos
+/mnt/Pool_Principal/proxmox
+   DIRE config-cluster | 0.0 MiB
+     FILE pve-config-pve-20261118-1214.sha256 | 0.0 MiB
+     FILE pve-config-pve-20261118-1214.tar.gz | 0.0 MiB
+     FILE pve-config-pve2-20261118-1214.sha256 | 0.0 MiB
+     FILE pve-config-pve2-20261118-1214.tar.gz | 0.0 MiB
+     FILE pve-config-pve3-20261118-1215.sha256 | 0.0 MiB
+     FILE pve-config-pve3-20261118-1215.tar.gz | 0.0 MiB
+     FILE pveversion-pve-20261118-1214.txt | 0.0 MiB
+     FILE pveversion-pve2-20261118-1214.txt | 0.0 MiB
+     FILE pveversion-pve3-20261118-1215.txt | 0.0 MiB
+   DIRE dump | 0.0 MiB
+     DIRE vzdump-lxc-102-2026_11_18-12_18_02.tmp | 0.0 MiB   (carpeta temporal de una copia que no terminó; contenido omitido)
+     FILE vzdump-lxc-102-2026_11_18-12_31_43.log | 0.0 MiB
+     FILE vzdump-lxc-102-2026_11_18-12_31_43.tar.zst | 123.1 MiB
+     FILE vzdump-lxc-102-2026_11_18-12_31_43.tar.zst.notes | 0.0 MiB
+     FILE vzdump-qemu-103-2026_11_18-12_17_39.log | 0.0 MiB
+     FILE vzdump-qemu-103-2026_11_18-12_17_39.vma.zst | 0.1 MiB
+     FILE vzdump-qemu-103-2026_11_18-12_17_39.vma.zst.notes | 0.0 MiB
+   DIRE images | 0.0 MiB
+     DIRE 100 | 0.0 MiB
+       FILE vm-100-disk-0.qcow2 | 65546.2 MiB
+     DIRE 102 | 0.0 MiB
+       FILE vm-102-disk-0.raw | 4096.0 MiB
+     DIRE 103 | 0.0 MiB
+       FILE vm-103-disk-0.qcow2 | 4096.9 MiB
+   DIRE private | 0.0 MiB
+   DIRE template | 0.0 MiB
+     DIRE iso | 0.0 MiB
+
+Tareas programadas (cron) en el TrueNAS: ninguna. Tareas de instantáneas: ninguna.
