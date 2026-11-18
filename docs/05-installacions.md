@@ -15,7 +15,52 @@ Tasca 5 «Instal·lació i comunicacions» · RA principales: ISO RA1 d-h y FDM 
 
 ## 2. Firmware, arranque, particionado y sistema de ficheros
 
-> Cuando instaléis cada sistema, escribid aquí cómo y qué habéis hecho con el firmware (UEFI o BIOS), el orden de arranque, el particionado y el sistema de ficheros, y por qué. Incluid la comprobación de TPM y UEFI y, en las VM, los dispositivos virtuales.
+Cómo está repartido el disco de cada sistema instalado y por qué. Los datos salen de los propios equipos: evidencias [t5-proxmox-particiones-20261118.txt](../evidencies/t5-proxmox-particiones-20261118.txt), [t2-diagnostico-pc01-lubuntu-20261103.txt](../evidencies/t2-diagnostico-pc01-lubuntu-20261103.txt) y [t2-diagnostico-pc02-truenas-20261103.txt](../evidencies/t2-diagnostico-pc02-truenas-20261103.txt).
+
+| Sistema | Arranque | Particiones | Sistema de ficheros |
+|---|---|---|---|
+| Nodos Proxmox (`pve`, `pve2`, `pve3`) | BIOS | `sda1` 1 MiB (arranque BIOS), `sda2` 512 MiB (arranque UEFI), `sda3` el resto (LVM) | **ext4** para el sistema, dentro de LVM |
+| TrueNAS (G3-PC-02) | UEFI | SSD de 238 GB: `sda1` 1 MiB, `sda2` 512 MiB (arranque), `sda3` 238 GB (sistema). HDD de 2 TB: entero para los datos | **ZFS** en los dos discos |
+| Lubuntu (G3-PC-01) | UEFI | `sda1` 300 MiB (arranque UEFI), `sda2` 465,5 GB (todo lo demás) | **ext4**; el intercambio es un fichero de 512 MiB, no una partición |
+| Contenedor `ct-test` | — (usa el núcleo del nodo) | Un disco virtual de 4 GB sin particiones | **ext4** |
+
+### Nodos Proxmox: LVM con ext4
+
+Es el reparto que hace el instalador de Proxmox cuando se elige ext4. Dentro de `sda3`, LVM crea tres trozos (se ven con `lsblk` y `lvs`):
+
+| Volumen | Tamaño en `pve` | Tamaño en pve2 y pve3 | Para qué |
+|---|---|---|---|
+| `swap` | 3,8 GB | 3,8 GB | Memoria de intercambio, por si se acaba la RAM |
+| `root` | 62,7 GB | 17,9 GB | El sistema (`/`), en ext4. Aquí está también el almacenamiento `local` (ISO y plantillas) |
+| `data` | 11 GB | 11 GB | El almacenamiento `local-lvm`: los discos de las VM y de los contenedores |
+
+Por qué nos vale así:
+
+- **LVM** deja agrandar un volumen sin reinstalar. Ya se usó: el nodo `pve` tiene el disco entero (80 GB) y su `root` es de 62,7 GB, mientras que pve2 y pve3 siguen con 40 GB repartidos y otros 40 GB libres.
+- **ext4** es el sistema de ficheros normal de Linux: sencillo, estable y gasta poca RAM. La alternativa del instalador es ZFS, que protege mejor los datos pero necesita más memoria. Nuestros nodos son máquinas virtuales con poca RAM y su disco ya está sobre el ZFS del servidor de clase (`zfs-1asixb`), así que poner otro ZFS encima no aporta nada.
+- **Los discos de las VM no van en ext4, van en `data`** (LVM *thin*): cada disco virtual es un volumen aparte y solo ocupa lo que tiene escrito.
+- **Las dos particiones de arranque** (`sda1` y `sda2`) las crea siempre el instalador para que el disco pueda arrancar tanto por BIOS como por UEFI. Nuestros nodos arrancan por BIOS.
+
+Los discos de las VM que están en el NAS (`truenas-nfs`) son ficheros `qcow2`: un formato de disco virtual que crece según se usa y admite instantáneas.
+
+### TrueNAS: ZFS
+
+TrueNAS no deja elegir: siempre usa ZFS. El instalador se queda el SSD entero para el sistema, y los datos van en otro disco, el HDD de 2 TB, con el pool `Pool_Principal`. Que el sistema y los datos estén en discos distintos permite reinstalar TrueNAS sin tocar los datos.
+
+Lo que nos aporta ZFS en el NAS:
+
+- **Datasets:** «carpetas» con ajustes propios (permisos, compresión, límite de espacio). Tenemos `Documentos`, `Configuraciones` y `proxmox`.
+- **Compresión LZ4:** medida el 18/11, ahorra un 21 % en el pool (1,26x) y un 36 % en `proxmox` (1,56x).
+- **Instantáneas:** fotos del estado de un dataset que casi no ocupan y permiten volver atrás. Todavía no las usamos.
+- **Comprobación de los datos:** ZFS guarda una suma de control de cada bloque y detecta si el disco devuelve datos estropeados. Una vez por semana (domingo a las 0:00) repasa el pool entero (*scrub*).
+
+Limitación: el pool tiene un solo disco (*stripe*), así que ZFS detecta los errores pero no puede repararlos. Para eso harían falta dos discos en espejo.
+
+### Lubuntu: una sola partición ext4
+
+El instalador de Lubuntu, con la opción de borrar el disco, crea la partición de arranque UEFI y una única partición ext4 para todo. Para un cliente es suficiente: no hay que calcular tamaños y no se desperdicia sitio. El inconveniente es que, si hay que reinstalar el sistema, los datos del usuario están en la misma partición; en la empresa los documentos estarán en el NAS, no en el cliente.
+
+> Escribid aquí el particionado y el sistema de ficheros de los sistemas que faltan y por qué los elegisteis: Windows Server (VM 100: arranca por UEFI con TPM 2.0; falta ver las particiones en **Administración de discos**), `Debian-RAID` (VM 101), OPNsense y Debian con nftables (VM de VirtualBox). Incluid la comprobación de TPM y UEFI en el Windows Server.
 
 ## 3. Instalaciones
 
@@ -27,6 +72,10 @@ Tasca 5 «Instal·lació i comunicacions» · RA principales: ISO RA1 d-h y FDM 
 | G3-PC-01 | Lubuntu como sistema operativo principal, con VirtualBox | Instalado |
 | G3-PC-01 (VM) | OPNsense en una máquina virtual de VirtualBox | Instalado, sin configurar |
 | G3-PC-01 (VM) | Debian en una máquina virtual de VirtualBox | Instalado, sin configurar |
+| Clúster Proxmox (VM 100) | Windows Server 2025 | Instalado y con el dominio `grupo3.lan` creado (ver [Windows Server](#servidor-de-centralización-de-dominio-windows-server-2025)) |
+| Clúster Proxmox (VM 101) | Debian 13 con tres discos extra para los RAID | Instalado |
+| Clúster Proxmox (CT 102 y VM 103) | Contenedor Debian 13 y VM vacía, para las pruebas de migración y copia | Creados (ver [Proxmox](#8-máquinas-virtuales-y-contenedor-creados)) |
+| VM de VirtualBox | Windows 11 Pro como cliente | Instalado y unido al dominio (ver [Clientes](#clientes-windows-11-y-gnulinux)) |
 
 ## 4. Actualización y vía de recuperación
 
@@ -47,11 +96,36 @@ Cada nodo busca actualizaciones él solo una vez al día (tarea `aptupdate` del 
 
 ## 5. Incidencia de instalación o arranque
 
-> Cuando resolváis una incidencia de instalación o arranque (real o provocada en una VM descartable), escribid aquí cómo y qué habéis hecho: síntoma, hipótesis, comprobación, solución y vuelta al estado anterior. Podéis usar la [plantilla de incidencias](../incidencies/_plantilla.md).
+### Incidencia: los nodos no podían descargar por HTTP (puerto 80)
+
+Incidencia real del 18/11, al preparar el contenedor de pruebas en el clúster Proxmox.
+
+- **Síntoma:** en el nodo, la descarga de la plantilla del contenedor (Debian 13) desde el menú de plantillas de Proxmox se quedaba parada y no avanzaba. Además, la tarea se había lanzado en pve2 y no en pve3, que era donde se quería crear el contenedor.
+- **Causa:** Proxmox descarga las plantillas y las actualizaciones por HTTP (puerto 80), y nuestro MikroTik tiene la regla `BLOQUEAR HTTP`, que corta ese puerto a toda la LAN (ver [Conexión permitida y conexión bloqueada](#conexión-permitida-y-conexión-bloqueada)). HTTPS (puerto 443) sí pasa.
+- **Primer intento:** descargar la plantilla por HTTPS desde `download.proxmox.com`. Dio un error de certificado: el certificado que presenta ese servidor no es el de ese nombre.
+- **Solución:** descargar la plantilla a mano en el Shell de pve3, por HTTPS y desde otro sitio que sí tiene bien el certificado (`images.linuxcontainers.org`), con `wget -4` (el `-4` obliga a usar IPv4, porque en la red de clase no hay salida por IPv6). El fichero se deja en `/var/lib/vz/template/cache`, que es la carpeta donde Proxmox busca las plantillas, y a partir de ahí el contenedor se crea de la forma normal.
+- **Arreglo de fondo (12:43):** se añadió en el MikroTik la regla `Permitir HTTP a los nodos Proxmox (actualizaciones)`, que deja pasar el puerto 80 solo a los tres nodos. Comprobado después con una descarga por HTTP desde cada nodo: respuesta 200 en los tres (evidencia [t5-mikrotik-cortafuegos-20261118.txt](../evidencies/t5-mikrotik-cortafuegos-20261118.txt)).
+- **Vuelta atrás:** la regla nueva se puede desactivar o borrar en el MikroTik y todo queda como antes; el resto de la LAN sigue con el puerto 80 cortado.
+
+> Escribid aquí cómo os disteis cuenta de que era el puerto 80 (qué probasteis para comprobarlo) y si, con la regla nueva, la descarga de plantillas desde el menú de Proxmox ya funciona.
+
+> Cuando resolváis otra incidencia de instalación o arranque (real o provocada en una VM descartable), escribid aquí cómo y qué habéis hecho: síntoma, hipótesis, comprobación, solución y vuelta al estado anterior. Podéis usar la [plantilla de incidencias](../incidencies/_plantilla.md).
 
 ## Conexión permitida y conexión bloqueada
 
 > Cuando probéis el filtrado, escribid aquí cómo y qué habéis hecho: qué red es la LAN y cuál la exterior de pruebas, una conexión permitida, otra bloqueada y cómo interpretáis el registro de cada una.
+
+Lo que hay configurado en el MikroTik a 18/11 (evidencia [t5-mikrotik-cortafuegos-20261118.txt](../evidencies/t5-mikrotik-cortafuegos-20261118.txt)). Las reglas se leen de arriba abajo y se aplica la primera que coincide:
+
+| Orden | Regla | Qué hace | Registro |
+|---|---|---|---|
+| 1 | `Permitir HTTPS` | Deja pasar el puerto 443 desde la LAN (`192.168.30.0/24`) | Sí, con el texto `PERMITIDO HTTPS` |
+| 2 | `Permitir HTTP a los nodos Proxmox (actualizaciones)` | Deja pasar el puerto 80 solo desde `192.168.30.32`–`.34` | No |
+| 3 | `BLOQUEAR HTTP` | Corta el puerto 80 desde toda la LAN | Sí, con el texto `BLOQUEO HTTP` |
+
+La regla 2 se añadió el 18/11 por la [incidencia de las actualizaciones](#incidencia-los-nodos-no-podían-descargar-por-http-puerto-80). Comprobado después: los tres nodos descargan por HTTP (respuesta 200) y un portátil de la LAN sigue sin poder abrir `http://example.com`.
+
+> Escribid aquí cómo creasteis las reglas `Permitir HTTPS` y `BLOQUEAR HTTP`, la prueba que hicisteis desde un cliente (una web por HTTPS que carga y otra por HTTP que no) y qué líneas salen en **Log** con `PERMITIDO HTTPS` y `BLOQUEO HTTP`.
 
 ## Servidores de comunicaciones
 
@@ -164,6 +238,8 @@ Devolvió 216.239.38.120, así que la cadena LAN → router → DNS del centro �
 
 > Cuando hagáis la copia de la configuración (`/export` y `/system backup`) y la guardéis en el TrueNAS, escribid aquí cómo y qué habéis hecho: qué diferencia hay entre los dos ficheros, dónde los guardáis y cómo se restauran.
 
+> Cuando cambiéis el DNS que reparte el DHCP, escribid aquí cómo y qué habéis hecho. Ahora el MikroTik da a los clientes el DNS `192.168.30.1`, que no conoce el dominio `grupo3.lan`, y por eso al cliente Windows 11 hubo que ponerle a mano el DNS `192.168.30.21` (ver [Clientes](#clientes-windows-11-y-gnulinux)). Lo ideal es que el DHCP reparta `192.168.30.21`; queda pendiente hablarlo con quien lleva el MikroTik.
+
 > Cuando provoquéis un fallo en el MikroTik y lo recuperéis, escribid aquí cómo y qué habéis hecho: qué fallo, cómo lo detectasteis, cómo lo recuperasteis con la copia y cuánto tardasteis.
 
 ### OPNsense
@@ -256,7 +332,96 @@ Al terminar la instalación, TrueNAS muestra un menú de texto con opciones nume
 4. **Un solo disco (Stripe).** Si el HDD de 2 TB falla, se pierden los datos. En la Tasca 2 vimos que ya lleva casi 5 años encendido. Lo aceptamos para el laboratorio, pero en la empresa harían falta dos discos en *Mirror*.
 5. **Sin copias automáticas.** No hay instantáneas (*snapshots*) ni réplicas programadas. El apartado 9 de la guía de Iván explica las instantáneas.
 
-> Cuando uséis el dataset `Configuraciones`, escribid aquí qué guardáis en él (por ejemplo, las copias `/export` y `/system backup` del MikroTik) y cómo lo copiáis.
+### Espacio de copias de seguridad
+
+El TrueNAS es nuestro servidor de copias. Todas van al pool `Pool_Principal`, que está en el HDD de 2 TB: un disco distinto del SSD donde está instalado el propio TrueNAS, y distinto de los discos de los equipos que se copian. Estado a 18/11 (evidencias [t5-truenas-copias-20261118.txt](../evidencies/t5-truenas-copias-20261118.txt) y [t5-proxmox-copias-20261118.txt](../evidencies/t5-proxmox-copias-20261118.txt)).
+
+#### Dónde se guarda cada cosa
+
+| Dataset | Cómo se llega | Qué se guarda | Ocupado |
+|---|---|---|---|
+| `Configuraciones` | Carpeta SMB `\\192.168.30.20\configuraciones`, con el usuario `userred` | Una carpeta por equipo con su configuración o su imagen | 14,86 GiB |
+| `proxmox` | NFS, montado en los tres nodos como `truenas-nfs` | `dump/`: copias de VM y contenedores hechas por Proxmox. `config-cluster/`: configuración del clúster | 10,85 GiB (casi todo son los discos de las VM, que no son copias) |
+| `Documentos` | Carpeta SMB `documentos` | Los datos de los usuarios (todavía vacío) | 96 KiB |
+
+#### Qué hay copiado
+
+| Equipo | Carpeta | Qué es | Fecha | Tamaño |
+|---|---|---|---|---|
+| MikroTik | `Configuraciones/Mikrotik` | Dos copias de la configuración (`.backup`) | 03/11 y 10/11 | Menos de 1 MiB |
+| OPNsense | `Configuraciones/OPNSense` | Fichero de configuración `config-OPNsense...xml` | 10/11 | 0,1 MiB |
+| TrueNAS | `Configuraciones/TrueNAS` | Su base de datos de configuración (`freenas-v1.db`) y su clave (`pwenc_secret`) | — | 0,8 MiB |
+| Cliente Linux | `Configuraciones/cliente-linux` | Configuración comprimida (`.tar.gz`), su SHA256 y la lista de paquetes instalados | 17/11 (dos veces) | 1 MiB cada una |
+| Cliente Windows 11 | `Configuraciones/cliente_windows` | Imagen completa de la VM (`Windows11_ISO.ova`) | — | 14,5 GiB |
+| Debian enrutador | `Configuraciones/Debian Enrutador` | Disco de la VM de VirtualBox (`debian enrutador.vdi`) | — | 1,26 GiB |
+| Clúster Proxmox | `proxmox/config-cluster` | Un `.tar.gz` de `/etc/pve` por nodo, su SHA256 y la lista de versiones (`pveversion`) | 18/11, 12:14 | 12 KiB cada uno |
+| Contenedor `ct-test` (102) | `proxmox/dump` | Copia completa hecha por Proxmox (`vzdump`) | 18/11, 12:31 | 123 MB |
+| VM `vm-test` (103) | `proxmox/dump` | Copia completa hecha por Proxmox (`vzdump`) | 18/11, 12:17 | 146 KB (la VM está vacía) |
+
+Hay dos tipos de copia y los usamos según el equipo:
+
+- **Copia de la configuración** (MikroTik, OPNsense, TrueNAS, cliente Linux, clúster): son ficheros pequeños. Si el equipo se rompe, se reinstala el sistema desde su ISO y se carga la configuración. Ocupa muy poco y se puede hacer a menudo.
+- **Copia de la imagen completa** (cliente Windows 11, Debian enrutador, VM y contenedores de Proxmox): se guarda el disco entero. Se recupera más rápido, porque no hay que reinstalar nada, pero ocupa mucho más.
+
+#### Cómo se hicieron las copias de Proxmox
+
+Las dos copias de `proxmox/dump` las hizo Proxmox con su herramienta de copias (`vzdump`, la que usa el botón **Respaldo → Respaldar ahora** de cada VM), sobre el almacenamiento `truenas-nfs` y comprimidas con ZSTD. Proxmox apunta en el registro cómo las hace:
+
+| Qué | Modo | Tiempo | Tiempo sin servicio | Datos leídos → tamaño de la copia |
+|---|---|---|---|---|
+| Contenedor 102 | *stop*: lo apaga, lo copia y lo enciende | 12 s | 11 s | 415 MiB → 123 MB |
+| VM 103 | *snapshot*: la copia encendida | 1 s | Ninguno | 4 GiB vacíos → 146 KB |
+
+Problemas que salieron al hacerlas:
+
+- **Las primeras copias se guardaron en el nodo.** El cuadro **Respaldar ahora** trae elegido el almacenamiento `local`. Se repitieron eligiendo `truenas-nfs`. Sirvió para comparar: la copia del contenedor en `local` tardó 6 s y ocupó lo mismo (123 MB).
+- **Una copia del contenedor al NAS se quedó colgada (12:18).** Estuvo parada en `starting first sync` durante 765 s y acabó con `unexpected status`. Se había elegido el modo *snapshot*. Un contenedor con el disco en el NFS no puede hacer una instantánea, así que Proxmox pasa al modo *suspend*: primero copia todos los ficheros del contenedor a una carpeta temporal y luego los empaqueta. Esa carpeta temporal estaba también en el NFS, y copiar miles de ficheros pequeños por la red es muy lento. Solución: cancelar la tarea con **Detener**, desbloquear el contenedor (`pct unlock 102`, porque la copia cancelada lo deja bloqueado), borrar la carpeta temporal `vzdump-lxc-102-2026_11_18-12_18_02.tmp` (en el listado de la evidencia, sacado justo al acabar la copia buena, todavía aparece) y repetir la copia en modo *stop*, que tardó 12 s.
+- **Para la próxima vez:** en los contenedores que tienen el disco en el NFS, usar el modo *stop*, o decirle a Proxmox que la carpeta temporal esté en el disco del nodo (opción `tmpdir` de `vzdump`).
+
+#### Cómo se copió la configuración del clúster
+
+En el Shell de cada nodo se lanzaron estos comandos, que dejan los ficheros en `config-cluster/`, dentro del NFS:
+
+```bash
+# Nombre del nodo, fecha y hora, y carpeta de destino
+H=$(hostname); F=$(date +%Y%m%d-%H%M); D=/mnt/pve/truenas-nfs/config-cluster
+
+# Lista de versiones de Proxmox y de sus paquetes
+pveversion -v > $D/pveversion-$H-$F.txt
+
+# Un .tar.gz con la configuración, sin las claves
+tar czf $D/pve-config-$H-$F.tar.gz --exclude='priv' --exclude='*.key' -C / \
+    etc/pve etc/network/interfaces etc/hosts etc/hostname etc/resolv.conf
+
+# SHA256 del fichero, para poder comprobar más adelante que no se ha estropeado
+(cd $D && sha256sum pve-config-$H-$F.tar.gz | tee pve-config-$H-$F.sha256)
+```
+
+- **Qué se copia:** `/etc/pve`, que es donde Proxmox guarda la configuración de cada VM y de cada contenedor, los almacenamientos (`storage.cfg`), el clúster (`corosync.conf`) y los usuarios y permisos. También la red del nodo (`/etc/network/interfaces`), `/etc/hosts`, el nombre del nodo y el DNS. Con esto se puede volver a montar el clúster y las máquinas tal como estaban.
+- **Qué no se copia:** las claves privadas (la carpeta `priv` y los ficheros `*.key`). Son secretos y no deben quedar en una carpeta de red.
+- **Comprobación:** se miró el contenido de cada `.tar.gz` con `tar tzf`. El SHA256 queda guardado al lado para comprobar el fichero antes de usarlo.
+
+> Escribid aquí cómo hicisteis las demás copias: con qué comando o programa se sacó cada una, cómo se llevó al NAS (carpeta de red, `scp`…) y quién la hizo. En el MikroTik hay un usuario `backup` y una regla `SSH backups TrueNAS` que deja entrar por SSH al NAS: explicad para qué los creasteis.
+
+#### Qué no se copia y por qué
+
+- **Las ISO de instalación y las plantillas de contenedores:** se pueden volver a descargar. Basta con apuntar el nombre, la versión y el SHA256.
+- **Las claves privadas del clúster Proxmox:** son secretos y no deben estar en una carpeta de red.
+- **Las VM 100 (Windows Server) y 101 (`Debian-RAID`) no entraron en la prueba de copias de Proxmox del 18/11:** eran de otros compañeros y no se tocaron. La del Windows Server sí hay que copiarla (ver el punto 1 de abajo).
+- **Los discos de prueba de `Debian-RAID`:** son para practicar los RAID, no tienen datos.
+
+> Revisad esta lista y completadla con lo que hayáis decidido no copiar.
+
+#### Qué falta o hay que mejorar
+
+1. **El Windows Server (VM 100) no tiene copia.** Es el servidor más importante y el que más cuesta rehacer.
+2. **No hay ninguna copia programada.** Todas se han hecho a mano. En Proxmox no hay trabajos en **Centro de datos → Respaldo** y en el TrueNAS no hay tareas de instantáneas ni tareas programadas.
+3. **Las copias de Proxmox están en el mismo disco que los discos de las VM.** `dump/` y `images/` son carpetas del mismo dataset y del mismo HDD. Sirven si se borra o se estropea una VM, pero no si falla el HDD del NAS, que es un solo disco.
+4. **La copia de la configuración del TrueNAS está guardada dentro del propio TrueNAS.** Si el NAS se rompe, se pierde con él. Hay que tener otra copia fuera (por ejemplo, en el PC-01).
+5. **`pwenc_secret` es una clave.** Con ese fichero y la base de datos se pueden sacar las contraseñas guardadas en el TrueNAS, y ahora está en una carpeta de red con permisos 777. Hay que protegerla o guardarla en otro sitio.
+6. **No se ha probado a recuperar ninguna copia.** Una copia que no se ha restaurado nunca no se sabe si sirve; es parte de la Tasca 6.
+
+> Cuando arregléis alguno de estos puntos, escribid aquí cómo y qué habéis hecho.
 
 ## Servidor de virtualización: Proxmox
 
@@ -515,7 +680,12 @@ Detalles de la VM del Windows Server (pestaña **Hardware**):
 - ISO de instalación: `26100.32230.260111-0550.lt_release_svc_refresh_SERVER_EVAL_x64FRE_es-es.iso` (Windows Server 2025 de evaluación, en castellano), guardada en el almacenamiento `local` del nodo `pve`.
 - El disco de 64 GB está en el NFS, pero los dos discos pequeños del UEFI y del TPM (4 MB cada uno) están en `local-lvm` del nodo `pve`.
 
-> Escribid aquí cómo creasteis cada máquina (las opciones del asistente), de dónde descargasteis las ISO de Windows Server y de `virtio-win` y si comprobasteis su SHA256, y las opciones de la instalación de Windows Server y de Debian.
+Las dos máquinas de pruebas (102 y 103) se hicieron pequeñas a propósito, para que las pruebas de migración y de copia fueran rápidas y se pudieran repetir. Se crearon en pve3 para no molestar en pve2, donde otro compañero estaba trabajando con `Debian-RAID`.
+
+- **Contenedor 102 `ct-test`:** Debian 13, **sin privilegios** (el `root` de dentro del contenedor no es el `root` del nodo, que es lo más seguro), 1 núcleo, 256 MiB de RAM, 256 MiB de intercambio y disco de 4 GB. La plantilla no se pudo bajar desde el menú de Proxmox y se descargó a mano (ver la [incidencia del puerto 80](#incidencia-los-nodos-no-podían-descargar-por-http-puerto-80)).
+- **VM 103 `vm-test`:** 1 núcleo, 512 MiB de RAM, BIOS SeaBIOS y disco de 4 GB. Se creó sin sistema operativo: solo sirve para medir la migración y la copia.
+
+> Escribid aquí cómo creasteis las VM 100 y 101 (las opciones del asistente), de dónde descargasteis las ISO de Windows Server y de `virtio-win` y si comprobasteis su SHA256, y las opciones de la instalación de Windows Server y de Debian.
 
 #### Problemas al crear y arrancar las VM (sacados del historial de tareas)
 
@@ -542,7 +712,7 @@ Entre medias se movieron los discos del nodo al NFS (botón **Mover almacenamien
 
 | Hora | Qué | Tiempo | Notas |
 |---|---|---|---|
-| 12:04:10 | Disco de la VM 103 | — | Cancelado al 19 % |
+| 12:04:10 | Disco de la VM 103 | — | Se cortó al 19 % (en pantalla salió `storage migration failed`). Se repitió y fue bien |
 | 12:04:37 | Disco de la VM 103 (4 GiB) | 29 s | De `local-lvm` a `truenas-nfs`, pasa a formato `qcow2` |
 | 12:05:59 | Disco del contenedor 102 (415 MB de ficheros) | 7 s | Con el contenedor apagado |
 
@@ -552,10 +722,13 @@ Entre medias se movieron los discos del nodo al NFS (botón **Mover almacenamien
 - **Con el disco en el NFS no se copia nada.** En las dos primeras migraciones Proxmox tuvo que copiar los 4 GiB del disco por la red. En las del NFS el disco no se mueve, porque los dos nodos ya lo ven; solo cambia qué nodo lo usa. Para migrar una VM en vivo de forma sencilla hace falta que su disco esté en un almacenamiento compartido.
 - **La migración en vivo fue tan rápida porque `vm-test` está vacía.** Solo se pasaron 3,8 MiB de memoria. Un servidor de verdad, con varios GiB de RAM en uso, tardará más: hay que repetir la medida con una VM con sistema.
 - **El contenedor tarda mucho más con el disco en el NFS: 45 s frente a 11 s.** La migración en sí dura 1 s; los otros 44 s son el arranque del contenedor en el nodo de destino. Con el disco en `local-lvm` el mismo contenedor arranca en 1 o 2 s.
-  > Escribid aquí por qué creéis que el contenedor arranca tan lento desde el NFS y si lo habéis comprobado (por ejemplo, arrancándolo varias veces seguidas sin migrar).
+  Lo que creemos (sin comprobar todavía): que es por ser la primera vez que el nodo de destino lee el disco del contenedor por la red, y que un segundo arranque sería más rápido.
+  > Cuando lo comprobéis (por ejemplo, arrancando el contenedor varias veces seguidas sin migrar), escribid aquí los tiempos y si la idea era cierta.
 - **La migración de las 12:07 tardó 9 s más** porque el contenedor todavía tenía apuntado su disco antiguo de `local-lvm` (al moverlo al NFS no se marcó «Eliminar origen») y Proxmox lo copió también.
 
-> Añadid aquí las capturas del historial de tareas con las migraciones y escribid quién las hizo y desde qué menú (clic derecho en la VM → **Migrar**).
+Cada migración se lanzó con el botón **Migrar** de la VM o del contenedor, y los tiempos se leyeron en el historial de tareas. El informe de quien hizo las pruebas está en [Tasca5_Proxmox_Grupo3.pdf](../lliuraments/Tasca5_Proxmox_Grupo3.pdf).
+
+> Añadid aquí las capturas del historial de tareas con las migraciones.
 
 **Qué falta por probar:** la VM del Windows Server (100) no se ha migrado. Tal como está no se puede mover sin más, porque tiene las dos ISO en el almacenamiento `local` del nodo `pve`, que los otros nodos no ven, y los discos del UEFI y del TPM en `local-lvm`.
 
@@ -588,8 +761,7 @@ Medido el 18/11 a las 12:13 en **almacenamiento → Resumen** y **almacenamiento
 - **Los discos virtuales ocupan solo lo que tienen escrito.** El Windows Server tiene un disco de 64 GiB, pero en el NAS ocupa 10,65 GiB. Esto se llama aprovisionamiento ligero (*thin*): el espacio se va gastando según la VM escribe.
 - **El TrueNAS comprime lo que guarda.** El dataset `proxmox` tiene la compresión LZ4 activada y consigue 1,56x: lo que serían unos 17 GiB ocupan 10,85 GiB en el disco.
 - **Configuración crítica: en pve2 hay prometido más espacio del que existe.** Los discos de `Debian-RAID` suman 47 GiB y `local-lvm` solo tiene 11 GiB. Proxmox avisó durante las migraciones: `Sum of all thin volume sizes (51.00 GiB) exceeds the size of thin pool`. Ahora no pasa nada porque solo hay 1,3 GiB escritos, pero si la VM llena sus discos, el almacenamiento se queda sin sitio y las máquinas de ese nodo se paran con errores de escritura.
-- **El dataset `Configuraciones` del TrueNAS ocupa 14,86 GiB.**
-  > Escribid aquí qué habéis guardado en `Configuraciones` (por el tamaño parecen las dos ISO de Windows Server) y por qué está ahí.
+- **El dataset `Configuraciones` del TrueNAS ocupa 14,86 GiB.** Casi todo es la imagen del cliente Windows 11 (14,5 GiB) y el disco del Debian enrutador (1,26 GiB); ver [Espacio de copias de seguridad](#espacio-de-copias-de-seguridad).
 
 #### Mejoras que vemos
 
@@ -598,22 +770,68 @@ Medido el 18/11 a las 12:13 en **almacenamiento → Resumen** y **almacenamiento
 3. **Quitar las ISO de la VM 100** cuando Windows esté instalado, y mover al NFS los discos del UEFI y del TPM, para poder migrarla.
 4. **Mover los discos de `Debian-RAID` al NFS**, o hacerlos más pequeños, para que pve2 no tenga prometido más espacio del que hay.
 5. **Usar el espacio que sobra:** pve2 y pve3 tienen 40 GB del disco del sistema sin particionar y los tres nodos tienen discos de 25 GB sin usar.
+6. **Vigilar cuánto se llena `local-lvm`** y no prometer más espacio del que hay. LVM también puede agrandar el almacenamiento él solo cuando se va llenando (opciones `thin_pool_autoextend` de LVM), pero para eso tiene que quedar sitio libre en el disco.
+7. **Programar las copias** en **Centro de datos → Respaldo**, indicando cuántas se guardan, y probar cada cierto tiempo que se pueden restaurar.
+8. **No depender de un solo NAS:** los tres nodos usan el mismo TrueNAS. Si falla, se paran las máquinas que tienen el disco en él y además se pierden las copias. Hace falta una segunda copia en otro sitio.
 
 > Revisad estas mejoras y dejad solo las que estéis de acuerdo en hacer; cuando hagáis alguna, escribid aquí cómo y el espacio ganado.
 
 ### Lo que falta en Proxmox
 
-> **Usuarios de administración.** A 18/11 el único usuario del clúster es `root@pam`, sin grupos ni permisos creados. Cuando creéis el usuario o usuarios de administración, escribid aquí cómo y qué habéis hecho: nombre, si es de tipo *PAM* o *PVE*, grupo, rol (por ejemplo `Administrator`) y por qué no conviene trabajar siempre con `root`.
+> **Usuarios de administración.** A 18/11 el único usuario del clúster es `root@pam`, sin grupos ni permisos creados, y es con el que se ha hecho todo (en la web y en el Shell de los nodos). Cuando creéis el usuario o usuarios de administración, escribid aquí cómo y qué habéis hecho: nombre, si es de tipo *PAM* o *PVE*, grupo, rol (por ejemplo `Administrator`) y por qué no conviene trabajar siempre con `root`.
 
-> **Copias al servidor de copias.** A 18/11 no hay ningún trabajo de copia en **Centro de datos → Respaldo**, aunque `truenas-nfs` ya admite copias de seguridad. Cuando las configuréis, escribid aquí cómo y qué habéis hecho, y qué tiene sentido copiar del clúster al servidor de copias y qué no.
+**Copias al servidor de copias.** El 18/11 se copiaron al NAS la configuración de los tres nodos (`/etc/pve`), el contenedor 102 y la VM 103. Qué se copia, cómo, dónde y qué falta está en [Espacio de copias de seguridad](#espacio-de-copias-de-seguridad).
 
-> Responded con vuestras palabras:
-> - ventajas e inconvenientes de virtualizar servidores;
-> - diferencia entre contenedores y máquinas virtuales, y cuándo usar cada uno.
+### Ventajas e inconvenientes de virtualizar servidores
+
+Los ejemplos salen de nuestras propias pruebas del 18/11.
+
+| Ventajas | Inconvenientes |
+|---|---|
+| **Se aprovecha mejor el hardware:** varios servidores en una sola máquina física, en lugar de una máquina para cada uno. | **Si se rompe la máquina física, caen todos los servidores que tiene dentro.** Se reduce con un clúster, almacenamiento compartido y copias. |
+| **Aislamiento:** cada servidor tiene su propio sistema, y si uno falla no arrastra a los demás. | **Se pierde algo de rendimiento:** el propio Proxmox gasta CPU, RAM y disco, y un disco en red es más lento que uno local (el contenedor tardó 44 s en arrancar desde el NFS). |
+| **Se puede cambiar una VM de nodo sin parar el servicio:** la VM 103 se movió encendida con un corte de 59 ms. | **Se puede prometer más disco del que hay:** con los discos *thin*, si el almacenamiento se llena, fallan todas las máquinas que lo usan (el aviso nos salió en las migraciones). |
+| **Copiar y recuperar es fácil:** el disco entero de una VM o de un contenedor se copia y se restaura en otro nodo; la copia del contenedor tardó 12 s. | **Es más complicado de llevar:** además de los servidores hay que saber manejar Proxmox, la red virtual, el almacenamiento y el clúster. |
+| **Crear, clonar o borrar una máquina cuesta minutos,** así que se pueden hacer pruebas sin riesgo. | **Se depende de la red y del almacenamiento compartido:** si falla el NFS, fallan las máquinas que tienen el disco en él. |
+| **Todo se administra desde una sola web,** entrando a cualquiera de los nodos. | **Licencias y soporte:** hay que revisar las licencias de los sistemas que se instalan dentro y el soporte de Proxmox. |
+
+### Máquina virtual o contenedor
+
+| | Máquina virtual | Contenedor |
+|---|---|---|
+| Qué es | Un ordenador completo imitado por software, con su propio núcleo (*kernel*) | Un sistema aislado que usa el núcleo de Linux del nodo |
+| Lo que gastó en las pruebas | 512 MiB de RAM | 256 MiB de RAM y unos 415 MB de disco |
+| Arranque | Arranca un sistema operativo entero | Solo arranca los programas del sistema (1 o 2 s con el disco en el nodo) |
+| Aislamiento | Fuerte: tiene su propio núcleo | Menor: comparte el núcleo con el nodo |
+| Sistemas que admite | Cualquiera: Windows, Linux u otros | Solo Linux |
+| Migración entre nodos | Encendida (59 ms de corte en la prueba) o apagada | Siempre con reinicio: se apaga y se enciende en el otro nodo |
+
+**Cuándo usamos cada uno:**
+
+- **Máquina virtual:** para Windows, para sistemas que necesitan su propio núcleo o un aislamiento fuerte, y para servicios que no se pueden parar al cambiarlos de nodo.
+- **Contenedor:** para servicios Linux ligeros (DNS, DHCP, web, bases de datos pequeñas), cuando hacen falta muchos en poco hardware, y para pruebas.
+
+En nuestro proyecto, el Windows Server (VM 100) tiene que ser una máquina virtual. Los servicios Linux sencillos pueden ir en contenedores y gastar menos.
 
 ## Servidor de centralización de dominio: Windows Server 2025
 
-> Cuando instaléis y configuréis Windows Server 2025, escribid aquí cómo y qué habéis hecho: usuarios de administración, parámetros de red y qué configuraciones o sistemas copiáis al servidor de copias y por qué (y qué no). Explicad también qué es un dominio y qué le aporta a la empresa centralizar la gestión.
+Windows Server 2025 está instalado en la VM 100 (`WS-Grupo3`) del clúster Proxmox y ya es el **controlador de dominio**: el servidor que guarda los usuarios y los equipos del dominio y que comprueba la contraseña cuando alguien inicia sesión.
+
+| Qué | Valor |
+|---|---|
+| Nombre del servidor | `dc-grupo3` |
+| IP | 192.168.30.21 |
+| Dominio | `grupo3.lan` |
+| DNS | El propio servidor: es el único que sabe dónde está el dominio |
+| Usuario de prueba | `administracion`, creado en **Usuarios y equipos de Active Directory** |
+
+Comprobado el 18/11 desde un portátil de la LAN, preguntando al DNS del servidor: el dominio `grupo3.lan` existe y apunta a `dc-grupo3` (192.168.30.21). Evidencia: [t5-dominio-dns-20261118.txt](../evidencies/t5-dominio-dns-20261118.txt).
+
+**Crear un usuario del dominio:** en el servidor, **Administrador del servidor → Herramientas → Usuarios y equipos de Active Directory**, se creó el usuario `administracion` con su contraseña. Con ese usuario se inicia sesión después desde el cliente (ver [Clientes](#clientes-windows-11-y-gnulinux)). La contraseña no se escribe en el repositorio.
+
+> Escribid aquí cómo instalasteis Windows Server y cómo creasteis el dominio: opciones de la instalación, cómo pusisteis el nombre y la IP fija, cómo añadisteis el rol de Active Directory y lo convertisteis en controlador de dominio, y qué usuarios de administración hay.
+
+> Cuando copiéis el servidor al servidor de copias, escribid aquí cómo y qué habéis hecho: qué copiáis y por qué (y qué no). Explicad también qué es un dominio y qué le aporta a la empresa centralizar la gestión.
 
 ## Servidores de infraestructura: GNU/Linux
 
@@ -623,7 +841,59 @@ Medido el 18/11 a las 12:13 en **almacenamiento → Resumen** y **almacenamiento
 
 G3-PC-01 tiene Lubuntu como sistema operativo principal y VirtualBox para las máquinas virtuales de OPNsense y Debian.
 
-> Cuando instaléis y configuréis cada cliente, escribid aquí cómo y qué habéis hecho: usuario de administración, parámetros de red, si lo unís al dominio (y por qué) y la copia de su configuración o imagen.
+### Cliente Windows 11 unido al dominio
+
+Para comprobar que el dominio sirve de verdad, se unió un cliente al dominio y se entró en él con un usuario creado en el servidor.
+
+| Qué | Valor |
+|---|---|
+| Cliente | Máquina virtual de VirtualBox con **Windows 11 Pro**, con la red en modo puente (la VM se conecta a nuestra LAN como si fuera un equipo más) |
+| IP | 192.168.30.182, que le dio el DHCP del MikroTik |
+| DNS | 192.168.30.21 (el Windows Server), puesto a mano |
+
+Tiene que ser la edición **Pro**: la edición Home no deja unirse a un dominio.
+
+#### Paso a paso
+
+**1. Poner el DNS del servidor en el cliente.** Con el DNS que le da el DHCP (el MikroTik), `nslookup grupo3.lan` respondía *Non-existent domain*: ese DNS no sabe nada de nuestro dominio. Para encontrarlo, el cliente tiene que preguntarle al Windows Server. Se cambió a mano:
+
+1. <kbd>Win</kbd> + <kbd>R</kbd> → `ncpa.cpl` → **Aceptar**.
+2. Clic derecho en la tarjeta de red → **Propiedades**.
+3. Doble clic en **Protocolo de Internet versión 4 (TCP/IPv4)**.
+4. Marcar **Usar las siguientes direcciones de servidor DNS** y poner `192.168.30.21`.
+
+Comprobación en el símbolo del sistema:
+
+```
+ipconfig /flushdns
+nslookup grupo3.lan
+```
+
+`ipconfig /flushdns` borra las respuestas de DNS que Windows tenía guardadas, para que no siga usando la respuesta mala de antes. Esta vez `nslookup` respondió con la IP del servidor.
+
+**2. Unir el equipo al dominio.**
+
+1. <kbd>Win</kbd> + <kbd>R</kbd> → `sysdm.cpl` → **Aceptar**.
+2. Pestaña **Nombre de equipo** → **Cambiar**.
+3. Marcar **Dominio** y escribir `grupo3.lan`.
+4. Pide un usuario y una contraseña: se pusieron los de un usuario del dominio con permiso para unir equipos.
+5. Sale el mensaje de bienvenida al dominio. Reiniciar.
+
+**3. Iniciar sesión con el usuario del servidor.** Después de reiniciar, en la pantalla de inicio → **Otro usuario** → `GRUPO3\administracion`, con la contraseña que se le puso en el servidor. Entró sin problema: quien comprueba la contraseña ya no es el cliente, sino el controlador de dominio.
+
+**4. Comprobaciones.**
+
+- En el cliente, el comando `whoami` responde `grupo3\administracion`.
+- En el servidor, en **Usuarios y equipos de Active Directory → Computers**, aparece el equipo cliente.
+
+#### Qué hemos aprendido y qué falta
+
+- Si un cliente no encuentra el dominio, casi siempre es por el DNS.
+- Poner el DNS a mano en cada cliente no es práctico. Lo ideal es que el DHCP del MikroTik reparta `192.168.30.21` como DNS a todos los equipos. Queda pendiente hablarlo con quien lleva el MikroTik.
+
+> Añadid aquí las capturas: el usuario `administracion` en Active Directory, `nslookup grupo3.lan` con la respuesta buena, el mensaje de bienvenida al dominio, la sesión iniciada y el cliente dentro de **Computers**. Escribid también el nombre del equipo cliente y quién lo hizo.
+
+> Cuando instaléis y configuréis el resto de clientes, escribid aquí cómo y qué habéis hecho: usuario de administración, parámetros de red, si lo unís al dominio (y por qué) y la copia de su configuración o imagen.
 
 ## Ampliación: copias automatizadas
 

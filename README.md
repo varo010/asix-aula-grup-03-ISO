@@ -22,7 +22,7 @@ Servidor de comunicaciones, virtualización (Proxmox VE), servidores empresarial
 | Tasca 2 «Equips i perifèrics» | [02-inventari](docs/02-inventari.md) | En curso | Mauro |
 | Tasca 3 «Rack i interconnexió» | [xarxa-aula](docs/xarxa-aula.md), [diagrames/](diagrames/) | En curso | |
 | Tasca 4 «Disseny físic i lògic» | [04-disseny](docs/04-disseny.md), [diagrames/](diagrames/) | Ejecutado | Mauro |
-| Tasca 5 «Instal·lació i comunicacions» | [05-installacions](docs/05-installacions.md) | En curso | MikroTik configurado; TrueNAS, Lubuntu y las VM de OPNsense y Debian instalados; clúster Proxmox `grupo3-cluster` con 3 nodos, almacenamiento NFS en el TrueNAS, VM y contenedor creados y migraciones medidas (18/11) |
+| Tasca 5 «Instal·lació i comunicacions» | [05-installacions](docs/05-installacions.md) | En curso | Hecho a 18/11: MikroTik configurado, con una conexión permitida (HTTPS) y otra bloqueada (HTTP); TrueNAS con las carpetas de copias; clúster Proxmox `grupo3-cluster` de 3 nodos con almacenamiento NFS, migración de una VM y de un contenedor medida, copias al NAS y espacio ocupado ([informe](lliuraments/Tasca5_Proxmox_Grupo3.pdf)); Windows Server 2025 con el dominio `grupo3.lan` y un cliente Windows 11 unido al dominio. Falta: configurar OPNsense y documentar el Debian con nftables, usuarios de administración, copia del Windows Server, copias programadas, actualizar el nodo `pve`, que el DHCP reparta el DNS del dominio, servidores Linux de infraestructura y la prueba de fallo y recuperación del MikroTik |
 | Tasca 6 «Emmagatzematge i recuperació» | [06-recuperacio](docs/06-recuperacio.md) | Pendiente | |
 | Tasca 7 «Rendiment i diagnòstic» | [07-rendiment](docs/07-rendiment.md) | Pendiente | |
 | Tasca 8 (Final) | — | Pendiente | |
