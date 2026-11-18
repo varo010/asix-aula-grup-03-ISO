@@ -1,0 +1,47 @@
+Estado del TrueNAS (192.168.30.20) leído el 18/11/2026 a las 12:15 desde su API con el usuario truenas_admin. Solo lectura.
+
+== Sistema
+versión 25.10.7 | nombre truenas | RAM 7.4 GiB
+actualizaciones: tren TrueNAS-SCALE-Goldeye | perfil MISSION_CRITICAL | versión nueva disponible: None
+
+== Red
+puerta de enlace 192.168.30.1 | DNS 172.16.222.1 
+tarjeta enp1s0 ['192.168.30.20/24'] | DHCP no
+
+== Pool
+Pool_Principal | estado ONLINE | tamaño 1856 GiB | ocupado 25.81 GiB | libre 1830 GiB | discos de datos [('DISK', 'sdb')]
+
+== Datasets
+Pool_Principal | ocupado 25.81 GiB | disponible 1.73 TiB | compresión LZ4 1.26x | cuota None | deduplicación OFF
+Pool_Principal/Documentos | ocupado 96 KiB | disponible 1.73 TiB | compresión LZ4 1.00x | cuota None | deduplicación OFF
+Pool_Principal/proxmox | ocupado 10.85 GiB | disponible 1.73 TiB | compresión LZ4 1.56x | cuota None | deduplicación OFF
+Pool_Principal/Configuraciones | ocupado 14.86 GiB | disponible 1.73 TiB | compresión LZ4 1.03x | cuota None | deduplicación OFF
+
+== Carpetas compartidas
+NFS /mnt/Pool_Principal/proxmox | redes ['192.168.30.0/24'] | maproot root root | solo lectura False | activa True
+SMB documentos /mnt/Pool_Principal/Documentos | activa True
+SMB configuraciones /mnt/Pool_Principal/Configuraciones | activa True
+
+== Servicios en marcha
+cifs | arranque automático
+nfs | arranque automático
+ssh | arranque automático
+
+== Copias y protección
+tareas de instantáneas (snapshots): [] 
+tareas de réplica: [] 
+tareas rsync: [] 
+tareas de nube: []
+revisión del pool (scrub): Pool_Principal {'minute': '00', 'hour': '00', 'dom': '*', 'month': '*', 'dow': '7'} activa
+
+== Usuarios creados
+truenas_admin | SMB no
+userred | SMB si
+
+== Discos
+sdc Storage_Device 0 GiB SSD | pool None
+sda SPCC_Solid_State_Disk 238 GiB SSD | pool None
+sdb ST2000NE0025-2FL101 1863 GiB HDD | pool None
+
+== Avisos
+CRITICAL | Failed to sync TRUENAS catalog: [EFAULT] Failed to clone 'https://github.com/truenas/apps' repository at '/var/run/middleware/ix-apps/catalogs' destination: [EFAULT] Failed to clone 'https://github.com/truenas/apps' repository at '/var/run/middleware/ix-apps/catalogs' destination: Cloning into '/var

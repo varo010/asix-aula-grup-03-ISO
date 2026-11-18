@@ -32,6 +32,19 @@ Tasca 5 «Instal·lació i comunicacions» · RA principales: ISO RA1 d-h y FDM 
 
 > Cuando actualicéis cada sistema, escribid aquí cómo y qué habéis hecho: cómo comprobáis que funciona después y qué tenéis preparado para volver atrás si un cambio sale mal.
 
+Lo que hay a 18/11 (leído de cada sistema, sin cambiar nada; evidencias [t5-proxmox-estado-cluster-20261118.txt](../evidencies/t5-proxmox-estado-cluster-20261118.txt) y [t5-truenas-estado-20261118.txt](../evidencies/t5-truenas-estado-20261118.txt)):
+
+| Sistema | Versión | Actualizaciones pendientes | De dónde se actualiza |
+|---|---|---|---|
+| Nodo `pve` | Proxmox VE 9.2.20 | **101 paquetes** | Repositorio `pve-no-subscription` (el gratuito) y los de Debian 13 |
+| Nodo `pve2` | Proxmox VE 9.2.20 | 0 | Igual |
+| Nodo `pve3` | Proxmox VE 9.2.20 | 0 | Igual |
+| TrueNAS | 25.10.7 | Ninguna versión nueva | Tren «Goldeye» |
+
+Cada nodo busca actualizaciones él solo una vez al día (tarea `aptupdate` del historial), pero **buscar no es instalar**: el nodo `pve` tiene 101 paquetes esperando.
+
+> Cuando actualicéis el nodo `pve`, escribid aquí cómo y qué habéis hecho: si movisteis antes el Windows Server a otro nodo, el comando o el botón usado, cuánto tardó y cómo comprobasteis que el clúster seguía con los tres nodos y el quórum.
+
 ## 5. Incidencia de instalación o arranque
 
 > Cuando resolváis una incidencia de instalación o arranque (real o provocada en una VM descartable), escribid aquí cómo y qué habéis hecho: síntoma, hipótesis, comprobación, solución y vuelta al estado anterior. Podéis usar la [plantilla de incidencias](../incidencies/_plantilla.md).
@@ -130,15 +143,6 @@ La ruta `0.0.0.0/0` hacia 172.16.222.1 debe salir activa (`As`).
 ```
 
 Devolvió 216.239.38.120, así que la cadena LAN → router → DNS del centro → Internet funciona.
-
-##### 6. Crear el clúster (interfaz gráfica)
-
-1. Entramos a la web del nodo `pve` (`https://192.168.30.32:8006`) como `root` → **Centro de datos → Clúster → Crear clúster** → *Nombre del clúster*: `grupo3-cluster` → *Enlace 0*: 192.168.30.32 → **Crear**. Desde ese momento el árbol de la izquierda sale como *Centro de datos (grupo3-cluster)*.
-2. En el mismo sitio, **Información de unión** muestra los datos que necesitan los otros nodos para entrar: la IP del primer nodo, la huella digital de su certificado y un texto largo con todo junto. Con **Copiar información** se copia.
-3. En la web de **pve2** (`https://192.168.30.33:8006`) → **Centro de datos → Clúster → Unirse al clúster** → pegamos la información → contraseña de `root` del nodo `pve` → **Unirse**. Lo mismo en **pve3** (`https://192.168.30.34:8006`).
-4. El clúster quedó con los tres nodos: `pve`, `pve2` y `pve3`.
-
-> Cuando lo reviséis, añadid aquí una captura de **Centro de datos → Clúster** con los tres nodos y de **Centro de datos → Resumen** con el quórum.
 
 ### Problemas que tuvimos y cómo los resolvimos
 
@@ -244,8 +248,8 @@ Al terminar la instalación, TrueNAS muestra un menú de texto con opciones nume
 
 ### Qué falta o hay que mejorar
 
-1. **Puerta de enlace y DNS vacíos.** El NAS funciona dentro de nuestra red, pero no puede salir: ni actualizaciones, ni hora por NTP, ni avisos por correo. Se pone en **Network → Global Configuration → Settings**, con gateway `192.168.30.1` y DNS `192.168.30.1` (el router).
-   > Cuando lo configuréis, escribid aquí cómo y qué habéis hecho y cómo comprobasteis que el NAS sale a Internet.
+1. **Puerta de enlace y DNS.** El 03/11 estaban vacíos y el NAS no podía salir de nuestra red. A 18/11 ya están puestos (**Network → Global Configuration**): gateway `192.168.30.1` (el MikroTik) y DNS `172.16.222.1` (el del centro). Aun así, el NAS da el aviso `Failed to sync TRUENAS catalog` porque no consigue descargar el catálogo de aplicaciones de GitHub.
+   > Escribid aquí quién y cuándo lo configuró, cómo comprobasteis que el NAS sale a Internet y si el aviso del catálogo sigue saliendo.
 2. **SMB1 activado.** Es la versión antigua del protocolo, la que aprovechó el virus WannaCry. Los clientes actuales usan SMB2/3, así que hay que desactivarlo salvo que un equipo lo necesite de verdad.
    > Cuando lo desactivéis (o si decidís dejarlo), escribid aquí cómo y por qué.
 3. **Permisos 777.** Ahora cualquier usuario del NAS puede escribir en las dos carpetas. Por red sigue pidiendo usuario y contraseña, porque el acceso de invitado no está activado, pero no separa departamentos. Para la Tasca 6 hay que cambiarlo por ACL con un grupo por departamento.
@@ -264,9 +268,9 @@ No tenemos tres ordenadores libres para los nodos. Por eso usamos el **servidor 
 
 | VM en `1asixb` | Nodo | IP | Gateway | DNS | Estado a 10/11 |
 |---|---|---|---|---|---|
-| 301 `g3-vm1` | `pve` | 192.168.30.32/24 | 192.168.30.1 | — | Hecho. Se quedó con el nombre de la plantilla (`pve`) |
+| 301 `g3-vm1` | `pve` | 192.168.30.32/24 | 192.168.30.1 | 172.16.20.1 (el de la plantilla) | Hecho. Se quedó con el nombre de la plantilla (`pve`) |
 | 302 `g3-vm2` | `pve2` | 192.168.30.33/24 | 192.168.30.1 | 192.168.30.1 | Hecho |
-| 303 `g3-vm3` | `pve3` | 192.168.30.34/24 | 192.168.30.1 | — | Hecho |
+| 303 `g3-vm3` | `pve3` | 192.168.30.34/24 | 192.168.30.1 | 172.16.20.1 (el de la plantilla) | Hecho |
 
 - **Servidor de clase:** `https://192.168.30.31:8006`, con el usuario `grupo3@pve`. La .31 es la dirección del servidor `1asixb` dentro de nuestra red, así que los nodos van de la .32 a la .34 (en el diseño estaban en .31–.33).
 - **Nuestros nodos:** `https://192.168.30.33:8006`, `https://192.168.30.34:8006` y `https://192.168.30.32:8006` (nodo `pve`), con el usuario `root` y el realm *Linux PAM*.
@@ -444,11 +448,168 @@ Después de reiniciar las dos:
 3. **Identificador y claves SSH:** los tres nodos siguen teniendo el `machine-id` y las claves SSH de la plantilla. No impiden crear el clúster, pero lo correcto es que cada nodo tenga los suyos.
 4. **Certificados de la web de `pve` y pve3:** siguen diciendo `pve.example.lan` y `pve3.example.lan`. Se renueva con `pvecm updatecerts --force` en el Shell del nodo.
 
-> Cuando configuréis el almacenamiento compartido (NFS del TrueNAS) y creéis los servidores virtualizados de la empresa, escribid aquí cómo y qué habéis hecho, y también los usuarios de administración. Además, responded con vuestras palabras:
+5. **DNS de `pve` y de pve3:** siguen con el de la plantilla (`172.16.20.1` y dominio de búsqueda `example.lan`). Solo pve2 pregunta al MikroTik (`192.168.30.1`). Funciona, porque las actualizaciones se descargan, pero los tres nodos deberían tener el mismo. Se cambia en **nodo → Sistema → DNS**.
+6. **Actualizaciones del nodo `pve`:** tiene 101 paquetes pendientes (ver el [apartado 4](#4-actualización-y-vía-de-recuperación)).
+
+### Los nodos a 18/11
+
+Los nodos ya no tienen los recursos del 10/11 (3,95 GiB de RAM y un disco de 40 GB). Leído el 18/11 en **nodo → Resumen** y **nodo → Discos** (evidencia [t5-proxmox-estado-cluster-20261118.txt](../evidencies/t5-proxmox-estado-cluster-20261118.txt)):
+
+| Nodo | CPU | RAM | Disco del sistema (`sda`) | Otros discos | Arranque |
+|---|---|---|---|---|---|
+| `pve` | 2 núcleos | 15,6 GiB | 80 GB, usados enteros | `sdb` 100 GB, `sdc` y `sdd` 25 GB, sin usar | BIOS |
+| `pve2` | 2 núcleos | 11,7 GiB | 80 GB, pero solo hay particiones hasta 40 GB | `sdb`, `sdc` y `sdd` 25 GB, sin usar | BIOS |
+| `pve3` | 2 núcleos | 11,7 GiB | 80 GB, pero solo hay particiones hasta 40 GB | `sdb`, `sdc` y `sdd` 25 GB, sin usar | BIOS |
+
+> Escribid aquí quién amplió la RAM y los discos (el profesor o vosotros desde `1asixb`), cuándo y por qué, y cómo se agrandó el disco del nodo `pve` de 40 a 80 GB.
+
+Los tres nodos tienen el disco del sistema repartido igual, que es como lo deja el instalador de Proxmox:
+
+| Partición | Tamaño | Para qué sirve |
+|---|---|---|
+| `sda1` | 1 MiB | Arranque por BIOS |
+| `sda2` | 512 MiB | Arranque por UEFI (no se usa, porque los nodos arrancan por BIOS) |
+| `sda3` | El resto | LVM: un «almacén» de espacio que Proxmox trocea por dentro |
+
+Dentro del LVM, Proxmox crea dos almacenamientos:
+
+- **`local`** (una carpeta, `/var/lib/vz`): para ISO, plantillas de contenedores y copias. En pve2 y pve3 tiene 17,4 GiB; en `pve`, 61,6 GiB.
+- **`local-lvm`** (11 GiB en cada nodo): para los discos de las VM y de los contenedores. Es de tipo *thin*: a cada disco virtual solo se le da espacio real cuando escribe datos, así que se pueden crear discos que sumen más de lo que hay.
+
+### 7. Almacenamiento compartido: NFS del TrueNAS
+
+Los discos de los nodos son pequeños y, además, lo que se guarda en `local` o en `local-lvm` solo lo ve ese nodo. Por eso el clúster usa una carpeta del TrueNAS que ven los tres nodos a la vez.
+
+**En el TrueNAS** (evidencia [t5-truenas-estado-20261118.txt](../evidencies/t5-truenas-estado-20261118.txt)):
+
+- Dataset `Pool_Principal/proxmox`.
+- Carpeta compartida por **NFS** (el sistema de carpetas en red de Linux): `/mnt/Pool_Principal/proxmox`, permitida solo a nuestra red (`192.168.30.0/24`), con *Maproot User* y *Maproot Group* = `root`. Esto último hace que el `root` de los nodos pueda escribir en la carpeta.
+- Servicio NFS encendido y con arranque automático.
+
+**En Proxmox** (**Centro de datos → Almacenamiento**):
+
+| Campo | Valor |
+|---|---|
+| ID | `truenas-nfs` |
+| Tipo | NFS |
+| Servidor | 192.168.30.20 |
+| Export | `/mnt/Pool_Principal/proxmox` |
+| Contenido | Imágenes ISO, discos de VM, contenedores y copias de seguridad |
+| Compartido | Sí: lo ven `pve`, `pve2` y `pve3` (1,73 TiB libres) |
+
+> Escribid aquí los clics que hicisteis en el TrueNAS y en Proxmox para crearlo, quién lo hizo y qué día, y añadid una captura de **Centro de datos → Almacenamiento**.
+
+### 8. Máquinas virtuales y contenedor creados
+
+| ID | Nombre | Tipo | Nodo (18/11, 12:13) | CPU | RAM | Disco | Dónde está el disco | Para qué |
+|---|---|---|---|---|---|---|---|---|
+| 100 | `WS-Grupo3` | VM | `pve` | 2 | 12 GiB | 64 GB | `truenas-nfs` | Windows Server 2025 (IP 192.168.30.21) |
+| 101 | `Debian-RAID` | VM | `pve2` | 1 | 2 GiB | 32 GB + 3 de 5 GB | `local-lvm` de pve2 | Debian 13 con tres discos extra para los RAID |
+| 102 | `ct-test` | Contenedor | `pve2` | 1 | 256 MiB | 4 GB | `truenas-nfs` | Contenedor Debian 13 para probar la migración (IP 192.168.30.202) |
+| 103 | `vm-test` | VM | `pve3` | 1 | 512 MiB | 4 GB | `truenas-nfs` | VM vacía (sin sistema instalado) para probar la migración |
+
+Detalles de la VM del Windows Server (pestaña **Hardware**):
+
+- **BIOS: OVMF (UEFI)** y **TPM 2.0**, con máquina `q35`. El tipo de sistema elegido es «Windows 11/2022/2025».
+- Disco y tarjeta de red de tipo **VirtIO**, que son los rápidos de Proxmox. Windows no trae sus controladores, y por eso la VM tiene dos CD: la ISO de Windows y la de controladores `virtio-win-0.1.271.iso`.
+- ISO de instalación: `26100.32230.260111-0550.lt_release_svc_refresh_SERVER_EVAL_x64FRE_es-es.iso` (Windows Server 2025 de evaluación, en castellano), guardada en el almacenamiento `local` del nodo `pve`.
+- El disco de 64 GB está en el NFS, pero los dos discos pequeños del UEFI y del TPM (4 MB cada uno) están en `local-lvm` del nodo `pve`.
+
+> Escribid aquí cómo creasteis cada máquina (las opciones del asistente), de dónde descargasteis las ISO de Windows Server y de `virtio-win` y si comprobasteis su SHA256, y las opciones de la instalación de Windows Server y de Debian.
+
+#### Problemas al crear y arrancar las VM (sacados del historial de tareas)
+
+- **16/11, 09:59 · El Windows Server no arrancaba.** Primer error: `MAX 2 vcpus allowed per VM on this node`. Significa que a la VM se le habían puesto más núcleos de los 2 que tiene el nodo, y Proxmox no deja. Después falló dos veces más con `start failed: QEMU exited with code 1`, y a las 10:01:30 arrancó. Del primer error al arranque pasaron **1 min 46 s**.
+  > Escribid aquí qué cambiasteis después del error de los núcleos para que dejara de salir `QEMU exited with code 1`.
+- **16/11 y 17/11 · La VM 100 se borró y se volvió a crear cuatro veces** (16/11 a las 13:11, y 17/11 a las 9:27, 9:50 y 11:42, que es la que está ahora).
+  > Escribid aquí por qué hubo que repetirla cada vez (por ejemplo, que el instalador no veía el disco o que no arrancaba desde la ISO) y qué cambiasteis en el último intento.
+- **17/11 y 18/11 · `Debian-RAID` no se apagaba con el botón «Apagar».** Salía `VM quit/powerdown failed - got timeout` a los 60 s. Se apagó con **Detener** (`qmstop`), que es como quitarle la corriente.
+  > Escribid aquí por qué creéis que no respondía (por ejemplo, si estaba todavía en el instalador).
+
+### 9. Migración de una VM y de un contenedor entre nodos
+
+El 18/11 se migraron entre pve2 y pve3 el contenedor `ct-test` (102) y la VM `vm-test` (103), primero con el disco en el propio nodo y después con el disco en el NFS. Los tiempos son los que apunta Proxmox en el historial de tareas (evidencia completa: [t5-proxmox-migraciones-20261118.txt](../evidencies/t5-proxmox-migraciones-20261118.txt)).
+
+| Hora | Qué | De → a | Disco en | Cómo | Tiempo total | Tiempo sin servicio |
+|---|---|---|---|---|---|---|
+| 11:58:54 | Contenedor 102 | pve3 → pve2 | `local-lvm` | Se apaga, se copia el disco (4 GiB) y se enciende en el otro nodo | **11 s** | 11 s |
+| 12:01:39 | VM 103 | pve3 → pve2 | `local-lvm` | Apagada: se copia el disco (4 GiB) | **5 s** | Estaba apagada |
+| 12:06:50 | VM 103 | pve2 → pve3 | `truenas-nfs` | **En vivo** (encendida): solo viaja la memoria | **6 s** | **59 ms** |
+| 12:07:34 | Contenedor 102 | pve2 → pve3 | `truenas-nfs` | Se apaga y se enciende en el otro nodo | **54 s** | 54 s |
+| 12:10:21 | Contenedor 102 | pve3 → pve2 | `truenas-nfs` | Se apaga y se enciende en el otro nodo | **45 s** | 45 s |
+
+Entre medias se movieron los discos del nodo al NFS (botón **Mover almacenamiento** / **Mover volumen**):
+
+| Hora | Qué | Tiempo | Notas |
+|---|---|---|---|
+| 12:04:10 | Disco de la VM 103 | — | Cancelado al 19 % |
+| 12:04:37 | Disco de la VM 103 (4 GiB) | 29 s | De `local-lvm` a `truenas-nfs`, pasa a formato `qcow2` |
+| 12:05:59 | Disco del contenedor 102 (415 MB de ficheros) | 7 s | Con el contenedor apagado |
+
+#### Qué nos dicen los resultados
+
+- **La VM se migra encendida; el contenedor no.** Proxmox puede pasar la memoria de una VM de un nodo a otro mientras funciona (migración en vivo): el corte fue de 59 milésimas de segundo, no se nota. Un contenedor comparte el núcleo de Linux con el nodo, así que Proxmox lo apaga, lo cambia de nodo y lo vuelve a encender (modo *restart*). Todo el tiempo de la migración es tiempo sin servicio.
+- **Con el disco en el NFS no se copia nada.** En las dos primeras migraciones Proxmox tuvo que copiar los 4 GiB del disco por la red. En las del NFS el disco no se mueve, porque los dos nodos ya lo ven; solo cambia qué nodo lo usa. Para migrar una VM en vivo de forma sencilla hace falta que su disco esté en un almacenamiento compartido.
+- **La migración en vivo fue tan rápida porque `vm-test` está vacía.** Solo se pasaron 3,8 MiB de memoria. Un servidor de verdad, con varios GiB de RAM en uso, tardará más: hay que repetir la medida con una VM con sistema.
+- **El contenedor tarda mucho más con el disco en el NFS: 45 s frente a 11 s.** La migración en sí dura 1 s; los otros 44 s son el arranque del contenedor en el nodo de destino. Con el disco en `local-lvm` el mismo contenedor arranca en 1 o 2 s.
+  > Escribid aquí por qué creéis que el contenedor arranca tan lento desde el NFS y si lo habéis comprobado (por ejemplo, arrancándolo varias veces seguidas sin migrar).
+- **La migración de las 12:07 tardó 9 s más** porque el contenedor todavía tenía apuntado su disco antiguo de `local-lvm` (al moverlo al NFS no se marcó «Eliminar origen») y Proxmox lo copió también.
+
+> Añadid aquí las capturas del historial de tareas con las migraciones y escribid quién las hizo y desde qué menú (clic derecho en la VM → **Migrar**).
+
+**Qué falta por probar:** la VM del Windows Server (100) no se ha migrado. Tal como está no se puede mover sin más, porque tiene las dos ISO en el almacenamiento `local` del nodo `pve`, que los otros nodos no ven, y los discos del UEFI y del TPM en `local-lvm`.
+
+### 10. Espacio ocupado
+
+Medido el 18/11 a las 12:13 en **almacenamiento → Resumen** y **almacenamiento → Discos de VM** de cada nodo, y en **Datasets** del TrueNAS.
+
+**Discos de las máquinas:**
+
+| Máquina | Tamaño del disco | Ocupado de verdad | Dónde |
+|---|---|---|---|
+| 100 `WS-Grupo3` | 64 GiB | 10,65 GiB | `truenas-nfs` (`qcow2`) |
+| 101 `Debian-RAID` | 32 + 5 + 5 + 5 = 47 GiB | 1,3 GiB | `local-lvm` de pve2 (11 GiB en total) |
+| 102 `ct-test` | 4 GiB | 0,2 GiB | `truenas-nfs` (`raw`) |
+| 103 `vm-test` | 4 GiB | 0 GiB | `truenas-nfs` (`qcow2`) |
+
+**Almacenamientos:**
+
+| Almacenamiento | Ocupado | Total | Qué hay |
+|---|---|---|---|
+| `truenas-nfs` (dataset `proxmox`) | 10,85 GiB | 1,73 TiB libres | Los discos de las máquinas 100, 102 y 103 |
+| `local` de `pve` | 21,7 GiB | 61,6 GiB | El sistema del nodo y 15,9 GiB de ISO: Windows Server en castellano (7,6 GiB), Windows Server en inglés (7,59 GiB) y `virtio-win` (0,68 GiB) |
+| `local` de pve2 | 6,6 GiB | 17,4 GiB | El sistema del nodo y la ISO de Debian (0,76 GiB) |
+| `local` de pve3 | 5,9 GiB | 17,4 GiB | El sistema del nodo y la plantilla del contenedor (0,09 GiB) |
+| `local-lvm` de pve2 | 1,3 GiB | 11 GiB | Los cuatro discos de `Debian-RAID` |
+| `local-lvm` de `pve` y pve3 | Casi 0 | 11 GiB | En `pve`, los discos del UEFI y del TPM del Windows Server |
+
+#### Qué nos dicen los resultados
+
+- **Los discos virtuales ocupan solo lo que tienen escrito.** El Windows Server tiene un disco de 64 GiB, pero en el NAS ocupa 10,65 GiB. Esto se llama aprovisionamiento ligero (*thin*): el espacio se va gastando según la VM escribe.
+- **El TrueNAS comprime lo que guarda.** El dataset `proxmox` tiene la compresión LZ4 activada y consigue 1,56x: lo que serían unos 17 GiB ocupan 10,85 GiB en el disco.
+- **Configuración crítica: en pve2 hay prometido más espacio del que existe.** Los discos de `Debian-RAID` suman 47 GiB y `local-lvm` solo tiene 11 GiB. Proxmox avisó durante las migraciones: `Sum of all thin volume sizes (51.00 GiB) exceeds the size of thin pool`. Ahora no pasa nada porque solo hay 1,3 GiB escritos, pero si la VM llena sus discos, el almacenamiento se queda sin sitio y las máquinas de ese nodo se paran con errores de escritura.
+- **El dataset `Configuraciones` del TrueNAS ocupa 14,86 GiB.**
+  > Escribid aquí qué habéis guardado en `Configuraciones` (por el tamaño parecen las dos ISO de Windows Server) y por qué está ahí.
+
+#### Mejoras que vemos
+
+1. **Borrar la ISO de Windows Server en inglés** del nodo `pve`: no la usa ninguna VM y ocupa 7,59 GiB.
+2. **Guardar las ISO en `truenas-nfs`** en lugar de en el `local` de cada nodo. Así se suben una vez, las ven los tres nodos y no impiden migrar las VM que las tienen puestas.
+3. **Quitar las ISO de la VM 100** cuando Windows esté instalado, y mover al NFS los discos del UEFI y del TPM, para poder migrarla.
+4. **Mover los discos de `Debian-RAID` al NFS**, o hacerlos más pequeños, para que pve2 no tenga prometido más espacio del que hay.
+5. **Usar el espacio que sobra:** pve2 y pve3 tienen 40 GB del disco del sistema sin particionar y los tres nodos tienen discos de 25 GB sin usar.
+
+> Revisad estas mejoras y dejad solo las que estéis de acuerdo en hacer; cuando hagáis alguna, escribid aquí cómo y el espacio ganado.
+
+### Lo que falta en Proxmox
+
+> **Usuarios de administración.** A 18/11 el único usuario del clúster es `root@pam`, sin grupos ni permisos creados. Cuando creéis el usuario o usuarios de administración, escribid aquí cómo y qué habéis hecho: nombre, si es de tipo *PAM* o *PVE*, grupo, rol (por ejemplo `Administrator`) y por qué no conviene trabajar siempre con `root`.
+
+> **Copias al servidor de copias.** A 18/11 no hay ningún trabajo de copia en **Centro de datos → Respaldo**, aunque `truenas-nfs` ya admite copias de seguridad. Cuando las configuréis, escribid aquí cómo y qué habéis hecho, y qué tiene sentido copiar del clúster al servidor de copias y qué no.
+
+> Responded con vuestras palabras:
 > - ventajas e inconvenientes de virtualizar servidores;
-> - diferencia entre contenedores y máquinas virtuales, y cuándo usar cada uno;
-> - migración de un contenedor y de una VM entre nodos: tiempo, espacio en disco y si se puede mejorar;
-> - qué tiene sentido copiar del clúster al servidor de copias y qué no.
+> - diferencia entre contenedores y máquinas virtuales, y cuándo usar cada uno.
 
 ## Servidor de centralización de dominio: Windows Server 2025
 
