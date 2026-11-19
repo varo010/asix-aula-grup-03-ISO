@@ -1144,7 +1144,34 @@ Comprobado el 18/11 desde un portátil de la LAN, preguntando al DNS del servido
 
 > Escribid aquí cómo instalasteis Windows Server y cómo creasteis el dominio: opciones de la instalación, cómo pusisteis el nombre y la IP fija, cómo añadisteis el rol de Active Directory y lo convertisteis en controlador de dominio, y qué usuarios de administración hay.
 
-> Cuando copiéis el servidor al servidor de copias, escribid aquí cómo y qué habéis hecho: qué copiáis y por qué (y qué no). Explicad también qué es un dominio y qué le aporta a la empresa centralizar la gestión.
+### Copia del servidor (19/11)
+
+- **Qué se copia:** la VM entera (su disco de 64 GiB, la configuración de la VM y los discos pequeños del UEFI y del TPM). En el disco está todo lo que cuesta rehacer: el dominio, sus usuarios, los equipos unidos y el DNS.
+- **Cómo:** con la copia de Proxmox (`vzdump`) en modo *snapshot*, que no apaga el servidor. Tardó 4 min 46 s y ocupa 7,96 GB, porque solo se guardan los 16,6 GiB que tienen datos y además van comprimidos.
+- **Dónde:** en el NAS, `truenas-nfs`, carpeta `dump/`. Desde el 19/11 se repite sola de lunes a viernes a las 12:30 y se guardan las 3 últimas.
+- **Qué no se copia:** las ISO de Windows Server y de `virtio-win` (se vuelven a descargar).
+- **Comprobado:** la copia se restauró como otra VM, sin red, y arrancó hasta la pantalla de inicio de sesión. Recuperar el servidor así cuesta unos 9 minutos y medio ([Tasca 6](06-recuperacio.md#pruebas-y-tiempo-de-inactividad)).
+
+### Qué es un dominio y qué aporta centralizar
+
+Sin dominio, cada ordenador tiene sus propios usuarios y contraseñas: si la empresa tiene 5 equipos y entra una persona nueva, hay que crearle el usuario en los 5, y si cambia la contraseña, cambiarla en los 5.
+
+Un **dominio** es un grupo de equipos que confían en un mismo servidor, el **controlador de dominio**, para saber quién es cada usuario. Los usuarios se crean una sola vez en ese servidor (en *Active Directory*) y valen en todos los equipos unidos al dominio. El nuestro es `grupo3.lan` y su controlador es `dc-grupo3` (192.168.30.21).
+
+Qué le aporta a la empresa:
+
+- **Un usuario y una contraseña para todo.** La persona inicia sesión con su usuario en cualquier equipo de la empresa. Lo comprobamos con el usuario `administracion` en el cliente Windows 11 y en el cliente Linux.
+- **Altas y bajas en un solo sitio.** Cuando alguien se va, se desactiva su usuario en el servidor y deja de poder entrar en todos los equipos a la vez.
+- **Las mismas normas para todos.** Con las directivas de grupo (GPO) se obliga, por ejemplo, a que las contraseñas tengan una longitud mínima o a que la pantalla se bloquee sola, sin ir equipo por equipo.
+- **Permisos por grupos.** Las carpetas del NAS se pueden abrir por departamento (Dirección, Administración, Comercial…) usando los grupos del dominio.
+
+Lo que cuesta:
+
+- **Todo depende del controlador.** Si `dc-grupo3` se cae, no se puede iniciar sesión con usuarios del dominio en un equipo donde no se haya entrado antes. Por eso es el primer servidor que se copia y el primero que arranca.
+- **El DNS tiene que apuntar al controlador.** Un equipo solo encuentra el dominio si pregunta al DNS del servidor (`192.168.30.21`). Nos pasó: el MikroTik reparte por DHCP el DNS `192.168.30.1`, que no conoce `grupo3.lan`, y a los clientes hubo que ponerles el DNS a mano.
+- **Hace falta licencia** de Windows Server (usamos la de evaluación) y alguien que lo administre.
+
+> Revisad esta explicación y dejadla con vuestras palabras: os la pueden preguntar en la defensa.
 
 ## Servidores de infraestructura: GNU/Linux
 
