@@ -1,0 +1,83 @@
+Estado de los equipos del grupo leído el 18/11/2026 entre las 13:05 y las 13:20, desde un portátil de la LAN (192.168.30.198).
+Solo lectura: API de Proxmox (root@pam), API de TrueNAS (truenas_admin), API REST del MikroTik (admin) y preguntas al DNS del dominio.
+Los portátiles personales se han quitado de las listas.
+
+===== Equipos que responden en la LAN (puertos abiertos)
+192.168.30.1    MikroTik           22 53 80
+192.168.30.15   G3-PC-01 (Lubuntu) 22 3389
+192.168.30.20   TrueNAS            22 80 443 445
+192.168.30.21   Windows Server     53 80 445
+192.168.30.31   servidor de clase  22 8006
+192.168.30.32   pve                22 8006
+192.168.30.33   pve2               22 8006
+192.168.30.34   pve3               22 8006
+192.168.30.210  cliente Linux (MAC 08:00:27:35:e1:d9, VirtualBox)   visto en la red, sin puertos abiertos
+En .2, .3 y .4 no responde nadie (OPNsense y Debian enrutador apagados en ese momento).
+
+===== DNS del dominio (dig @192.168.30.21)
+clientelinux.grupo3.lan  A  192.168.30.210
+opnsense.grupo3.lan      sin respuesta
+
+===== Proxmox (clúster grupo3-cluster)
+Clúster: 3 nodos en línea (pve, pve2, pve3), con quórum.
+Usuarios: solo root@pam. Grupos: ninguno. Permisos (ACL): ninguno.
+Trabajos de copia (Centro de datos > Respaldo): ninguno.
+Alta disponibilidad (HA): nada. Replicación: nada.
+Versión: 9.2.20 en los tres nodos.
+Actualizaciones pendientes: pve 104, pve2 104, pve3 104.
+DNS: pve 172.16.20.1 (búsqueda example.lan) | pve2 192.168.30.1 | pve3 172.16.20.1 (búsqueda example.lan)
+Máquinas:
+  100 WS-Grupo3    VM          pve   encendida  12 GiB RAM  disco 64 GiB
+  101 Debian-RAID  VM          pve2  encendida   2 GiB RAM  disco 32 GiB
+  102 ct-test      contenedor  pve2  encendido 256 MiB RAM  disco  4 GiB
+  103 vm-test      VM          pve3  encendida 512 MiB RAM  disco  4 GiB
+
+===== TrueNAS (25.10.7)
+Red: gateway 192.168.30.1, DNS 172.16.222.1.
+Usuarios (no del sistema): truenas_admin, userred (SMB).
+Carpetas SMB: documentos, configuraciones. SMB1: activado.
+Carpeta NFS: /mnt/Pool_Principal/proxmox, solo para 192.168.30.0/24.
+Tareas de instantáneas: 0. Tareas programadas (cron): 0. Rsync: 0. Réplicas: 0. Copias a la nube: 0.
+Scrub: Pool_Principal, domingos a las 00:00, activado.
+Aviso: CRITICAL Failed to sync TRUENAS catalog (no puede clonar https://github.com/truenas/apps).
+Datasets: Pool_Principal 26,08 GiB (1,26x) | Documentos 96 KiB | proxmox 11,12 GiB (1,56x) | Configuraciones 14,86 GiB (1,03x)
+
+Contenido de /mnt/Pool_Principal/Configuraciones (tamaño en bytes, fecha de modificación):
+  cliente_windows/Windows11_ISO.ova                               15211234304  2026-11-17 13:23
+  TrueNAS/freenas-v1.db                                                835584  2026-11-16 09:44
+  TrueNAS/pwenc_secret                                                     32  2026-10-27 10:34
+  Mikrotik/backup-3-11-2026- MKT.backup                                 29605  2026-11-03 08:24
+  Mikrotik/Backup_mikrotik_10-11-2026.backup                            31816  2026-11-10 08:58
+  OPNSense/config-OPNsense.internal-20261110123754.xml                  54377  2026-11-10 13:37
+  Debian Enrutador/debian enrutador.vdi                            1323222144  2026-11-16 10:20
+  cliente-linux/config-ClienteLinux-20261117-1113.tar.gz              1037137  2026-11-17 11:13
+  cliente-linux/config-ClienteLinux-20261117-1113.sha256                  107  2026-11-17 11:13
+  cliente-linux/paquetes-ClienteLinux-20261117-1113.txt                 46874  2026-11-17 11:13
+  cliente-linux/config-ClienteLinux-20261117-1117.tar.gz              1036782  2026-11-17 11:17
+  cliente-linux/config-ClienteLinux-20261117-1117.sha256                  107  2026-11-17 11:17
+  cliente-linux/paquetes-ClienteLinux-20261117-1117.txt                 46874  2026-11-17 11:17
+
+El fichero del OPNsense empieza así (está cifrado con contraseña, no se puede leer el contenido):
+  ---- BEGIN config.xml ----
+  Version: OPNsense 26.7
+  Cipher: AES-256-CBC
+  PBKDF2: 100000
+  Hash: SHA512
+
+En /mnt/Pool_Principal/proxmox/dump sigue la carpeta temporal vzdump-lxc-102-2026_11_18-12_18_02.tmp (2026-11-18 12:30).
+
+===== MikroTik (RouterOS 7.20.8 long-term, hEX)
+Nombre (identity): MikroTik (el de fábrica).
+Reloj: 2026-03-05 13:15 (mal: la fecha real es 2026-11-18). Zona horaria: manual. Cliente NTP: desactivado.
+Usuarios: admin (grupo full) | backup (grupo backupgrp: ssh, ftp, read, write, policy, sensitive).
+DHCP: red 192.168.30.0/24, gateway 192.168.30.1, DNS 192.168.30.1, rango pool-lan 192.168.30.100-192.168.30.200.
+DNS: servidor 172.16.222.1, allow-remote-requests=true. Entrada fija: router.lan -> 192.168.30.1.
+Tareas programadas (scheduler): ninguna. Scripts: ninguno.
+Ficheros en el router: backup-3-11-2026.backup | Backup_mikrotik_10-11-2026.backup | Backup_mikrotik_10-11-2026.backup.rsc
+Servicios abiertos: ftp 21, ssh 22, telnet 23, www 80, winbox 8291, api 8728, api-ssl 8729 (www-ssl 443 desactivado).
+Concesiones del DHCP (sin los portátiles):
+  192.168.30.181  debian-RAID            BC:24:11:4B:0F:C2
+  192.168.30.182  Administracion-grupo3  08:00:27:68:F4:EB   (cliente Windows 11)
+  192.168.30.183  (sin nombre)           BC:24:11:EF:04:34
+  192.168.30.184  ct-test                BC:24:11:59:DA:3C
+  192.168.30.188  ClienteLinux           08:00:27:35:E1:D9   (ahora usa la .210)

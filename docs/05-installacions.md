@@ -70,12 +70,13 @@ El instalador de Lubuntu, con la opción de borrar el disco, crea la partición 
 |---|---|---|
 | G3-PC-02 (Ticnova) | TrueNAS como sistema del equipo | Instalado y configurado: pool, datasets, usuario y carpetas SMB (ver [TrueNAS](#servidor-nassan-truenas)) |
 | G3-PC-01 | Lubuntu como sistema operativo principal, con VirtualBox | Instalado |
-| G3-PC-01 (VM) | OPNsense en una máquina virtual de VirtualBox | Instalado, sin configurar |
-| G3-PC-01 (VM) | Debian en una máquina virtual de VirtualBox | Instalado, sin configurar |
+| G3-PC-01 (VM) | OPNsense 26.7 en una máquina virtual de VirtualBox | Instalado y configurado; falta escribir cómo (ver [OPNsense](#opnsense)) |
+| G3-PC-01 (VM) | Debian en una máquina virtual de VirtualBox | Instalado y configurado como router con nftables (ver [GNU/Linux con nftables](#gnulinux-con-nftables)) |
 | Clúster Proxmox (VM 100) | Windows Server 2025 | Instalado y con el dominio `grupo3.lan` creado (ver [Windows Server](#servidor-de-centralización-de-dominio-windows-server-2025)) |
 | Clúster Proxmox (VM 101) | Debian 13 con tres discos extra para los RAID | Instalado |
 | Clúster Proxmox (CT 102 y VM 103) | Contenedor Debian 13 y VM vacía, para las pruebas de migración y copia | Creados (ver [Proxmox](#8-máquinas-virtuales-y-contenedor-creados)) |
-| VM de VirtualBox | Windows 11 Pro como cliente | Instalado y unido al dominio (ver [Clientes](#clientes-windows-11-y-gnulinux)) |
+| VM de VirtualBox | Windows 11 Pro como cliente (`Administracion-grupo3`) | Instalado y unido al dominio (ver [Clientes](#clientes-windows-11-y-gnulinux)) |
+| VM de VirtualBox | Debian 13 como cliente Linux (`clientelinux`) | Instalado, unido al dominio y con copia al NAS (ver [Cliente Linux](#cliente-linux-debian-13-unido-al-dominio)) |
 
 ## 4. Actualización y vía de recuperación
 
@@ -85,14 +86,15 @@ Lo que hay a 18/11 (leído de cada sistema, sin cambiar nada; evidencias [t5-pro
 
 | Sistema | Versión | Actualizaciones pendientes | De dónde se actualiza |
 |---|---|---|---|
-| Nodo `pve` | Proxmox VE 9.2.20 | **101 paquetes** | Repositorio `pve-no-subscription` (el gratuito) y los de Debian 13 |
-| Nodo `pve2` | Proxmox VE 9.2.20 | 0 | Igual |
-| Nodo `pve3` | Proxmox VE 9.2.20 | 0 | Igual |
+| Nodo `pve` | Proxmox VE 9.2.20 | **104 paquetes** | Repositorio `pve-no-subscription` (el gratuito) y los de Debian 13 |
+| Nodo `pve2` | Proxmox VE 9.2.20 | **104 paquetes** | Igual |
+| Nodo `pve3` | Proxmox VE 9.2.20 | **104 paquetes** | Igual |
 | TrueNAS | 25.10.7 | Ninguna versión nueva | Tren «Goldeye» |
+| Cliente Linux (Debian 13) | Debian 13 (trixie) | 94 paquetes | Repositorios oficiales de Debian, por HTTPS |
 
-Cada nodo busca actualizaciones él solo una vez al día (tarea `aptupdate` del historial), pero **buscar no es instalar**: el nodo `pve` tiene 101 paquetes esperando.
+Cada nodo busca actualizaciones él solo una vez al día (tarea `aptupdate` del historial), pero **buscar no es instalar**: a las 13:10 del 18/11 los tres nodos tienen 104 paquetes esperando (evidencia [t5-estado-equipos-20261118.txt](../evidencies/t5-estado-equipos-20261118.txt)). Por la mañana pve2 y pve3 marcaban 0: no es que estuvieran al día, es que no podían descargar la lista de paquetes porque el MikroTik les cortaba el puerto 80 (ver la [incidencia](#incidencia-los-nodos-no-podían-descargar-por-http-puerto-80)). **Ningún sistema se ha actualizado todavía.**
 
-> Cuando actualicéis el nodo `pve`, escribid aquí cómo y qué habéis hecho: si movisteis antes el Windows Server a otro nodo, el comando o el botón usado, cuánto tardó y cómo comprobasteis que el clúster seguía con los tres nodos y el quórum.
+> Cuando actualicéis los nodos (de uno en uno), escribid aquí cómo y qué habéis hecho: si movisteis antes el Windows Server a otro nodo, el comando o el botón usado, cuánto tardó y cómo comprobasteis que el clúster seguía con los tres nodos y el quórum.
 
 ## 5. Incidencia de instalación o arranque
 
@@ -108,6 +110,20 @@ Incidencia real del 18/11, al preparar el contenedor de pruebas en el clúster P
 - **Vuelta atrás:** la regla nueva se puede desactivar o borrar en el MikroTik y todo queda como antes; el resto de la LAN sigue con el puerto 80 cortado.
 
 > Escribid aquí cómo os disteis cuenta de que era el puerto 80 (qué probasteis para comprobarlo) y si, con la regla nueva, la descarga de plantillas desde el menú de Proxmox ya funciona.
+
+### Incidencia: `apt update` no funcionaba en el cliente Linux
+
+Incidencia real en el cliente Debian 13. Tiene la misma causa de fondo que la anterior: el puerto 80.
+
+| Fase | Qué pasó |
+|---|---|
+| Síntoma | `apt update` daba error al conectar con `deb.cipfpbatoi.lan:80` (tiempo agotado) y con `security.debian.org:80` (tiempo agotado por IPv4 y «La red es inaccesible» por IPv6) |
+| Hipótesis | La lista de repositorios (`/etc/apt/sources.list`) apuntaba al servidor del centro, al que no se llega desde nuestra LAN. Además, el puerto 80 está cortado y no hay salida por IPv6 |
+| Comprobación | `cat /etc/apt/sources.list` para ver a dónde apuntaba; `getent hosts deb.debian.org` resolvía el nombre (el DNS iba bien); una conexión de prueba por el puerto 443 sí salía a Internet |
+| Solución | Usar los repositorios oficiales de Debian **por HTTPS** (fichero `/etc/apt/sources.list.d/debian.sources`) y obligar a `apt` a usar IPv4 (`Acquire::ForceIPv4 "true";` en `/etc/apt/apt.conf.d/99force-ipv4`) |
+| Vuelta atrás | Antes de tocar nada se guardó una copia de los ficheros originales en `/root/apt-backup` |
+
+Después, `apt update` descargó las listas (33,3 MB) y se pudieron instalar los programas que hacían falta. Los comandos están en el informe del cliente: [Tasca5_Cliente_Linux_Grupo3.pdf](../lliuraments/Tasca5_Cliente_Linux_Grupo3.pdf).
 
 > Cuando resolváis otra incidencia de instalación o arranque (real o provocada en una VM descartable), escribid aquí cómo y qué habéis hecho: síntoma, hipótesis, comprobación, solución y vuelta al estado anterior. Podéis usar la [plantilla de incidencias](../incidencies/_plantilla.md).
 
@@ -234,6 +250,14 @@ Devolvió 216.239.38.120, así que la cadena LAN → router → DNS del centro �
 
 #### Pendiente
 
+Estado leído del router el 18/11 (evidencia [t5-estado-equipos-20261118.txt](../evidencies/t5-estado-equipos-20261118.txt)):
+
+- **Nombre:** sigue siendo `MikroTik`, el de fábrica.
+- **Hora:** el reloj marca el 5 de marzo y el cliente NTP está desactivado, así que los registros salen con la fecha mal.
+- **Usuarios:** `admin` (el de fábrica, con todos los permisos) y `backup`.
+- **Copias:** en el router hay dos copias (`.backup`, del 03/11 y del 10/11) y un `/export` (`.rsc`). En el NAS están las dos `.backup`, pero no el `.rsc`. No hay ninguna tarea programada.
+- **Servicios abiertos que no usamos:** `telnet` y `ftp`.
+
 > Cuando configuréis el usuario de administración, el nombre del router y el NTP, escribid aquí cómo y qué habéis hecho y por qué (el router tenía la fecha mal, 11 de febrero, y las evidencias saldrían con fechas erróneas). La contraseña no se escribe en el repositorio.
 
 > Cuando hagáis la copia de la configuración (`/export` y `/system backup`) y la guardéis en el TrueNAS, escribid aquí cómo y qué habéis hecho: qué diferencia hay entre los dos ficheros, dónde los guardáis y cómo se restauran.
@@ -244,15 +268,199 @@ Devolvió 216.239.38.120, así que la cadena LAN → router → DNS del centro �
 
 ### OPNsense
 
-Instalado en una máquina virtual de VirtualBox dentro del Lubuntu de G3-PC-01. Todavía no está configurado.
+OPNsense 26.7 está instalado en una máquina virtual de VirtualBox dentro del Lubuntu de G3-PC-01, y los compañeros que lo llevan ya lo han configurado. Lo que se puede comprobar desde fuera (evidencia [t5-estado-equipos-20261118.txt](../evidencies/t5-estado-equipos-20261118.txt)):
 
-> Cuando instaléis y configuréis OPNsense, escribid aquí cómo y qué habéis hecho: usuario de administración, red WAN y LAN, salida a Internet de la LAN, copia de la configuración y prueba de fallo con su recuperación.
+- **Hay una copia de su configuración en el NAS:** `Configuraciones/OPNSense/config-OPNsense.internal-20261110123754.xml`, sacada el 10/11 a las 12:37. Es el fichero que da OPNsense en **System → Configuration → Backups**.
+- **La copia está cifrada con contraseña** (AES-256). Es lo correcto, porque ese fichero lleva dentro las contraseñas del cortafuegos, pero quiere decir que para restaurarla hace falta esa contraseña.
+- El 18/11 a las 13:10 la VM estaba apagada (no respondía en la LAN). Es normal: las tres soluciones se prueban de una en una.
+
+> Escribid aquí cómo configurasteis OPNsense y qué habéis hecho: usuario de administración, red WAN y LAN (tarjetas de la VM y direcciones), cómo sale a Internet la LAN y cómo lo probasteis, cómo sacasteis la copia de la configuración y dónde guardáis su contraseña (no en el repositorio), y la prueba de fallo con su recuperación.
 
 ### GNU/Linux con nftables
 
-Debian instalado en una máquina virtual de VirtualBox dentro del Lubuntu de G3-PC-01. Todavía no está configurado.
+Hemos convertido una máquina virtual con Debian (sin escritorio, solo texto) en un **router**: un equipo que hace de puerta de salida a Internet para nuestra red interna, igual que el MikroTik pero hecho con un Linux normal. La máquina se llama `debian-enrutador` y funciona dentro de VirtualBox, en el Lubuntu de G3-PC-01.
 
-> Cuando instaléis y configuréis el GNU/Linux con nftables, escribid aquí cómo y qué habéis hecho: usuario de administración, red WAN y LAN, salida a Internet de la LAN, copia de la configuración y prueba de fallo con su recuperación.
+Documento original del grupo, con todos los comandos: [Tasca5_Debian_nftables_Configuracion_Grupo3.pdf](../lliuraments/Tasca5_Debian_nftables_Configuracion_Grupo3.pdf).
+
+#### La idea en pocas palabras
+
+Una casa con dos puertas: una da a la calle (Internet) y otra al pasillo interior (nuestra red). El Debian está en medio. Los equipos de dentro le pasan lo que quieren enviar fuera, él lo saca por la puerta de la calle **con su propio nombre** y, cuando llega la respuesta, se la devuelve a quien la pidió. Además, hace de **portero**: desde fuera no deja entrar a nadie que no haya sido invitado desde dentro.
+
+```
+Equipo de la red interna (192.168.30.x)
+        │
+        ▼
+ [ Debian · puerta interior 192.168.30.3 ]
+ [ Debian · puerta a la calle 172.16.222.134 ]
+        │
+        ▼
+     Internet
+```
+
+#### Las dos «puertas» (tarjetas de red)
+
+| Puerta | Nombre en Debian | Dirección | Qué hace |
+|---|---|---|---|
+| Hacia fuera (WAN) | `enp0s3` | 172.16.222.134, la da automáticamente la red del centro | Sale a Internet a través de la red del aula |
+| Hacia dentro (LAN) | `enp0s8` | 192.168.30.3, fija, puesta a mano | Es la puerta por la que entran los equipos de nuestra red |
+
+#### Paso a paso
+
+**1. Darle dos tarjetas de red en VirtualBox**
+
+- **Qué:** con la máquina apagada, en *Configuración › Red* activamos dos adaptadores:
+  - **Adaptador 1 en «Adaptador puente»** sobre la tarjeta física del PC: la máquina virtual aparece en la red del aula como un equipo más y recibe su dirección (172.16.222.134).
+  - **Adaptador 2 en «Red interna»**, con un nombre que comparten todas las máquinas de nuestra LAN: es como un cable que solo une a las máquinas virtuales que usan ese mismo nombre.
+- **Por qué:** un router necesita estar a la vez en las dos redes. El orden importa: el adaptador 1 aparece en Debian como `enp0s3` y el 2 como `enp0s8`; si se cambian, las reglas del paso 4 dejan de funcionar.
+- **Detalles que nos hicieron perder tiempo:** el adaptador 2 viene **desactivado** de fábrica (hay que marcar *Habilitar adaptador de red*) y en *Avanzadas* tiene que estar marcado *Cable conectado*. Si no, Debian ve la tarjeta «apagada».
+
+**2. Poner la dirección fija de la puerta interior**
+
+- **Qué:** le dijimos a Debian que la tarjeta `enp0s8` tenga siempre la dirección 192.168.30.3.
+- **Por qué:** los equipos de dentro tienen que saber siempre dónde está su puerta de salida; si la dirección cambiara, se perderían. La puerta de fuera no se toca porque ya recibe su dirección sola.
+- **Ojo:** a esta tarjeta **no** se le pone puerta de enlace. La salida a Internet ya la da la otra tarjeta; si tuviera dos salidas, Debian no sabría por cuál ir.
+
+<details><summary>Comandos</summary>
+
+Se añade al final del fichero `/etc/network/interfaces`:
+
+```
+auto enp0s8
+iface enp0s8 inet static
+    address 192.168.30.3/24
+```
+
+Y se enciende y comprueba con `ifup enp0s8` y `ip -br a` (deben salir las dos tarjetas `UP` con sus direcciones).
+
+</details>
+
+**3. Permitir que Debian pase tráfico de una puerta a otra**
+
+- **Qué:** activamos el «reenvío» (*IP forwarding*).
+- **Por qué:** por seguridad, Linux viene de fábrica sin pasar paquetes de una tarjeta a otra: lo que le llega por una puerta no lo saca por la otra. Un router tiene que hacer justo eso, así que hay que activarlo.
+
+<details><summary>Comandos</summary>
+
+```
+echo "net.ipv4.ip_forward=1" > /etc/sysctl.d/99-forward.conf
+sysctl --system
+sysctl net.ipv4.ip_forward
+```
+
+El último debe responder `net.ipv4.ip_forward = 1`.
+
+</details>
+
+**4. Poner las normas del portero y la salida con su nombre (nftables)**
+
+**nftables** es el programa de Linux que decide qué tráfico pasa y cuál no. Escribimos tres normas:
+
+- **Lo que va al propio Debian:** por defecto se rechaza todo, salvo: lo que viene de nuestra red interna, las respuestas a conexiones que él mismo ha abierto, el `ping` (para comprobar que está vivo) y la conexión remota por SSH.
+- **Lo que pasa a través de Debian:** por defecto se rechaza todo, salvo lo que va **de dentro hacia fuera** y sus respuestas. Desde Internet nadie puede iniciar una conexión hacia nuestros equipos.
+- **Salida con su nombre (NAT o *masquerade*):** todo lo que sale por la puerta de fuera lleva la dirección del Debian (172.16.222.134) en lugar de la del equipo interno. Hace falta porque las direcciones 192.168.30.x son privadas y la red del aula no sabría devolver las respuestas.
+
+<details><summary>Fichero <code>/etc/nftables.conf</code></summary>
+
+```
+#!/usr/sbin/nft -f
+
+flush ruleset
+
+table inet filter {
+        chain input {
+                type filter hook input priority filter; policy drop;
+                iif lo accept
+                ct state established,related accept
+                ct state invalid drop
+                icmp type echo-request accept
+                iifname "enp0s8" accept
+                tcp dport 22 accept
+        }
+        chain forward {
+                type filter hook forward priority filter; policy drop;
+                ct state established,related accept
+                iifname "enp0s8" oifname "enp0s3" accept
+        }
+        chain output {
+                type filter hook output priority filter; policy accept;
+        }
+}
+
+table ip nat {
+        chain postrouting {
+                type nat hook postrouting priority srcnat; policy accept;
+                oifname "enp0s3" masquerade
+        }
+}
+```
+
+Para revisarlo, aplicarlo y que se cargue solo al encender:
+
+```
+nft -c -f /etc/nftables.conf     # solo revisa que esté bien escrito
+nft -f /etc/nftables.conf        # lo aplica
+systemctl enable --now nftables  # lo deja activo en cada arranque
+nft list ruleset                 # muestra las normas cargadas
+```
+
+</details>
+
+**5. Configurar los equipos de la red interna**
+
+Cada equipo que quiera salir a Internet a través del Debian se configura así:
+
+| Dato | Valor | Qué significa |
+|---|---|---|
+| Dirección | Una libre de la red 192.168.30.x | Su «número de casa» en nuestra red |
+| Máscara | 255.255.255.0 | Indica que todos los 192.168.30.x son vecinos |
+| Puerta de enlace | 192.168.30.3 | A quién le pasa lo que va a Internet: el Debian |
+| DNS | 10.239.3.7, 10.239.3.8 y 172.16.20.1 | La «guía telefónica» que traduce nombres (google.com) en direcciones. Son los del centro, porque los públicos, como 1.1.1.1, pueden estar bloqueados en esta red |
+
+Las máquinas virtuales cliente tienen su adaptador en **«Red interna» con el mismo nombre** que el adaptador 2 del Debian; si no, no están «enchufadas» a él.
+
+**6. Comprobar que todo sigue igual después de reiniciar**
+
+Cada pieza queda guardada en un fichero para que no se pierda al apagar:
+
+| Qué | Dónde se guarda |
+|---|---|
+| Dirección fija de la puerta interior | `/etc/network/interfaces` |
+| Normas del portero y NAT | `/etc/nftables.conf` (y el servicio `nftables` activado) |
+| Reenvío de tráfico | `/etc/sysctl.d/99-forward.conf` |
+
+Tras `reboot` se comprueba con `ip -br a`, `sysctl net.ipv4.ip_forward` y `nft list ruleset`: la puerta interior con 192.168.30.3, el reenvío en 1 y la regla `masquerade` en la tabla `nat`.
+
+#### Cómo se comprueba desde un equipo de dentro
+
+Se prueba en este orden, porque así, si algo falla, se sabe en qué paso está el problema:
+
+| Prueba | Si funciona, quiere decir que… |
+|---|---|
+| `ping 192.168.30.3` | el equipo llega al Debian |
+| `ping 1.1.1.1` (o `ping 10.239.3.7` si el centro bloquea 1.1.1.1) | el Debian deja salir y hace el NAT |
+| `ping google.com` | además funcionan los nombres (DNS) |
+
+> Cuando hagáis las pruebas desde un cliente, escribid aquí cómo y qué habéis hecho: qué equipo usasteis y qué respondió cada prueba.
+
+#### Problemas que tuvimos y cómo los resolvimos
+
+| Síntoma | Causa | Solución |
+|---|---|---|
+| La tarjeta interior (`enp0s8`) salía apagada y sin dirección | El adaptador 2 no estaba activado en VirtualBox y Debian tampoco tenía configurada esa tarjeta | Habilitar el adaptador 2 (con *Cable conectado*) y añadir la tarjeta en `/etc/network/interfaces` |
+| Los equipos de dentro no salían a Internet | En las normas del NAT, la cadena estaba enganchada en `output` en vez de en `postrouting`, con la prioridad equivocada o sin la regla `masquerade` | Enganchar la cadena en `postrouting`, prioridad `srcnat`, y añadir `masquerade` |
+| Las teclas salían cambiadas al escribir en la máquina | No era cosa de Debian, sino de Remmina, el programa con el que nos conectamos en remoto al PC que tiene la máquina virtual | Corregir la distribución del teclado en Remmina |
+| `sudo` no funcionaba después de dar permisos al usuario | El permiso de administrador (grupo `sudo`) solo se aplica al volver a iniciar sesión | Cerrar sesión y volver a entrar |
+| Comandos como `sysctl` o `nft` no se encontraban | Se entró como administrador con `su` sin el guion, y no se cargaban las rutas de los programas de administración | Usar siempre `su -` (con guion) |
+
+Un aviso que sale al activar `nftables`, `Failed to query local AF_VSOCK CID`, es normal en máquinas virtuales y no afecta.
+
+#### Pendiente
+
+En el NAS ya hay una copia del disco entero de la máquina: `Configuraciones/Debian Enrutador/debian enrutador.vdi` (1,23 GiB, del 16/11; ver [Espacio de copias de seguridad](#espacio-de-copias-de-seguridad)).
+
+> Escribid aquí cómo sacasteis esa copia y cómo la llevasteis al NAS, y cómo se restaura (crear una VM nueva en VirtualBox con ese disco).
+
+> Cuando provoquéis un fallo en el Debian y lo recuperéis, escribid aquí cómo y qué habéis hecho: qué fallo, cómo lo detectasteis, cómo lo recuperasteis con la copia y cuánto tardasteis.
 
 ## Servidor NAS/SAN: TrueNAS
 
@@ -349,11 +557,11 @@ El TrueNAS es nuestro servidor de copias. Todas van al pool `Pool_Principal`, qu
 | Equipo | Carpeta | Qué es | Fecha | Tamaño |
 |---|---|---|---|---|
 | MikroTik | `Configuraciones/Mikrotik` | Dos copias de la configuración (`.backup`) | 03/11 y 10/11 | Menos de 1 MiB |
-| OPNsense | `Configuraciones/OPNSense` | Fichero de configuración `config-OPNsense...xml` | 10/11 | 0,1 MiB |
-| TrueNAS | `Configuraciones/TrueNAS` | Su base de datos de configuración (`freenas-v1.db`) y su clave (`pwenc_secret`) | — | 0,8 MiB |
-| Cliente Linux | `Configuraciones/cliente-linux` | Configuración comprimida (`.tar.gz`), su SHA256 y la lista de paquetes instalados | 17/11 (dos veces) | 1 MiB cada una |
-| Cliente Windows 11 | `Configuraciones/cliente_windows` | Imagen completa de la VM (`Windows11_ISO.ova`) | — | 14,5 GiB |
-| Debian enrutador | `Configuraciones/Debian Enrutador` | Disco de la VM de VirtualBox (`debian enrutador.vdi`) | — | 1,26 GiB |
+| OPNsense | `Configuraciones/OPNSense` | Fichero de configuración `config-OPNsense...xml`, cifrado con contraseña | 10/11 | 0,1 MiB |
+| TrueNAS | `Configuraciones/TrueNAS` | Su base de datos de configuración (`freenas-v1.db`) y su clave (`pwenc_secret`) | 16/11 | 0,8 MiB |
+| Cliente Linux | `Configuraciones/cliente-linux` | Configuración comprimida (`.tar.gz`), su SHA256 y la lista de paquetes instalados (ver [cómo se hace](#copia-de-la-configuración-al-nas)) | 17/11, 11:13 y 11:17 | 1 MiB cada una |
+| Cliente Windows 11 | `Configuraciones/cliente_windows` | Imagen completa de la VM (`Windows11_ISO.ova`) | 17/11 | 14,2 GiB |
+| Debian enrutador | `Configuraciones/Debian Enrutador` | Disco de la VM de VirtualBox (`debian enrutador.vdi`) | 16/11 | 1,23 GiB |
 | Clúster Proxmox | `proxmox/config-cluster` | Un `.tar.gz` de `/etc/pve` por nodo, su SHA256 y la lista de versiones (`pveversion`) | 18/11, 12:14 | 12 KiB cada uno |
 | Contenedor `ct-test` (102) | `proxmox/dump` | Copia completa hecha por Proxmox (`vzdump`) | 18/11, 12:31 | 123 MB |
 | VM `vm-test` (103) | `proxmox/dump` | Copia completa hecha por Proxmox (`vzdump`) | 18/11, 12:17 | 146 KB (la VM está vacía) |
@@ -375,7 +583,7 @@ Las dos copias de `proxmox/dump` las hizo Proxmox con su herramienta de copias (
 Problemas que salieron al hacerlas:
 
 - **Las primeras copias se guardaron en el nodo.** El cuadro **Respaldar ahora** trae elegido el almacenamiento `local`. Se repitieron eligiendo `truenas-nfs`. Sirvió para comparar: la copia del contenedor en `local` tardó 6 s y ocupó lo mismo (123 MB).
-- **Una copia del contenedor al NAS se quedó colgada (12:18).** Estuvo parada en `starting first sync` durante 765 s y acabó con `unexpected status`. Se había elegido el modo *snapshot*. Un contenedor con el disco en el NFS no puede hacer una instantánea, así que Proxmox pasa al modo *suspend*: primero copia todos los ficheros del contenedor a una carpeta temporal y luego los empaqueta. Esa carpeta temporal estaba también en el NFS, y copiar miles de ficheros pequeños por la red es muy lento. Solución: cancelar la tarea con **Detener**, desbloquear el contenedor (`pct unlock 102`, porque la copia cancelada lo deja bloqueado), borrar la carpeta temporal `vzdump-lxc-102-2026_11_18-12_18_02.tmp` (en el listado de la evidencia, sacado justo al acabar la copia buena, todavía aparece) y repetir la copia en modo *stop*, que tardó 12 s.
+- **Una copia del contenedor al NAS se quedó colgada (12:18).** Estuvo parada en `starting first sync` durante 765 s y acabó con `unexpected status`. Se había elegido el modo *snapshot*. Un contenedor con el disco en el NFS no puede hacer una instantánea, así que Proxmox pasa al modo *suspend*: primero copia todos los ficheros del contenedor a una carpeta temporal y luego los empaqueta. Esa carpeta temporal estaba también en el NFS, y copiar miles de ficheros pequeños por la red es muy lento. Solución: cancelar la tarea con **Detener**, desbloquear el contenedor (`pct unlock 102`, porque la copia cancelada lo deja bloqueado), y repetir la copia en modo *stop*, que tardó 12 s. **Falta borrar la carpeta temporal** `vzdump-lxc-102-2026_11_18-12_18_02.tmp`: a las 13:10 seguía en `dump/`.
 - **Para la próxima vez:** en los contenedores que tienen el disco en el NFS, usar el modo *stop*, o decirle a Proxmox que la carpeta temporal esté en el disco del nodo (opción `tmpdir` de `vzdump`).
 
 #### Cómo se copió la configuración del clúster
@@ -415,7 +623,7 @@ tar czf $D/pve-config-$H-$F.tar.gz --exclude='priv' --exclude='*.key' -C / \
 #### Qué falta o hay que mejorar
 
 1. **El Windows Server (VM 100) no tiene copia.** Es el servidor más importante y el que más cuesta rehacer.
-2. **No hay ninguna copia programada.** Todas se han hecho a mano. En Proxmox no hay trabajos en **Centro de datos → Respaldo** y en el TrueNAS no hay tareas de instantáneas ni tareas programadas.
+2. **Casi no hay copias programadas.** La única es la del cliente Linux, que tiene una copia diaria preparada (ver [Ampliación: copias automatizadas](#ampliación-copias-automatizadas)). En Proxmox no hay trabajos en **Centro de datos → Respaldo**, en el TrueNAS no hay tareas de instantáneas ni tareas programadas y en el MikroTik tampoco.
 3. **Las copias de Proxmox están en el mismo disco que los discos de las VM.** `dump/` y `images/` son carpetas del mismo dataset y del mismo HDD. Sirven si se borra o se estropea una VM, pero no si falla el HDD del NAS, que es un solo disco.
 4. **La copia de la configuración del TrueNAS está guardada dentro del propio TrueNAS.** Si el NAS se rompe, se pierde con él. Hay que tener otra copia fuera (por ejemplo, en el PC-01).
 5. **`pwenc_secret` es una clave.** Con ese fichero y la base de datos se pueden sacar las contraseñas guardadas en el TrueNAS, y ahora está en una carpeta de red con permisos 777. Hay que protegerla o guardarla en otro sitio.
@@ -614,7 +822,7 @@ Después de reiniciar las dos:
 4. **Certificados de la web de `pve` y pve3:** siguen diciendo `pve.example.lan` y `pve3.example.lan`. Se renueva con `pvecm updatecerts --force` en el Shell del nodo.
 
 5. **DNS de `pve` y de pve3:** siguen con el de la plantilla (`172.16.20.1` y dominio de búsqueda `example.lan`). Solo pve2 pregunta al MikroTik (`192.168.30.1`). Funciona, porque las actualizaciones se descargan, pero los tres nodos deberían tener el mismo. Se cambia en **nodo → Sistema → DNS**.
-6. **Actualizaciones del nodo `pve`:** tiene 101 paquetes pendientes (ver el [apartado 4](#4-actualización-y-vía-de-recuperación)).
+6. **Actualizaciones:** los tres nodos tienen 104 paquetes pendientes (ver el [apartado 4](#4-actualización-y-vía-de-recuperación)).
 
 ### Los nodos a 18/11
 
@@ -761,7 +969,7 @@ Medido el 18/11 a las 12:13 en **almacenamiento → Resumen** y **almacenamiento
 - **Los discos virtuales ocupan solo lo que tienen escrito.** El Windows Server tiene un disco de 64 GiB, pero en el NAS ocupa 10,65 GiB. Esto se llama aprovisionamiento ligero (*thin*): el espacio se va gastando según la VM escribe.
 - **El TrueNAS comprime lo que guarda.** El dataset `proxmox` tiene la compresión LZ4 activada y consigue 1,56x: lo que serían unos 17 GiB ocupan 10,85 GiB en el disco.
 - **Configuración crítica: en pve2 hay prometido más espacio del que existe.** Los discos de `Debian-RAID` suman 47 GiB y `local-lvm` solo tiene 11 GiB. Proxmox avisó durante las migraciones: `Sum of all thin volume sizes (51.00 GiB) exceeds the size of thin pool`. Ahora no pasa nada porque solo hay 1,3 GiB escritos, pero si la VM llena sus discos, el almacenamiento se queda sin sitio y las máquinas de ese nodo se paran con errores de escritura.
-- **El dataset `Configuraciones` del TrueNAS ocupa 14,86 GiB.** Casi todo es la imagen del cliente Windows 11 (14,5 GiB) y el disco del Debian enrutador (1,26 GiB); ver [Espacio de copias de seguridad](#espacio-de-copias-de-seguridad).
+- **El dataset `Configuraciones` del TrueNAS ocupa 14,86 GiB.** Casi todo es la imagen del cliente Windows 11 (14,2 GiB) y el disco del Debian enrutador (1,23 GiB); ver [Espacio de copias de seguridad](#espacio-de-copias-de-seguridad).
 
 #### Mejoras que vemos
 
@@ -891,10 +1099,138 @@ nslookup grupo3.lan
 - Si un cliente no encuentra el dominio, casi siempre es por el DNS.
 - Poner el DNS a mano en cada cliente no es práctico. Lo ideal es que el DHCP del MikroTik reparta `192.168.30.21` como DNS a todos los equipos. Queda pendiente hablarlo con quien lleva el MikroTik.
 
-> Añadid aquí las capturas: el usuario `administracion` en Active Directory, `nslookup grupo3.lan` con la respuesta buena, el mensaje de bienvenida al dominio, la sesión iniciada y el cliente dentro de **Computers**. Escribid también el nombre del equipo cliente y quién lo hizo.
+El equipo cliente se llama `Administracion-grupo3` (es el nombre con el que aparece en el DHCP del MikroTik, con la IP .182).
 
-> Cuando instaléis y configuréis el resto de clientes, escribid aquí cómo y qué habéis hecho: usuario de administración, parámetros de red, si lo unís al dominio (y por qué) y la copia de su configuración o imagen.
+> Añadid aquí las capturas: el usuario `administracion` en Active Directory, `nslookup grupo3.lan` con la respuesta buena, el mensaje de bienvenida al dominio, la sesión iniciada y el cliente dentro de **Computers**. Escribid también quién lo hizo, el usuario de administración del equipo y cómo sacasteis la imagen `Windows11_ISO.ova` que está en el NAS.
+
+### Cliente Linux (Debian 13) unido al dominio
+
+Lo ha hecho Juan Pablo. Su informe (17/11), con todos los comandos y resultados: [Tasca5_Cliente_Linux_Grupo3.pdf](../lliuraments/Tasca5_Cliente_Linux_Grupo3.pdf).
+
+| Qué | Valor |
+|---|---|
+| Equipo | Máquina virtual de VirtualBox |
+| Nombre | `clientelinux.grupo3.lan` (antes `ClienteLinux`) |
+| Sistema | Debian GNU/Linux 13 (trixie), de 64 bits, núcleo 6.12 |
+| Imagen de instalación | `debian-13.1.0-amd64-netinst.iso`, del servidor de recursos del centro. SHA256: N/C |
+| Tarjeta de red | `enp0s3`, llevada por NetworkManager |
+| IP | 192.168.30.210/24 (al principio 192.168.30.188, dada por el DHCP del MikroTik) |
+| Puerta de enlace | 192.168.30.1 (MikroTik) |
+| DNS | 192.168.30.21 (el Windows Server) |
+| Dominio | `grupo3.lan` |
+| Hora | Sincronizada con el Windows Server |
+
+Comprobado el 18/11 preguntando al DNS del dominio: `clientelinux.grupo3.lan` responde con la 192.168.30.210, así que el servidor ya tiene apuntado al cliente (evidencia [t5-estado-equipos-20261118.txt](../evidencies/t5-estado-equipos-20261118.txt)).
+
+> Escribid aquí cómo y por qué se cambió la IP a la .210. Está fuera del rango que reparte el DHCP (.100–.200), así que tiene que estar puesta a mano; en el diseño los clientes iban por DHCP.
+
+#### Instalación y usuario de administración
+
+- **Versión:** con `cat /etc/os-release` y `hostnamectl` se comprobó que es Debian 13 (trixie) y que es una máquina virtual de VirtualBox.
+- **Usuario de administración:** Debian no trae `sudo` si se le pone contraseña a `root` en la instalación. Se entró como `root` (`su -`), se instaló (`apt install -y sudo`) y se metió al usuario `user` en el grupo `sudo` (`usermod -aG sudo user`). Comprobación: `getent group sudo` responde `sudo:x:27:user`. Así, el trabajo normal se hace con `user`, y solo se usan permisos de administrador cuando hace falta, escribiendo `sudo` delante.
+
+#### Red
+
+Comprobaciones que se hicieron y resultado:
+
+| Comprobación | Comando | Resultado |
+|---|---|---|
+| IP y tarjeta | `ip -br a` | 192.168.30.210/24 en `enp0s3` |
+| Puerta de enlace | `ip r` | `default via 192.168.30.1` |
+| Llega al router y al NAS | `ping -c3 192.168.30.1` y `ping -c3 192.168.30.20` | 3 de 3, menos de 1 ms |
+| Resuelve nombres | `getent hosts deb.debian.org` | Responde |
+| Sale a Internet | Conexión de prueba al puerto 443 de 1.1.1.1 | Funciona |
+| Llega a las carpetas del NAS | Conexión de prueba al puerto 445 de 192.168.30.20 | Funciona |
+| `ping 1.1.1.1` | — | No responde: en la red del aula el `ping` hacia Internet está cortado. No es un fallo nuestro |
+
+#### Unión al dominio
+
+En el diseño se decidió que los clientes entran en el dominio. En Linux se hace con **realmd** (el programa que une el equipo), **SSSD** (el servicio que pregunta al servidor por los usuarios) y **Kerberos** (el sistema con el que el dominio comprueba las contraseñas).
+
+Antes de unirlo hubo que arreglar tres cosas:
+
+1. **El nombre del equipo**, que tiene que llevar el dominio: `hostnamectl set-hostname clientelinux.grupo3.lan`.
+2. **El DNS**, que tiene que ser el Windows Server, porque es el único que sabe dónde está el dominio (igual que en el cliente Windows 11). Se escribió a mano en `/etc/resolv.conf`: `search grupo3.lan` y `nameserver 192.168.30.21`.
+3. **La hora.** Kerberos no deja entrar si el reloj del cliente y el del servidor no coinciden (admite unos pocos minutos de diferencia). Se instaló `chrony` y se le puso como servidor de hora el Windows Server (`server 192.168.30.21 iburst` en `/etc/chrony/chrony.conf`).
+
+Y después:
+
+```bash
+# ¿Se ve el dominio? Debe responder "type: kerberos" y "server-software: active-directory"
+realm discover grupo3.lan
+
+# Unir el equipo. Pide la contraseña del usuario Administrador del dominio
+realm join --user=Administrador grupo3.lan
+
+# Que se cree la carpeta personal la primera vez que entra un usuario del dominio
+pam-auth-update --enable mkhomedir
+```
+
+Paquetes que se instalaron para esto: `realmd`, `sssd`, `sssd-tools`, `adcli`, `libnss-sss`, `libpam-sss`, `oddjob`, `oddjob-mkhomedir` y `krb5-user`.
+
+Comprobaciones:
+
+- `realm list` responde `configured: kerberos-member`: el equipo es miembro del dominio.
+- `id Administrador@grupo3.lan` devuelve el usuario con sus grupos del dominio. Es decir, el Linux ya «ve» los usuarios del Windows Server.
+- `su - Administrador@grupo3.lan` inicia sesión y crea su carpeta `/home/administrador@grupo3.lan`.
+
+**Problema que salió:** la primera búsqueda del dominio falló (`NXDOMAIN`, «ese nombre no existe»). Se estaba probando con un nombre de dominio equivocado (`empresa.local`) y además el reloj no estaba en hora. Con el nombre de verdad (`grupo3.lan`) y el DNS apuntando al servidor, funcionó.
+
+#### Copia de la configuración al NAS
+
+La carpeta `configuraciones` del TrueNAS se monta en el cliente en `/mnt/nas-config`, con el usuario `userred`:
+
+- La contraseña no se escribe en el comando: se guarda en el fichero `/root/.smbcred`, que solo puede leer `root` (`chmod 600`).
+- Se monta con `vers=3.0` para obligar a usar SMB 3, la versión moderna, porque el NAS todavía tiene activada la antigua (SMB1).
+
+| Se copia | Por qué |
+|---|---|
+| `/etc` | Ahí está la configuración del sistema y de los servicios |
+| `/home/user/.bashrc` y `/home/user/.config` | Los ajustes del usuario |
+| La lista de paquetes instalados (`dpkg --get-selections`) | Para poder volver a instalar los mismos programas |
+| El SHA256 de cada copia | Para comprobar que el fichero no se ha estropeado |
+
+| No se copia | Por qué |
+|---|---|
+| `/etc/shadow` y `/etc/gshadow` | Guardan las contraseñas (cifradas) de los usuarios, y la carpeta del NAS tiene permisos 777 |
+| `/proc`, `/sys`, `/dev`, `/tmp` | No son configuración: el sistema los crea al arrancar |
+| `/root/.smbcred` | Es la contraseña del NAS |
+
+La copia es un `.tar.gz` hecho con `tar`, con la fecha y la hora en el nombre. En el NAS hay dos, del 17/11 a las 11:13 y a las 11:17, de 1 MiB cada una.
+
+**Prueba de recuperación:** se sacó de la copia el fichero `etc/hostname` a una carpeta temporal y se comparó con el del sistema con `diff`. Eran iguales (`RESTAURACION OK`). Es una prueba pequeña, de un solo fichero: demuestra que la copia se puede abrir y que guarda lo que tiene que guardar.
+
+La copia también está automatizada: ver [Ampliación: copias automatizadas](#ampliación-copias-automatizadas).
+
+#### Qué falta en el cliente Linux
+
+- Instalar las 94 actualizaciones pendientes.
+- Anotar el SHA256 de la ISO.
+- El DNS está escrito a mano en `/etc/resolv.conf`. Si el DHCP del MikroTik repartiera el 192.168.30.21, no haría falta.
+
+> Cuando instaléis y configuréis otros clientes, escribid aquí cómo y qué habéis hecho: usuario de administración, parámetros de red, si lo unís al dominio (y por qué) y la copia de su configuración o imagen.
 
 ## Ampliación: copias automatizadas
 
-> Cuando automaticéis las copias, escribid aquí cómo y qué habéis hecho y, si lo conseguís, cómo funciona la recuperación automática.
+### Cliente Linux: copia diaria de la configuración
+
+El cliente Linux hace solo la misma copia que se hizo a mano (ver [Copia de la configuración al NAS](#copia-de-la-configuración-al-nas)). Tiene tres piezas:
+
+1. **Montaje automático del NAS.** Una línea en `/etc/fstab` monta `//192.168.30.20/configuraciones` en `/mnt/nas-config`. Lleva las opciones `_netdev` (esperar a que haya red) y `nofail` (si el NAS no está, el equipo arranca igual).
+2. **Un guion** (`/usr/local/bin/backup-config.sh`) que hace estos pasos:
+   - monta el NAS si no lo está;
+   - crea la copia y la lista de paquetes;
+   - calcula el SHA256 y lo comprueba;
+   - borra las copias viejas y deja solo las 7 últimas;
+   - apunta el resultado (`OK` o `ERROR`) en `/var/log/backup-config.log`.
+3. **Un temporizador de systemd** (`backup-config.timer`) que lanza el guion **todos los días a las 02:00**. Con la opción `Persistent=true`, si el equipo estaba apagado a esa hora, la copia se hace al encenderlo.
+
+Se activa con `systemctl enable --now backup-config.timer` y se comprueba con `systemctl list-timers backup-config.timer`. El guion completo está en el [informe del cliente](../lliuraments/Tasca5_Cliente_Linux_Grupo3.pdf).
+
+**Sin comprobar todavía:** a 18/11 a las 13:10, en el NAS solo están las dos copias del 17/11 (11:13 y 11:17). No hay ninguna hecha por el temporizador.
+
+> Cuando comprobéis que la copia automática funciona, escribid aquí la fecha y la hora de la copia que hizo sola y lo que sale en `/var/log/backup-config.log`.
+
+La recuperación automática no está hecha: la recuperación se probó a mano.
+
+> Cuando automaticéis otras copias (Proxmox, MikroTik, TrueNAS…), escribid aquí cómo y qué habéis hecho y, si lo conseguís, cómo funciona la recuperación automática.
