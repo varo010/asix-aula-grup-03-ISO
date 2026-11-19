@@ -1,0 +1,144 @@
+Línea base (equipos en reposo) del 19/11/2026: nodos Proxmox, TrueNAS y MikroTik.
+
+===== pve · linea base en reposo (VM 100 Windows Server encendida) · 19/11/2026 10:25:20 · medida de 30 s
+--- carga (uptime)
+ 10:25:20 up 23:06,  1 user,  load average: 0.80, 0.60, 0.40
+--- CPU y memoria cada 5 s (vmstat 5 6): us=usuario sy=sistema id=libre wa=esperando al disco
+--procs-- -----------------------memory---------------------- ---swap-- -----io---- -system-- ----------cpu----------
+   r    b         swpd         free         buff        cache   si   so    bi    bo   in   cs  us  sy  id  wa  st  gu
+   4    0         4880       636932       121400      2162556    0    0   125    84 3164   15   1   2  90   2   0   5
+   0    0         4880       636952       121416      2162712    0    0   204   538 2937 2936   1   2  92   2   0   4
+   0    0         4880       636780       121416      2162784    0    0     0     5 2831 2854   0   2  93   1   0   4
+   0    0         4880       638020       121420      2162856    0    0   198  9261 2941 2952   0   2  92   2   0   4
+   0    0         4880       637528       121424      2162952    0    0     5    15 2802 2795   0   2  94   1   0   3
+   0    0         4880       636268       121432      2163024    0    0   198     3 2904 2941   1   2  93   1   0   4
+--- disco sda cada 5 s (iostat -dx): r/s w/s = lecturas/escrituras por segundo, %util = ocupación
+Device  r/s   rkB/s   w/s    wkB/s    %wrqm  %util
+sda     3.60  235.80  56.80  538.40   46.92  0.56
+sda     0.00  0.00    0.40   4.80     66.67  0.32
+sda     1.60  198.20  37.20  9260.80  8.82   0.54
+sda     1.20  4.80    0.40   15.20    89.47  0.42
+sda     1.60  198.20  0.40   3.20     50.00  0.16
+sda     0.00  0.00    1.00   8.00     16.67  0.12
+--- red vmbr0 cada 5 s (sar -n DEV): rxkB/s = recibido, txkB/s = enviado
+10:25:20  IFACE  rxpck/s  txpck/s  rxkB/s  txkB/s
+10:25:25  vmbr0  77.80    84.00    13.26   38.04
+10:25:30  vmbr0  69.40    68.60    12.25   23.78
+10:25:35  vmbr0  81.00    87.60    14.20   42.18
+10:25:40  vmbr0  60.80    59.40    11.16   12.21
+10:25:45  vmbr0  77.80    85.00    13.24   33.98
+10:25:50  vmbr0  62.60    61.80    11.36   26.06
+Average:  71.57  74.40    12.58    29.38   0.00
+--- memoria (free -m)
+               total        used        free      shared  buff/cache   available
+Mem:           15992       13518         613          48        2230        2473
+Swap:           3863           4        3859
+--- 5 procesos con más CPU
+%CPU %MEM COMMAND
+12.8 75.5 kvm
+ 1.6  0.0 ksmd
+ 0.7  1.1 corosync
+ 0.1  0.8 pvestatd
+ 0.1  0.2 pmxcfs
+
+===== pve2 · linea base en reposo (VM 101 y contenedor 102 encendidos) · 19/11/2026 10:25:20 · medida de 30 s
+--- carga (uptime)
+ 10:25:20 up 23:06,  2 users,  load average: 0.26, 0.48, 0.32
+--- CPU y memoria cada 5 s (vmstat 5 6): us=usuario sy=sistema id=libre wa=esperando al disco
+--procs-- -----------------------memory---------------------- ---swap-- -----io---- -system-- ----------cpu----------
+   r    b         swpd         free         buff        cache   si   so    bi    bo   in   cs  us  sy  id  wa  st  gu
+   3    0            0      3995408       175668      6069060    0    0   288   251  872    4   0   1  98   0   0   1
+   0    0            0      3993816       175672      6069148    0    0     1  9096  771  726   0   1  99   0   0   0
+   0    0            0      3997048       175676      6069148    0    0   102    60  770  726   0   0  99   0   0   0
+   0    0            0      3995788       175676      6069148    0    0     0     7  766  731   0   0  99   0   0   0
+   0    0            0      3995788       175680      6069148    0    0   102     6  718  670   0   1  99   0   0   0
+   1    0            0      3995548       175684      6069148    0    0     0    12  790  735   0   1  99   0   0   0
+--- disco sda cada 5 s (iostat -dx): r/s w/s = lecturas/escrituras por segundo, %util = ocupación
+Device  r/s   rkB/s   w/s   wkB/s    %wrqm  %util
+sda     1.20  32.00   3.80  9095.20  58.70  0.56
+sda     0.80  102.40  9.60  59.20    21.31  0.44
+sda     0.00  0.00    1.00  6.40     16.67  0.24
+sda     0.80  102.40  0.60  4.80     50.00  0.10
+sda     0.00  0.00    1.60  11.20    11.11  0.26
+sda     0.80  102.40  5.20  177.60   3.70   0.08
+--- red vmbr0 cada 5 s (sar -n DEV): rxkB/s = recibido, txkB/s = enviado
+10:25:20  IFACE  rxpck/s  txpck/s  rxkB/s  txkB/s
+10:25:25  vmbr0  74.00    67.20    14.80   11.24
+10:25:30  vmbr0  66.80    69.80    9.91    15.19
+10:25:35  vmbr0  77.60    69.40    15.75   12.13
+10:25:40  vmbr0  59.40    62.60    9.02    14.06
+10:25:45  vmbr0  76.20    69.60    15.04   12.43
+10:25:50  vmbr0  61.20    65.20    9.23    14.42
+Average:  69.20  67.30    12.29    13.25   0.00
+--- memoria (free -m)
+               total        used        free      shared  buff/cache   available
+Mem:           11960        2333        3904          47        6098        9626
+Swap:           3863           0        3863
+--- 5 procesos con más CPU
+%CPU %MEM COMMAND
+ 8.1  4.2 kvm
+ 0.7  1.5 corosync
+ 0.2  1.1 pvestatd
+ 0.1  0.0 kworker/u8:3-events_power_efficient
+ 0.1  0.0 kworker/u8:5-dm-thin
+
+===== pve3 · linea base en reposo (VM 103 encendida, vacia) · 19/11/2026 10:17:50 · medida de 30 s
+--- carga (uptime)
+ 10:17:50 up 22:58,  1 user,  load average: 0.44, 0.42, 0.38
+--- CPU y memoria cada 5 s (vmstat 5 6): us=usuario sy=sistema id=libre wa=esperando al disco
+--procs-- -----------------------memory---------------------- ---swap-- -----io---- -system-- ----------cpu----------
+   r    b         swpd         free         buff        cache   si   so    bi    bo   in   cs  us  sy  id  wa  st  gu
+   2    2            0      6290496       162236      4346476    0    0   165   100 1181    4   1   7  86   0   0   6
+   1    0            0      6288240       162236      4346548    0    0   112    36  891  746   0   2  96   0   0   2
+   0    0            0      6284472       162240      4346548    0    0     0     2 1321  868   1  16  70   0   0  13
+   0    0            0      6273636       162240      4346548    0    0   102    11 1256 1235   1   2  96   0   0   2
+   3    0            0      6272376       162240      4346548    0    0     0     2 1171  839   1  12  79   0   0   9
+   0    0            0      6273616       162240      4346548    0    0   102    31  850  578   1   6  88   0   0   5
+--- disco sda cada 5 s (iostat -dx): r/s w/s = lecturas/escrituras por segundo, %util = ocupación
+Device  r/s   rkB/s   w/s   wkB/s  %wrqm  %util
+sda     1.40  115.20  3.00  36.00  31.82  0.24
+sda     0.00  0.00    0.40  2.40   33.33  0.12
+sda     0.80  102.40  0.60  11.20  78.57  0.16
+sda     0.00  0.00    0.40  2.40   33.33  0.10
+sda     0.80  102.40  3.60  31.20  0.00   0.06
+sda     0.00  0.00    0.60  8.80   72.73  0.10
+--- red vmbr0 cada 5 s (sar -n DEV): rxkB/s = recibido, txkB/s = enviado
+10:17:50  IFACE   rxpck/s  txpck/s  rxkB/s  txkB/s
+10:17:55  vmbr0   54.20    58.00    8.15    13.00
+10:18:00  vmbr0   94.20    85.60    18.02   14.33
+10:18:05  vmbr0   98.20    101.80   15.24   20.64
+10:18:10  vmbr0   92.40    84.00    17.75   14.04
+10:18:15  vmbr0   62.00    85.00    37.32   72.02
+10:18:20  vmbr0   261.60   156.80   93.77   84.05
+Average:  110.43  95.20    31.71    36.35   0.00
+--- memoria (free -m)
+               total        used        free      shared  buff/cache   available
+Mem:           11960        1803        6129          47        4403       10156
+Swap:           3863           0        3863
+--- 5 procesos con más CPU
+%CPU %MEM COMMAND
+26.4  0.3 kvm
+ 0.6  1.5 corosync
+ 0.1  1.1 pvestatd
+ 0.1  1.1 pve-firewall
+ 0.0  0.3 pmxcfs
+
+===== TrueNAS · linea base en reposo · 19/11/2026 10:26:25 · medias y máximos de los últimos 600 s (monitor Reporting del TrueNAS)
+CPU: media 0.5 %  máximo 17 %
+carga (1 min): media 0.14  máximo 0.30  (4 núcleos)
+memoria disponible: media 358 MiB (el resto la usa ZFS como caché)
+red enp1s0: recibido media 0.2 Mbit/s máx 4.1 · enviado media 0.0 Mbit/s máx 3.8
+disco de datos sdb: {'reads': (0.0, 0.2), 'writes': (0.2, 3.6)} (media, máximo) en MiB/s
+
+===== MikroTik (192.168.30.1) · linea base · 10 lecturas cada 3 s
+10:25:20 CPU 0 % | RAM libre 190 MiB | WAN bajada 10.18 Mbit/s subida 0.26 Mbit/s
+10:25:23 CPU 1 % | RAM libre 190 MiB | WAN bajada 1.39 Mbit/s subida 0.09 Mbit/s
+10:25:26 CPU 0 % | RAM libre 190 MiB | WAN bajada 1.71 Mbit/s subida 0.06 Mbit/s
+10:25:29 CPU 0 % | RAM libre 190 MiB | WAN bajada 4.15 Mbit/s subida 10.59 Mbit/s
+10:25:32 CPU 0 % | RAM libre 190 MiB | WAN bajada 3.11 Mbit/s subida 0.1 Mbit/s
+10:25:35 CPU 0 % | RAM libre 190 MiB | WAN bajada 9.51 Mbit/s subida 0.19 Mbit/s
+10:25:38 CPU 1 % | RAM libre 190 MiB | WAN bajada 4.94 Mbit/s subida 0.13 Mbit/s
+10:25:41 CPU 0 % | RAM libre 190 MiB | WAN bajada 7.56 Mbit/s subida 0.25 Mbit/s
+10:25:44 CPU 0 % | RAM libre 190 MiB | WAN bajada 7.34 Mbit/s subida 0.14 Mbit/s
+10:25:47 CPU 0 % | RAM libre 190 MiB | WAN bajada 10.98 Mbit/s subida 0.32 Mbit/s
+conexiones abiertas: 115

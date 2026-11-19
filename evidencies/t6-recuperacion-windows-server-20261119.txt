@@ -1,0 +1,57 @@
+Copia de seguridad del Windows Server (VM 100) al NAS y restauración de prueba como VM 900 (sin red). 19/11/2026.
+
+################################################################
+# 1. Copia: registro de vzdump (nodo pve)
+################################################################
+2026-11-19 10:39:26 INFO: Starting Backup of VM 100 (qemu)
+2026-11-19 10:39:26 INFO: status = running
+2026-11-19 10:39:26 INFO: VM Name: WS-Grupo3
+2026-11-19 10:39:26 INFO: include disk 'scsi0' 'truenas-nfs:100/vm-100-disk-0.qcow2' 64G
+2026-11-19 10:39:26 INFO: include disk 'efidisk0' 'local-lvm:vm-100-disk-0' 4M
+2026-11-19 10:39:26 INFO: include disk 'tpmstate0' 'local-lvm:vm-100-disk-1' 4M
+2026-11-19 10:39:26 INFO: backup mode: snapshot
+2026-11-19 10:39:26 INFO: ionice priority: 7
+2026-11-19 10:39:26 INFO: creating vzdump archive '/mnt/pve/truenas-nfs/dump/vzdump-qemu-100-2026_11_19-10_39_26.vma.zst'
+2026-11-19 10:39:26 INFO: attaching TPM drive to QEMU for backup
+2026-11-19 10:39:26 INFO: skipping guest filesystem freeze - disabled in VM options
+2026-11-19 10:39:26 INFO: starting backup via QMP command
+2026-11-19 10:39:26 INFO: started backup task '3eefa073-2c3e-4259-909e-36b709716993'
+2026-11-19 10:39:26 INFO: resuming VM again
+2026-11-19 10:44:08 INFO: 100% (64.0 GiB of 64.0 GiB) in 4m 42s, read: 54.6 MiB/s, write: 54.2 MiB/s
+2026-11-19 10:44:08 INFO: backup is sparse: 47.38 GiB (74%) total zero data
+2026-11-19 10:44:08 INFO: transferred 64.00 GiB in 282 seconds (232.4 MiB/s)
+2026-11-19 10:44:12 INFO: archive file size: 7.96GB
+2026-11-19 10:44:12 INFO: adding notes to backup
+2026-11-19 10:44:12 INFO: Finished Backup of VM 100 (00:04:46)
+
+################################################################
+# 2. Restauración en pve2 como VM 900: registro de qmrestore (duración total 244 s)
+################################################################
+restore vma archive: zstd -q -d -c -- /mnt/pve/truenas-nfs/dump/vzdump-qemu-100-2026_11_19-10_39_26.vma.zst | vma extract -v -r /var/tmp/vzdumptmp316838.fifo - /var/tmp/vzdumptmp316838
+CFG: size: 909 name: qemu-server.conf
+DEV: dev_id=1 size: 540672 devname: drive-efidisk0
+DEV: dev_id=2 size: 68719476736 devname: drive-scsi0
+DEV: dev_id=3 size: 4194304 devname: drive-tpmstate0-backup
+CTIME: Thu Nov 19 10:39:26 2026
+Formatting '/mnt/pve/truenas-nfs/images/900/vm-900-disk-0.raw', fmt=raw size=540672 preallocation=off
+new volume ID is 'truenas-nfs:900/vm-900-disk-0.raw'
+Formatting '/mnt/pve/truenas-nfs/images/900/vm-900-disk-0.qcow2', fmt=qcow2 cluster_size=65536 extended_l2=off preallocation=metadata compression_type=zlib size=68719476736 lazy_refcounts=off refcount_bits=16
+new volume ID is 'truenas-nfs:900/vm-900-disk-0.qcow2'
+Formatting '/mnt/pve/truenas-nfs/images/900/vm-900-disk-1.raw', fmt=raw size=4194304 preallocation=off
+new volume ID is 'truenas-nfs:900/vm-900-disk-1.raw'
+map 'drive-efidisk0' to '/mnt/pve/truenas-nfs/images/900/vm-900-disk-0.raw' (write zeros = 0)
+map 'drive-scsi0' to '/mnt/pve/truenas-nfs/images/900/vm-900-disk-0.qcow2' (write zeros = 0)
+map 'drive-tpmstate0-backup' to '/mnt/pve/truenas-nfs/images/900/vm-900-disk-1.raw' (write zeros = 0)
+progress 100% (read 68724260864 bytes, duration 223 sec)
+total bytes read 68724260864, sparse bytes 50875547648 (74%)
+space reduction due to 4K zero blocks 0.651%
+rescan volumes...
+VM 900 (efidisk0): size of disk 'truenas-nfs:900/vm-900-disk-0.raw' updated from 4M to 528K
+
+################################################################
+# 3. Arranque de la copia restaurada
+################################################################
+10:53:10 se arranca la VM 900 sin tarjeta de red y con 6 GiB de RAM.
+10:55:40 (150 s) pantalla «Aplicando la configuración del equipo».
+10:58:36 (326 s) pantalla de bloqueo de Windows («Presiona Ctrl+Alt+Supr para desbloquear»): captura t6-windows-server-restaurado-20261119.png
+Después se paró y se borró la VM 900.

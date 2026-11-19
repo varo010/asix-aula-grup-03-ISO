@@ -1,0 +1,14 @@
+Recuperación del contenedor 102 (ct-test) borrado, desde su copia de seguridad del NAS. 19/11/2026.
+
+copia usada: /mnt/pve/truenas-nfs/dump/vzdump-lxc-102-2026_11_18-12_31_43.tar.zst
+fichero-nuevo.txt
+10:44:31 se apaga y se borra el contenedor (fallo provocado)
+purging CT 102 from related configurations..
+10:44:34 192.168.30.202 ya no responde
+10:44:34 se restaura desde la copia
+Total bytes read: 434800640 (415MiB, 948MiB/s)
+merging backed-up and given configuration..
+10:45:53 el contenedor vuelve a responder al ping
+restaurar y arrancar: 78.8 s · tiempo total sin servicio: 82.3 s
+net0: name=eth0,bridge=vmbr0,firewall=1,gw=192.168.30.1,hwaddr=BC:24:11:59:DA:3C,ip=192.168.30.202/24,type=veth
+rootfs: truenas-nfs:102/vm-102-disk-0.raw,size=4G

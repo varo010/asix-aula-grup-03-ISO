@@ -1,0 +1,3 @@
+Copia automática diaria creada en Proxmox (Centro de datos → Respaldo). 19/11/2026.
+{'id': 'copia-diaria-g3', 'schedule': 'mon..fri 12:30', 'vmid': '100,101,102', 'storage': 'truenas-nfs', 'mode': 'snapshot', 'compress': 'zstd', 'prune-backups': {'keep-last': '3'}, 'enabled': 1, 'next-run': 1795087800}
+carpeta temporal de la copia fallida del 18/11 borrada

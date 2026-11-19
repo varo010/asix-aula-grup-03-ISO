@@ -1,0 +1,15 @@
+===== Caída de un nodo: reinicio de pve3 · 19/11/2026
+VM 100 arranque automático (onboot): 0
+VM 103 arranque automático (onboot): 0 · estado: status: running · núcleo en uso: 7.0.14-19-pve
+10:49:12 FALLO PROVOCADO: se reinicia pve3 (comando reboot)
+10:52:26 pve3 deja de responder al ping (194 s después de la orden)
+Quorate:          Yes
+Expected votes:   3
+Total votes:      2
+Flags:            Quorate 
+nodos en línea: ['pve', 'pve2']
+10:52:38 pve3 vuelve a responder al ping (sin red: 12 s)
+10:52:42 pve3 vuelve a estar dentro del clúster (3 votos) · 210 s desde la orden
+10:52:44 núcleo en uso tras reiniciar: 7.0.14-30-pve · versión 9.2.31 · VM 103: status: stopped · NAS montado: 1
+10:52:46 VM 103 arrancada a mano: status: running
+tiempo total con la VM 103 parada: 213 s

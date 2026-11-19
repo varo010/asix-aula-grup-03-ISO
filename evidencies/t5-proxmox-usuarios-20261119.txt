@@ -1,0 +1,12 @@
+===== Usuarios de administración del clúster Proxmox · 19/11/2026 11:07:58
+contraseña puesta a admin-g3@pve
+contraseña puesta a consulta-g3@pve
+--- pveum user list
+admin-g3@pve | grupos  | activo 1 | Administrador del grupo 3
+consulta-g3@pve | grupos  | activo 1 | Usuario de consulta (solo lectura)
+root@pam | grupos  | activo 1 | 
+--- pveum acl list
+/ group administradores Administrator
+/ group consulta PVEAuditor
+prueba de inicio de sesión de admin-g3@pve: entra | permisos sobre /: ['SDN.Allocate', 'SDN.Audit', 'SDN.Use', 'Sys.Audit', 'Sys.Modify']
+prueba de inicio de sesión de consulta-g3@pve: entra | permisos sobre /: ['SDN.Audit', 'Sys.Audit']
