@@ -11,7 +11,21 @@ Tasca 5 «Instal·lació i comunicacions» · RA principales: ISO RA1 d-h y FDM 
 | TrueNAS | SCALE 25.10.7 (Goldeye), `TrueNAS-SCALE-25.10.7.iso` | ISO de la página oficial de TrueNAS | N/C | G3-PC-02 (Ticnova), instalado en el SSD de 256 GB |
 | Lubuntu | 24.04.4 Desktop amd64, `lubuntu-24.04.4-desktop-amd64.iso` | ISO de la página oficial de Lubuntu | N/C | G3-PC-01, sistema operativo principal |
 | OPNsense | 26.7 | OVA de la página oficial de OPNsense | N/C | VM de VirtualBox en G3-PC-01 |
-| Debian | 13.1.0 netinst amd64, `debian-13.1.0-amd64-netinst.iso` | ISO del servidor de recursos del centro: http://deb.cipfpbatoi.lan/recursos/ISO/ | N/C | VM de VirtualBox en G3-PC-01 |
+| Debian | 13.1.0 netinst amd64, `debian-13.1.0-amd64-netinst.iso` | ISO del servidor de recursos del centro: http://deb.cipfpbatoi.lan/recursos/ISO/ | **Sí** (19/11): `658b28e2…c65568b3`, igual que la de Debian | VM de VirtualBox en G3-PC-01 |
+
+El 19/11 calculamos con `sha256sum` la suma de las imágenes que están guardadas en los nodos Proxmox y la comparamos con la que publica cada fabricante (evidencia [t5-iso-sha256-20261119.txt](../evidencies/t5-iso-sha256-20261119.txt)):
+
+| Imagen | Dónde está | SHA256 (principio y final) | ¿Coincide con la publicada? |
+|---|---|---|---|
+| `debian-13.1.0-amd64-netinst.iso` | `local` de pve2 | `658b28e2…c65568b3` | **Sí.** Es la misma que sale en el fichero `SHA256SUMS` de `cdimage.debian.org` |
+| Windows Server 2025 de evaluación, en castellano (`…SERVER_EVAL_x64FRE_es-es.iso`) | `local` de `pve` | `8f27939f…b99041aa` | No se puede comparar: Microsoft no publica la suma de las ISO de evaluación. Queda apuntada para saber si el fichero cambia |
+| La misma en inglés (`…en-us.iso`) | `local` de `pve` | `7b052573…125bfd51` | Igual que la anterior. No la usa ninguna VM |
+| `virtio-win-0.1.271.iso` (controladores) | `local` de `pve` | `bbe6166a…81656429` | No encontramos una suma publicada junto a la descarga |
+| `debian-13-lxc-amd64.tar.xz` (plantilla del contenedor) | `local` de pve3 | `93f62a2e…5b1a783a` | Sin comparar |
+
+Una suma SHA256 es como la huella del fichero: si cambia un solo bit, la suma sale distinta. Que coincida con la del fabricante demuestra que la descarga está completa y que nadie la ha cambiado por el camino.
+
+> Escribid aquí la suma de las imágenes que no están en los nodos (TrueNAS, Lubuntu y OPNsense): están en el equipo desde el que se instalaron.
 
 ## 2. Firmware, arranque, particionado y sistema de ficheros
 
@@ -23,6 +37,7 @@ Cómo está repartido el disco de cada sistema instalado y por qué. Los datos s
 | TrueNAS (G3-PC-02) | UEFI | SSD de 238 GB: `sda1` 1 MiB, `sda2` 512 MiB (arranque), `sda3` 238 GB (sistema). HDD de 2 TB: entero para los datos | **ZFS** en los dos discos |
 | Lubuntu (G3-PC-01) | UEFI | `sda1` 300 MiB (arranque UEFI), `sda2` 465,5 GB (todo lo demás) | **ext4**; el intercambio es un fichero de 512 MiB, no una partición |
 | Contenedor `ct-test` | — (usa el núcleo del nodo) | Un disco virtual de 4 GB sin particiones | **ext4** |
+| VM `Debian-RAID` (101) | BIOS | Disco del sistema: `sda1` 30,3 GB (todo el sistema) y `sda5` 1,7 GB (intercambio). Tres discos de 5 GB con tres particiones de 768 MiB cada uno, para los RAID | **ext4** en el sistema y en los tres RAID (ver [Tasca 6](06-recuperacio.md#2-raid)) |
 
 ### Nodos Proxmox: LVM con ext4
 
@@ -60,7 +75,7 @@ Limitación: el pool tiene un solo disco (*stripe*), así que ZFS detecta los er
 
 El instalador de Lubuntu, con la opción de borrar el disco, crea la partición de arranque UEFI y una única partición ext4 para todo. Para un cliente es suficiente: no hay que calcular tamaños y no se desperdicia sitio. El inconveniente es que, si hay que reinstalar el sistema, los datos del usuario están en la misma partición; en la empresa los documentos estarán en el NAS, no en el cliente.
 
-> Escribid aquí el particionado y el sistema de ficheros de los sistemas que faltan y por qué los elegisteis: Windows Server (VM 100: arranca por UEFI con TPM 2.0; falta ver las particiones en **Administración de discos**), `Debian-RAID` (VM 101), OPNsense y Debian con nftables (VM de VirtualBox). Incluid la comprobación de TPM y UEFI en el Windows Server.
+> Escribid aquí el particionado y el sistema de ficheros de los sistemas que faltan y por qué los elegisteis: Windows Server (VM 100: arranca por UEFI con TPM 2.0; falta ver las particiones en **Administración de discos**), OPNsense y Debian con nftables (VM de VirtualBox). Incluid la comprobación de TPM y UEFI en el Windows Server.
 
 ## 3. Instalaciones
 
@@ -86,15 +101,59 @@ Lo que hay a 18/11 (leído de cada sistema, sin cambiar nada; evidencias [t5-pro
 
 | Sistema | Versión | Actualizaciones pendientes | De dónde se actualiza |
 |---|---|---|---|
-| Nodo `pve` | Proxmox VE 9.2.20 | **104 paquetes** | Repositorio `pve-no-subscription` (el gratuito) y los de Debian 13 |
-| Nodo `pve2` | Proxmox VE 9.2.20 | **104 paquetes** | Igual |
-| Nodo `pve3` | Proxmox VE 9.2.20 | **104 paquetes** | Igual |
+| Nodo `pve` | Proxmox VE 9.2.20 (a 19/11: **9.2.31**) | 104 paquetes (a 19/11: **0**) | Repositorio `pve-no-subscription` (el gratuito) y los de Debian 13 |
+| Nodo `pve2` | Proxmox VE 9.2.20 (a 19/11: **9.2.31**) | 104 paquetes (a 19/11: **0**) | Igual |
+| Nodo `pve3` | Proxmox VE 9.2.20 (a 19/11: **9.2.31**) | 104 paquetes (a 19/11: **0**) | Igual |
 | TrueNAS | 25.10.7 | Ninguna versión nueva | Tren «Goldeye» |
 | Cliente Linux (Debian 13) | Debian 13 (trixie) | 94 paquetes | Repositorios oficiales de Debian, por HTTPS |
 
 Cada nodo busca actualizaciones él solo una vez al día (tarea `aptupdate` del historial), pero **buscar no es instalar**: a las 13:10 del 18/11 los tres nodos tienen 104 paquetes esperando (evidencia [t5-estado-equipos-20261118.txt](../evidencies/t5-estado-equipos-20261118.txt)). Por la mañana pve2 y pve3 marcaban 0: no es que estuvieran al día, es que no podían descargar la lista de paquetes porque el MikroTik les cortaba el puerto 80 (ver la [incidencia](#incidencia-los-nodos-no-podían-descargar-por-http-puerto-80)). **Ningún sistema se ha actualizado todavía.**
 
-> Cuando actualicéis los nodos (de uno en uno), escribid aquí cómo y qué habéis hecho: si movisteis antes el Windows Server a otro nodo, el comando o el botón usado, cuánto tardó y cómo comprobasteis que el clúster seguía con los tres nodos y el quórum.
+### Actualización de los tres nodos (18 y 19/11)
+
+Se actualizaron **de uno en uno**, para que el clúster nunca se quedara con menos de dos nodos, y empezando por el que menos cosas tenía. Evidencia: [t5-actualizacion-nodos-20261119.txt](../evidencies/t5-actualizacion-nodos-20261119.txt).
+
+| Orden | Nodo | Cuándo | Paquetes | Tiempo total | De ese tiempo, instalar | Versión antes → después |
+|---|---|---|---|---|---|---|
+| 1 | pve3 | 18/11, 12:37 | 103 | 33 min | 57 s | 9.2.20 → 9.2.28 |
+| 2 | pve2 | 19/11, 10:01 | 105 | 17 min | 59 s | 9.2.20 → 9.2.31 |
+| 3 | `pve` (con el Windows Server encendido) | 19/11, 10:19 | 105 | 5 min | 61 s | 9.2.20 → 9.2.31 |
+| 4 | pve3 otra vez, para igualar | 19/11, 10:28 | 18 | 3 min | 29 s | 9.2.28 → 9.2.31 |
+
+Casi todo el tiempo se va en **descargar**: son unos 1,1 GB por nodo y la salida a Internet es lenta. En `pve` tardó menos porque los paquetes se habían descargado antes, sin instalar (`apt-get -d dist-upgrade`). La instalación en sí dura un minuto.
+
+Comandos en cada nodo:
+
+```
+apt-get update            # descarga la lista de paquetes nuevos
+apt-get dist-upgrade      # los instala (en Proxmox se usa dist-upgrade, no upgrade)
+```
+
+**No hizo falta mover ni apagar el Windows Server.** Actualizar los paquetes no para las VM: siguen funcionando con el programa que ya tenían en memoria. Lo comprobamos con `qm status 100` y con un `ping` a la `192.168.30.21` antes y después.
+
+**Comprobación después de cada nodo** (antes de pasar al siguiente):
+
+| Qué | Comando | Resultado |
+|---|---|---|
+| Versión nueva | `pveversion` | `pve-manager/9.2.31` en los tres |
+| No queda nada pendiente | `apt list --upgradable` | 0 paquetes |
+| Servicios de Proxmox en marcha | `systemctl is-active pve-cluster corosync pvedaemon pveproxy` | `active` los cuatro |
+| El clúster sigue completo | `pvecm status` | `Quorate: Yes`, 3 votos |
+| Los almacenamientos responden | `pvesm status` | `local`, `local-lvm` y `truenas-nfs` activos |
+| Las VM siguen encendidas | `qm status`, `pct status` | Todas `running` |
+| Las migraciones siguen funcionando | Migrar la VM 103 y el contenedor 102 | VM en vivo: 6 s, corte de 8 ms. Contenedor: 48 s |
+
+**Qué queda pendiente: reiniciar `pve` y pve2.** La actualización instala un núcleo de Linux nuevo (`7.0.14-30-pve`), pero un nodo sigue usando el antiguo hasta que se reinicia. pve3 ya se reinició el 19/11 (en la prueba de caída de un nodo de la [Tasca 6](06-recuperacio.md#4-plan-de-contingencia)) y usa el nuevo. `pve` y pve2 siguen con el `7.0.14-19-pve`.
+
+> Cuando reiniciéis `pve` y pve2, escribid aquí cuándo y cómo: en `pve` hay que apagar antes el Windows Server con orden (o hacerlo fuera del horario de clase) y comprobar después que arranca solo.
+
+**Vía de recuperación si una actualización sale mal:**
+
+- **El núcleo anterior no se borra.** En el menú de arranque del nodo se puede elegir el antiguo (en `/boot` quedan los dos).
+- **La configuración del clúster está copiada en el NAS** (`proxmox/config-cluster`, ver [Espacio de copias](#espacio-de-copias-de-seguridad)).
+- **Los discos de las VM no están en el nodo, están en el NAS.** Si un nodo quedara inservible, sus VM se arrancan en otro.
+- **Hay copia de las VM importantes** desde el 19/11 (copia diaria en Proxmox).
+- En `/var/log/apt/history.log` queda la lista exacta de paquetes cambiados y sus versiones anteriores.
 
 ## 5. Incidencia de instalación o arranque
 
@@ -252,19 +311,39 @@ Devolvió 216.239.38.120, así que la cadena LAN → router → DNS del centro �
 
 Estado leído del router el 18/11 (evidencia [t5-estado-equipos-20261118.txt](../evidencies/t5-estado-equipos-20261118.txt)):
 
-- **Nombre:** sigue siendo `MikroTik`, el de fábrica.
-- **Hora:** el reloj marca el 5 de marzo y el cliente NTP está desactivado, así que los registros salen con la fecha mal.
+- **Nombre:** era `MikroTik`, el de fábrica. Desde el 19/11 es `G3-RT-01`, el del inventario.
+- **Hora:** el reloj marcaba el 5 de marzo y el cliente NTP estaba desactivado, así que los registros salían con la fecha mal. Arreglado el 19/11 (ver abajo).
 - **Usuarios:** `admin` (el de fábrica, con todos los permisos) y `backup`.
 - **Copias:** en el router hay dos copias (`.backup`, del 03/11 y del 10/11) y un `/export` (`.rsc`). En el NAS están las dos `.backup`, pero no el `.rsc`. No hay ninguna tarea programada.
 - **Servicios abiertos que no usamos:** `telnet` y `ftp`.
 
-> Cuando configuréis el usuario de administración, el nombre del router y el NTP, escribid aquí cómo y qué habéis hecho y por qué (el router tenía la fecha mal, 11 de febrero, y las evidencias saldrían con fechas erróneas). La contraseña no se escribe en el repositorio.
+**Nombre y hora (19/11).** Evidencia: [t6-mikrotik-copia-y-recuperacion-20261119.txt](../evidencies/t6-mikrotik-copia-y-recuperacion-20261119.txt).
 
-> Cuando hagáis la copia de la configuración (`/export` y `/system backup`) y la guardéis en el TrueNAS, escribid aquí cómo y qué habéis hecho: qué diferencia hay entre los dos ficheros, dónde los guardáis y cómo se restauran.
+| Qué | Dónde se cambia | Antes | Después |
+|---|---|---|---|
+| Nombre | **System → Identity** | `MikroTik` | `G3-RT-01` |
+| Zona horaria | **System → Clock** | `manual` | `Europe/Madrid` |
+| Hora automática (NTP) | **System → NTP Client** | Desactivado | Activado, con los servidores `hora.roa.es` y `pool.ntp.org` |
+| Fecha del router | — | 06/03/2026 | 19/11/2026 (`synchronized`) |
+
+NTP es el servicio con el que un equipo pregunta la hora a un servidor de Internet. Hace falta porque el hEX no tiene pila: cada vez que se apaga, pierde la hora. Con la fecha mal, las líneas del **Log** no se pueden comparar con las de los otros equipos y no sirven como evidencia.
+
+> Cuando configuréis un usuario de administración propio (ahora se entra con `admin`, el de fábrica), escribid aquí cómo y qué habéis hecho y por qué. La contraseña no se escribe en el repositorio.
+
+**Copia de la configuración en el NAS (19/11).** Se sacaron los dos tipos de copia y se guardaron en `Configuraciones/Mikrotik` con su suma SHA256:
+
+| Fichero | Cómo se saca | Qué es | Para qué sirve |
+|---|---|---|---|
+| `g3-rt-01-20261119.backup` (35 KB) | **Files → Backup**, o `/system backup save` | Copia completa en un fichero que solo entiende un MikroTik | Dejar el mismo router exactamente como estaba, usuarios y contraseñas incluidos. Se restaura con **Files → Restore** y el router se reinicia |
+| `g3-rt-01-20261119.rsc` (8 KB) | `/export file=…` | La configuración en texto: los mismos comandos que la crean | Leerla, ver qué ha cambiado y recuperar **solo una parte** copiando sus líneas. No lleva las contraseñas de los usuarios |
+
+Los ficheros se bajaron del router por FTP y se subieron al NAS. Con el `.rsc` es con lo que recuperamos una regla borrada en 6 s (ver abajo).
+
+> Escribid aquí para qué creasteis el usuario `backup` y la regla `SSH backups TrueNAS`, y si la copia se va a hacer sola.
 
 > Cuando cambiéis el DNS que reparte el DHCP, escribid aquí cómo y qué habéis hecho. Ahora el MikroTik da a los clientes el DNS `192.168.30.1`, que no conoce el dominio `grupo3.lan`, y por eso al cliente Windows 11 hubo que ponerle a mano el DNS `192.168.30.21` (ver [Clientes](#clientes-windows-11-y-gnulinux)). Lo ideal es que el DHCP reparta `192.168.30.21`; queda pendiente hablarlo con quien lleva el MikroTik.
 
-> Cuando provoquéis un fallo en el MikroTik y lo recuperéis, escribid aquí cómo y qué habéis hecho: qué fallo, cómo lo detectasteis, cómo lo recuperasteis con la copia y cuánto tardasteis.
+**Fallo provocado y recuperación (19/11).** Borramos la regla `Permitir HTTP a los nodos Proxmox`. Síntoma: el nodo pve3 dejó de descargar por HTTP y en el **Log** del router apareció `BLOQUEO HTTP` con su IP. Recuperación: se buscó la línea de esa regla en el `.rsc` guardado en el NAS y se volvió a crear tal cual, encima de `BLOQUEAR HTTP`. El nodo volvió a descargar (respuesta 200). **6 s** sin servicio, con los comandos ya preparados. Está contado con las demás pruebas en la [Tasca 6](06-recuperacio.md#pruebas-y-tiempo-de-inactividad).
 
 ### OPNsense
 
@@ -615,19 +694,19 @@ tar czf $D/pve-config-$H-$F.tar.gz --exclude='priv' --exclude='*.key' -C / \
 
 - **Las ISO de instalación y las plantillas de contenedores:** se pueden volver a descargar. Basta con apuntar el nombre, la versión y el SHA256.
 - **Las claves privadas del clúster Proxmox:** son secretos y no deben estar en una carpeta de red.
-- **Las VM 100 (Windows Server) y 101 (`Debian-RAID`) no entraron en la prueba de copias de Proxmox del 18/11:** eran de otros compañeros y no se tocaron. La del Windows Server sí hay que copiarla (ver el punto 1 de abajo).
+- **Las VM 100 (Windows Server) y 101 (`Debian-RAID`) no entraron en la prueba de copias de Proxmox del 18/11.** Desde el 19/11 sí se copian las dos, en la copia diaria.
 - **Los discos de prueba de `Debian-RAID`:** son para practicar los RAID, no tienen datos.
 
 > Revisad esta lista y completadla con lo que hayáis decidido no copiar.
 
 #### Qué falta o hay que mejorar
 
-1. **El Windows Server (VM 100) no tiene copia.** Es el servidor más importante y el que más cuesta rehacer.
-2. **Casi no hay copias programadas.** La única es la del cliente Linux, que tiene una copia diaria preparada (ver [Ampliación: copias automatizadas](#ampliación-copias-automatizadas)). En Proxmox no hay trabajos en **Centro de datos → Respaldo**, en el TrueNAS no hay tareas de instantáneas ni tareas programadas y en el MikroTik tampoco.
+1. **El Windows Server (VM 100) no tenía copia. Arreglado el 19/11:** se hizo una copia (4 min 46 s, 7,96 GB) y se probó a restaurarla como otra VM, que arrancó bien. Desde entonces entra en la copia diaria.
+2. **Casi no había copias programadas. Arreglado el 19/11:** en Proxmox está el trabajo `copia-diaria-g3` (**Centro de datos → Respaldo**): de lunes a viernes a las 12:30 copia las VM 100 y 101 y el contenedor 102 a `truenas-nfs`, en modo *snapshot* (sin apagarlas), y guarda las 3 últimas. En el TrueNAS hay instantáneas automáticas: cada hora en `Documentos` y `Configuraciones` (se guardan 2 semanas) y cada día a las 2:00 en `proxmox` (1 semana). El cliente Linux ya tenía su copia diaria. La del MikroTik sigue siendo a mano.
 3. **Las copias de Proxmox están en el mismo disco que los discos de las VM.** `dump/` y `images/` son carpetas del mismo dataset y del mismo HDD. Sirven si se borra o se estropea una VM, pero no si falla el HDD del NAS, que es un solo disco.
 4. **La copia de la configuración del TrueNAS está guardada dentro del propio TrueNAS.** Si el NAS se rompe, se pierde con él. Hay que tener otra copia fuera (por ejemplo, en el PC-01).
 5. **`pwenc_secret` es una clave.** Con ese fichero y la base de datos se pueden sacar las contraseñas guardadas en el TrueNAS, y ahora está en una carpeta de red con permisos 777. Hay que protegerla o guardarla en otro sitio.
-6. **No se ha probado a recuperar ninguna copia.** Una copia que no se ha restaurado nunca no se sabe si sirve; es parte de la Tasca 6.
+6. **No se había probado a recuperar ninguna copia. Hecho el 19/11:** se recuperaron un contenedor borrado (82 s), el Windows Server en una VM aparte (9 min y medio), una regla del MikroTik (6 s) y un fichero del NAS desde una instantánea (8 s). Está en el [plan de contingencia de la Tasca 6](06-recuperacio.md#4-plan-de-contingencia).
 
 > Cuando arregléis alguno de estos puntos, escribid aquí cómo y qué habéis hecho.
 
@@ -822,7 +901,7 @@ Después de reiniciar las dos:
 4. **Certificados de la web de `pve` y pve3:** siguen diciendo `pve.example.lan` y `pve3.example.lan`. Se renueva con `pvecm updatecerts --force` en el Shell del nodo.
 
 5. **DNS de `pve` y de pve3:** siguen con el de la plantilla (`172.16.20.1` y dominio de búsqueda `example.lan`). Solo pve2 pregunta al MikroTik (`192.168.30.1`). Funciona, porque las actualizaciones se descargan, pero los tres nodos deberían tener el mismo. Se cambia en **nodo → Sistema → DNS**.
-6. **Actualizaciones:** los tres nodos tienen 104 paquetes pendientes (ver el [apartado 4](#4-actualización-y-vía-de-recuperación)).
+6. **Reinicio de `pve` y pve2:** los tres nodos se actualizaron el 18 y el 19/11, pero `pve` y pve2 no usarán el núcleo nuevo hasta que se reinicien (ver el [apartado 4](#4-actualización-y-vía-de-recuperación)).
 
 ### Los nodos a 18/11
 
@@ -929,9 +1008,7 @@ Entre medias se movieron los discos del nodo al NFS (botón **Mover almacenamien
 - **La VM se migra encendida; el contenedor no.** Proxmox puede pasar la memoria de una VM de un nodo a otro mientras funciona (migración en vivo): el corte fue de 59 milésimas de segundo, no se nota. Un contenedor comparte el núcleo de Linux con el nodo, así que Proxmox lo apaga, lo cambia de nodo y lo vuelve a encender (modo *restart*). Todo el tiempo de la migración es tiempo sin servicio.
 - **Con el disco en el NFS no se copia nada.** En las dos primeras migraciones Proxmox tuvo que copiar los 4 GiB del disco por la red. En las del NFS el disco no se mueve, porque los dos nodos ya lo ven; solo cambia qué nodo lo usa. Para migrar una VM en vivo de forma sencilla hace falta que su disco esté en un almacenamiento compartido.
 - **La migración en vivo fue tan rápida porque `vm-test` está vacía.** Solo se pasaron 3,8 MiB de memoria. Un servidor de verdad, con varios GiB de RAM en uso, tardará más: hay que repetir la medida con una VM con sistema.
-- **El contenedor tarda mucho más con el disco en el NFS: 45 s frente a 11 s.** La migración en sí dura 1 s; los otros 44 s son el arranque del contenedor en el nodo de destino. Con el disco en `local-lvm` el mismo contenedor arranca en 1 o 2 s.
-  Lo que creemos (sin comprobar todavía): que es por ser la primera vez que el nodo de destino lee el disco del contenedor por la red, y que un segundo arranque sería más rápido.
-  > Cuando lo comprobéis (por ejemplo, arrancando el contenedor varias veces seguidas sin migrar), escribid aquí los tiempos y si la idea era cierta.
+- **El contenedor tarda 45 s en migrar con el disco en el NFS, frente a 11 s con el disco local.** La migración en sí dura 1 s; los otros 44 s son el **primer** arranque del contenedor en el nodo de destino. El 19/11 lo medimos mejor: ya en su nodo, el mismo contenedor arranca desde el NFS en 1,3 s (tres intentos), y al migrarlo vuelve a tardar 44 s. Así que no es que el NFS sea lento para arrancar: la espera solo aparece justo después de cambiar de nodo. Creemos que es el NAS, que tarda en dejar al nodo nuevo usar un fichero que el nodo anterior tenía abierto, pero no lo hemos comprobado.
 - **La migración de las 12:07 tardó 9 s más** porque el contenedor todavía tenía apuntado su disco antiguo de `local-lvm` (al moverlo al NFS no se marcó «Eliminar origen») y Proxmox lo copió también.
 
 Cada migración se lanzó con el botón **Migrar** de la VM o del contenedor, y los tiempos se leyeron en el historial de tareas. El informe de quien hizo las pruebas está en [Tasca5_Proxmox_Grupo3.pdf](../lliuraments/Tasca5_Proxmox_Grupo3.pdf).
@@ -986,7 +1063,35 @@ Medido el 18/11 a las 12:13 en **almacenamiento → Resumen** y **almacenamiento
 
 ### Lo que falta en Proxmox
 
-> **Usuarios de administración.** A 18/11 el único usuario del clúster es `root@pam`, sin grupos ni permisos creados, y es con el que se ha hecho todo (en la web y en el Shell de los nodos). Cuando creéis el usuario o usuarios de administración, escribid aquí cómo y qué habéis hecho: nombre, si es de tipo *PAM* o *PVE*, grupo, rol (por ejemplo `Administrator`) y por qué no conviene trabajar siempre con `root`.
+**Usuarios de administración (19/11).** Hasta el 19/11 el único usuario del clúster era `root@pam` y con él se hizo todo. Se crearon dos grupos y dos usuarios (evidencia [t5-proxmox-usuarios-20261119.txt](../evidencies/t5-proxmox-usuarios-20261119.txt)):
+
+| Usuario | Tipo | Grupo | Rol sobre todo el clúster (`/`) | Para qué |
+|---|---|---|---|---|
+| `root@pam` | PAM: es el `root` del Linux de cada nodo | — | Todo | Solo para lo que no se puede hacer de otra forma (Shell del nodo, actualizaciones) |
+| `admin-g3@pve` | PVE: existe solo dentro de Proxmox | `administradores` | `Administrator` | El trabajo de cada día: crear VM, copias, migraciones |
+| `consulta-g3@pve` | PVE | `consulta` | `PVEAuditor` | Solo mirar: no puede cambiar ni apagar nada |
+
+Cómo se hace en la web: **Centro de datos → Permisos → Grupos → Crear**; **Permisos → Añadir → Permiso de grupo** (ruta `/`, el grupo y el rol); y **Permisos → Usuarios → Añadir** (realm *Proxmox VE authentication server*, y el grupo). Por comandos:
+
+```
+pveum group add administradores
+pveum acl modify / --groups administradores --roles Administrator
+pveum user add admin-g3@pve --groups administradores
+pveum passwd admin-g3@pve
+```
+
+Por qué así:
+
+- **El permiso se da al grupo, no a la persona.** Para dar o quitar el acceso a alguien basta con meterlo o sacarlo del grupo.
+- **Un usuario PVE no puede entrar al Linux del nodo.** Si alguien se entera de la contraseña de `admin-g3`, puede tocar las VM pero no el sistema de los nodos. Con la de `root` podría hacerlo todo.
+- **No conviene trabajar siempre con `root`:** no tiene límites, un error se paga caro, y en el historial de tareas todo sale hecho por `root@pam`, así que no se sabe quién hizo qué.
+- **El de consulta** sirve para enseñar el clúster o revisar su estado sin riesgo de romper nada.
+
+Comprobado iniciando sesión con cada uno: `admin-g3` recibe el permiso de modificar el sistema (`Sys.Modify`) y `consulta-g3` solo los de ver (`Sys.Audit`). Las contraseñas no están en el repositorio.
+
+> Si queréis un usuario por persona, creadlos dentro del grupo `administradores` y escribid aquí los nombres.
+
+**Arranque automático y alertas (19/11).** Al probar la caída de un nodo vimos que ninguna máquina arrancaba sola. Se activó **Opciones → Iniciar al arranque** en las VM 100 y 101 y en el contenedor 102, con orden de arranque 1, 2 y 3 (primero el Windows Server). En los tres nodos se instaló `monit`, que avisa si la CPU, la memoria o el disco pasan de un límite: está explicado en la [Tasca 7](07-rendiment.md#alerta-en-los-nodos).
 
 **Copias al servidor de copias.** El 18/11 se copiaron al NAS la configuración de los tres nodos (`/etc/pve`), el contenedor 102 y la VM 103. Qué se copia, cómo, dónde y qué falta está en [Espacio de copias de seguridad](#espacio-de-copias-de-seguridad).
 
@@ -997,7 +1102,7 @@ Los ejemplos salen de nuestras propias pruebas del 18/11.
 | Ventajas | Inconvenientes |
 |---|---|
 | **Se aprovecha mejor el hardware:** varios servidores en una sola máquina física, en lugar de una máquina para cada uno. | **Si se rompe la máquina física, caen todos los servidores que tiene dentro.** Se reduce con un clúster, almacenamiento compartido y copias. |
-| **Aislamiento:** cada servidor tiene su propio sistema, y si uno falla no arrastra a los demás. | **Se pierde algo de rendimiento:** el propio Proxmox gasta CPU, RAM y disco, y un disco en red es más lento que uno local (el contenedor tardó 44 s en arrancar desde el NFS). |
+| **Aislamiento:** cada servidor tiene su propio sistema, y si uno falla no arrastra a los demás. | **Se pierde algo de rendimiento:** el propio Proxmox gasta CPU, RAM y disco, y un disco en red es más lento que uno local (escribir en el NAS va a 22 MiB/s, frente a más de 1.000 en el disco del nodo; ver la [Tasca 7](07-rendiment.md)). |
 | **Se puede cambiar una VM de nodo sin parar el servicio:** la VM 103 se movió encendida con un corte de 59 ms. | **Se puede prometer más disco del que hay:** con los discos *thin*, si el almacenamiento se llena, fallan todas las máquinas que lo usan (el aviso nos salió en las migraciones). |
 | **Copiar y recuperar es fácil:** el disco entero de una VM o de un contenedor se copia y se restaura en otro nodo; la copia del contenedor tardó 12 s. | **Es más complicado de llevar:** además de los servidores hay que saber manejar Proxmox, la red virtual, el almacenamiento y el clúster. |
 | **Crear, clonar o borrar una máquina cuesta minutos,** así que se pueden hacer pruebas sin riesgo. | **Se depende de la red y del almacenamiento compartido:** si falla el NFS, fallan las máquinas que tienen el disco en él. |
@@ -1039,7 +1144,34 @@ Comprobado el 18/11 desde un portátil de la LAN, preguntando al DNS del servido
 
 > Escribid aquí cómo instalasteis Windows Server y cómo creasteis el dominio: opciones de la instalación, cómo pusisteis el nombre y la IP fija, cómo añadisteis el rol de Active Directory y lo convertisteis en controlador de dominio, y qué usuarios de administración hay.
 
-> Cuando copiéis el servidor al servidor de copias, escribid aquí cómo y qué habéis hecho: qué copiáis y por qué (y qué no). Explicad también qué es un dominio y qué le aporta a la empresa centralizar la gestión.
+### Copia del servidor (19/11)
+
+- **Qué se copia:** la VM entera (su disco de 64 GiB, la configuración de la VM y los discos pequeños del UEFI y del TPM). En el disco está todo lo que cuesta rehacer: el dominio, sus usuarios, los equipos unidos y el DNS.
+- **Cómo:** con la copia de Proxmox (`vzdump`) en modo *snapshot*, que no apaga el servidor. Tardó 4 min 46 s y ocupa 7,96 GB, porque solo se guardan los 16,6 GiB que tienen datos y además van comprimidos.
+- **Dónde:** en el NAS, `truenas-nfs`, carpeta `dump/`. Desde el 19/11 se repite sola de lunes a viernes a las 12:30 y se guardan las 3 últimas.
+- **Qué no se copia:** las ISO de Windows Server y de `virtio-win` (se vuelven a descargar).
+- **Comprobado:** la copia se restauró como otra VM, sin red, y arrancó hasta la pantalla de inicio de sesión. Recuperar el servidor así cuesta unos 9 minutos y medio ([Tasca 6](06-recuperacio.md#pruebas-y-tiempo-de-inactividad)).
+
+### Qué es un dominio y qué aporta centralizar
+
+Sin dominio, cada ordenador tiene sus propios usuarios y contraseñas: si la empresa tiene 5 equipos y entra una persona nueva, hay que crearle el usuario en los 5, y si cambia la contraseña, cambiarla en los 5.
+
+Un **dominio** es un grupo de equipos que confían en un mismo servidor, el **controlador de dominio**, para saber quién es cada usuario. Los usuarios se crean una sola vez en ese servidor (en *Active Directory*) y valen en todos los equipos unidos al dominio. El nuestro es `grupo3.lan` y su controlador es `dc-grupo3` (192.168.30.21).
+
+Qué le aporta a la empresa:
+
+- **Un usuario y una contraseña para todo.** La persona inicia sesión con su usuario en cualquier equipo de la empresa. Lo comprobamos con el usuario `administracion` en el cliente Windows 11 y en el cliente Linux.
+- **Altas y bajas en un solo sitio.** Cuando alguien se va, se desactiva su usuario en el servidor y deja de poder entrar en todos los equipos a la vez.
+- **Las mismas normas para todos.** Con las directivas de grupo (GPO) se obliga, por ejemplo, a que las contraseñas tengan una longitud mínima o a que la pantalla se bloquee sola, sin ir equipo por equipo.
+- **Permisos por grupos.** Las carpetas del NAS se pueden abrir por departamento (Dirección, Administración, Comercial…) usando los grupos del dominio.
+
+Lo que cuesta:
+
+- **Todo depende del controlador.** Si `dc-grupo3` se cae, no se puede iniciar sesión con usuarios del dominio en un equipo donde no se haya entrado antes. Por eso es el primer servidor que se copia y el primero que arranca.
+- **El DNS tiene que apuntar al controlador.** Un equipo solo encuentra el dominio si pregunta al DNS del servidor (`192.168.30.21`). Nos pasó: el MikroTik reparte por DHCP el DNS `192.168.30.1`, que no conoce `grupo3.lan`, y a los clientes hubo que ponerles el DNS a mano.
+- **Hace falta licencia** de Windows Server (usamos la de evaluación) y alguien que lo administre.
+
+> Revisad esta explicación y dejadla con vuestras palabras: os la pueden preguntar en la defensa.
 
 ## Servidores de infraestructura: GNU/Linux
 

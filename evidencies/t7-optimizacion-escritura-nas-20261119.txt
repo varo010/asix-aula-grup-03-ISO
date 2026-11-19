@@ -1,0 +1,20 @@
+Prueba de optimización en un dataset de pruebas del TrueNAS (Pool_Principal/pruebas-rendimiento), montado por NFS en pve2.
+El contenedor 902 es una copia del contenedor 102 restaurada de su copia de seguridad, sin red.
+
+===== ANTES: sync=STANDARD (como está el dataset proxmox) · 19/11/2026 10:32:29
+arranque del contenedor de prueba 902, intento 1: 0.9 s
+arranque del contenedor de prueba 902, intento 2: 0.9 s
+arranque del contenedor de prueba 902, intento 3: 0.9 s
+--- escritura de un fichero grande (512 MiB, bloques de 1 MiB)
+  WRITE: bw=21.9MiB/s (23.0MB/s), 21.9MiB/s-21.9MiB/s (23.0MB/s-23.0MB/s), io=512MiB (537MB), run=23386-23386msec
+--- escritura al azar de 4 KiB asegurando cada una (fsync, 20 s)
+  write: IOPS=94, BW=378KiB/s (387kB/s)(7572KiB/20023msec); 0 zone resets
+
+===== DESPUÉS: sync=DISABLED solo en el dataset de pruebas · 19/11/2026 10:33:47
+arranque del contenedor de prueba 902, intento 1: 0.9 s
+arranque del contenedor de prueba 902, intento 2: 0.9 s
+arranque del contenedor de prueba 902, intento 3: 0.9 s
+--- escritura de un fichero grande (512 MiB, bloques de 1 MiB)
+  WRITE: bw=101MiB/s (106MB/s), 101MiB/s-101MiB/s (106MB/s-106MB/s), io=512MiB (537MB), run=5059-5059msec
+--- escritura al azar de 4 KiB asegurando cada una (fsync, 20 s)
+  write: IOPS=3289, BW=12.8MiB/s (13.5MB/s)(257MiB/20001msec); 0 zone resets

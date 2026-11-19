@@ -1,0 +1,23 @@
+===== MikroTik: hora, nombre y copia de la configuración · 19/11/2026 10:46:26 (hora real)
+ANTES  reloj: {'date': '2026-03-06', 'time': '10:52:13', 'time-zone-name': 'manual'} | NTP: false | nombre: MikroTik
+cambio zona horaria -> []
+cambio NTP -> []
+cambio nombre -> []
+DESPUES reloj: {'date': '2026-11-19', 'time': '10:46:52', 'time-zone-name': 'Europe/Madrid'} | NTP: true synchronized pool.ntp.org | nombre: G3-RT-01
+
+===== Copia de la configuración guardada en el NAS (Configuraciones/Mikrotik)
+ea0f0d8d326c8eb0846a4e535d9bfba8f9ba97de52a915fa6d18073f61d0a49d  g3-rt-01-20261119.backup
+a05c5f30c01ad81423e177babeb63ec9bb6da4d914e5077e2bebc01d917fb57f  g3-rt-01-20261119.rsc
+g3-rt-01-20261119.backup = copia completa (binaria) · g3-rt-01-20261119.rsc = configuración en texto (/export)
+
+===== MikroTik: fallo controlado y recuperación desde la copia · 19/11/2026
+10:47:33 estado inicial: pve3 descarga por HTTP -> 200
+10:47:33 FALLO PROVOCADO: se borra la regla «Permitir HTTP a los nodos Proxmox (actualizaciones)» -> None
+10:47:33 síntoma: pve3 descarga por HTTP -> 000 (sin respuesta = bloqueado)
+10:47:39 comprobación en el registro del router: 2026-11-19 10:47:39 BLOQUEO HTTP forward: in:bridge_grupo3 out:ether1, connection-state:new src-mac bc:24:11:ba:15:2d, proto TCP (SYN), 192.168.30.34:40786->51.
+10:47:39 línea de la copia (.rsc) con la regla perdida:
+      add action=accept chain=forward comment="Permitir HTTP a los nodos Proxmox (actualizaciones)" dst-port=80 in-interface=bridge_grupo3 protocol=tcp src-address=192.168.30.32-192.168.30.34
+10:47:39 RECUPERACIÓN: se vuelve a crear con los datos de la copia, encima de «BLOQUEAR HTTP» -> {'action': 'accept', 'chain': 'forward', 'comment': 'Permitir HTTP a los nodos Proxmox (actualizaciones)', 'dst-port': '80', 'src-address': '192.168.30.32-192.168.30.34'}
+10:47:40 comprobación: pve3 descarga por HTTP -> 200
+tiempo con el fallo sin detectar/diagnosticar: 6 s · tiempo de recuperación: 0 s · total sin servicio (HTTP de los nodos): 6 s
+orden final: [('accept', '443', 'Permitir HTTPS'), ('accept', '80', 'Permitir HTTP a los nodos Proxmox (actualizaciones)'), ('drop', '80', 'BLOQUEAR HTTP')]

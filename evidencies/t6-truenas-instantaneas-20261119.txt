@@ -1,0 +1,20 @@
+===== TrueNAS: recuperar un fichero estropeado con una instantánea (snapshot) de ZFS · 19/11/2026
+Carpeta de prueba: /mnt/Pool_Principal/Configuraciones/prueba-recuperacion (datos ficticios)
+10:48:43 fichero original (suma SHA256 c16666bbcf0e766e…):
+     Contabilidad ficticia 2026
+     enero 1200
+     febrero 1350
+     marzo 1410
+10:48:44 instantánea creada: Pool_Principal/Configuraciones@antes-de-la-prueba-20261119
+10:48:48 FALLO PROVOCADO: alguien machaca el fichero. Ahora contiene:
+     BORRADO POR ERROR
+10:48:49 RECUPERACIÓN: se lee el fichero tal como lo guarda la instantánea
+     (.zfs/snapshot/antes-de-la-prueba-20261119/prueba-recuperacion/contabilidad-ficticia.txt) y se vuelve a poner en su sitio
+10:48:52 fichero recuperado (suma SHA256 c16666bbcf0e766e…):
+     Contabilidad ficticia 2026
+     enero 1200
+     febrero 1350
+     marzo 1410
+tiempo con el fichero estropeado: 8 s (de ellos, 5 s de recuperación)
+instantáneas del dataset Configuraciones: ['Pool_Principal/Configuraciones@antes-de-la-prueba-20261119']
+tareas de instantáneas automáticas: [('Pool_Principal/Documentos', 'cada hora', 'se guardan', 2, 'WEEK'), ('Pool_Principal/Configuraciones', 'cada hora', 'se guardan', 2, 'WEEK'), ('Pool_Principal/proxmox', 'cada día a las 2:00', 'se guardan', 1, 'WEEK')]

@@ -1,0 +1,363 @@
+===== RAID en la VM Debian-RAID (VM 101 del nodo pve2) · 19/11/2026 10:21:10
+===== 1. Discos antes de empezar
+
+$ lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINTS
+NAME    SIZE TYPE FSTYPE MOUNTPOINTS
+sda      32G disk        
+├─sda1 30,3G part ext4   /
+├─sda2    1K part        
+└─sda5  1,7G part swap   [SWAP]
+sdb       5G disk        
+sdc       5G disk        
+sdd       5G disk        
+sr0    1024M rom         
+
+===== 2. Particiones: tres de 768 MiB en cada disco (sdb, sdc, sdd)
+
+$ sfdisk -q /dev/sdb <<P
+label: gpt
+size=768M, type=A19D880F-05FC-4D3B-A006-743F0F84911E
+size=768M, type=A19D880F-05FC-4D3B-A006-743F0F84911E
+size=768M, type=A19D880F-05FC-4D3B-A006-743F0F84911E
+P
+
+$ sfdisk -q /dev/sdc <<P
+label: gpt
+size=768M, type=A19D880F-05FC-4D3B-A006-743F0F84911E
+size=768M, type=A19D880F-05FC-4D3B-A006-743F0F84911E
+size=768M, type=A19D880F-05FC-4D3B-A006-743F0F84911E
+P
+
+$ sfdisk -q /dev/sdd <<P
+label: gpt
+size=768M, type=A19D880F-05FC-4D3B-A006-743F0F84911E
+size=768M, type=A19D880F-05FC-4D3B-A006-743F0F84911E
+size=768M, type=A19D880F-05FC-4D3B-A006-743F0F84911E
+P
+
+$ lsblk -o NAME,SIZE,TYPE,PARTTYPENAME /dev/sdb /dev/sdc /dev/sdd
+NAME    SIZE TYPE PARTTYPENAME
+sdb       5G disk 
+├─sdb1  768M part Linux RAID
+├─sdb2  768M part Linux RAID
+└─sdb3  768M part Linux RAID
+sdc       5G disk 
+├─sdc1  768M part Linux RAID
+├─sdc2  768M part Linux RAID
+└─sdc3  768M part Linux RAID
+sdd       5G disk 
+├─sdd1  768M part 
+├─sdd2  768M part 
+└─sdd3  768M part 
+
+===== 3. Crear los tres RAID
+
+$ mdadm --create /dev/md0 --level=0 --raid-devices=2 /dev/sdb1 /dev/sdc1 --run
+mdadm: Defaulting to version 1.2 metadata
+mdadm: array /dev/md0 started.
+
+$ mdadm --create /dev/md1 --level=1 --raid-devices=2 /dev/sdb2 /dev/sdc2 --run --metadata=1.2
+mdadm: array /dev/md1 started.
+
+$ mdadm --create /dev/md5 --level=5 --raid-devices=3 /dev/sdb3 /dev/sdc3 /dev/sdd3 --run
+mdadm: Defaulting to version 1.2 metadata
+mdadm: array /dev/md5 started.
+
+$ cat /proc/mdstat
+Personalities : [raid0] [raid1] [raid6] [raid5] [raid4] [raid10] 
+md5 : active raid5 sdd3[3](S) sdc3[1] sdb3[0]
+      1568768 blocks super 1.2 level 5, 512k chunk, algorithm 2 [3/2] [UU_]
+      
+md1 : active raid1 sdc2[1] sdb2[0]
+      785408 blocks super 1.2 [2/2] [UU]
+      [=>...................]  resync =  6.4% (51136/785408) finish=0.2min speed=51136K/sec
+      
+md0 : active raid0 sdc1[1] sdb1[0]
+      1568768 blocks super 1.2 512k chunks
+      
+unused devices: <none>
+
+$ mdadm --wait /dev/md1 /dev/md5
+sincronización inicial terminada en 13 s
+
+$ cat /proc/mdstat
+Personalities : [raid0] [raid1] [raid6] [raid5] [raid4] [raid10] 
+md5 : active raid5 sdd3[3] sdc3[1] sdb3[0]
+      1568768 blocks super 1.2 level 5, 512k chunk, algorithm 2 [3/3] [UUU]
+      
+md1 : active raid1 sdc2[1] sdb2[0]
+      785408 blocks super 1.2 [2/2] [UU]
+      
+md0 : active raid0 sdc1[1] sdb1[0]
+      1568768 blocks super 1.2 512k chunks
+      
+unused devices: <none>
+
+===== 4. Sistema de ficheros ext4 y montaje
+
+$ mkfs.ext4 -q -L md0 /dev/md0 && mkdir -p /mnt/md0 && mount /dev/md0 /mnt/md0
+
+$ mkfs.ext4 -q -L md1 /dev/md1 && mkdir -p /mnt/md1 && mount /dev/md1 /mnt/md1
+
+$ mkfs.ext4 -q -L md5 /dev/md5 && mkdir -p /mnt/md5 && mount /dev/md5 /mnt/md5
+
+$ df -h /mnt/md0 /mnt/md1 /mnt/md5
+S.ficheros     Tamaño Usados  Disp Uso% Montado en
+/dev/md0         1,5G   404K  1,4G   1% /mnt/md0
+/dev/md1         738M   212K  684M   1% /mnt/md1
+/dev/md5         1,5G   404K  1,4G   1% /mnt/md5
+
+$ mdadm --detail /dev/md0 | grep -E 'Raid Level|Array Size|Used Dev Size|Raid Devices|State :|Active Devices'
+        Raid Level : raid0
+        Array Size : 1568768 (1532.00 MiB 1606.42 MB)
+      Raid Devices : 2
+             State : clean 
+    Active Devices : 2
+
+$ mdadm --detail /dev/md1 | grep -E 'Raid Level|Array Size|Used Dev Size|Raid Devices|State :|Active Devices'
+        Raid Level : raid1
+        Array Size : 785408 (767.00 MiB 804.26 MB)
+     Used Dev Size : 785408 (767.00 MiB 804.26 MB)
+      Raid Devices : 2
+             State : active 
+    Active Devices : 2
+
+$ mdadm --detail /dev/md5 | grep -E 'Raid Level|Array Size|Used Dev Size|Raid Devices|State :|Active Devices'
+        Raid Level : raid5
+        Array Size : 1568768 (1532.00 MiB 1606.42 MB)
+     Used Dev Size : 784384 (766.00 MiB 803.21 MB)
+      Raid Devices : 3
+             State : active 
+    Active Devices : 3
+
+===== 5. Datos ficticios con su suma de comprobación (para ver después si se han estropeado)
+
+$ head -c 100M /dev/urandom > /mnt/md0/datos-ficticios.bin && sha256sum /mnt/md0/datos-ficticios.bin | tee /root/suma-md0.txt
+55ff15537ea60df115beb3d44b6451e49d7c2262b4ae3c12e16cd492c6d3e9a9  /mnt/md0/datos-ficticios.bin
+
+$ head -c 100M /dev/urandom > /mnt/md1/datos-ficticios.bin && sha256sum /mnt/md1/datos-ficticios.bin | tee /root/suma-md1.txt
+4d92568511bebf3b7b91890f38b52573799224c3540b4d158c5c48c44dad6405  /mnt/md1/datos-ficticios.bin
+
+$ head -c 100M /dev/urandom > /mnt/md5/datos-ficticios.bin && sha256sum /mnt/md5/datos-ficticios.bin | tee /root/suma-md5.txt
+410e3f5df9e3d437e9f13194b760ea075f1fc9e59f115c482e4755f63d5bfc9c  /mnt/md5/datos-ficticios.bin
+
+===== 6. Velocidad de cada RAID (fio, 256 MiB, bloques de 1 MiB, sin caché)
+
+--- md0 escritura
+  WRITE: bw=996MiB/s (1044MB/s), 996MiB/s-996MiB/s (1044MB/s-1044MB/s), io=256MiB (268MB), run=257-257msec
+--- md0 lectura
+   READ: bw=2349MiB/s (2463MB/s), 2349MiB/s-2349MiB/s (2463MB/s-2463MB/s), io=256MiB (268MB), run=109-109msec
+--- md0 escritura en trozos pequeños (4 KiB, al azar, 20 s)
+  write: IOPS=13.4k, BW=52.5MiB/s (55.1MB/s)(1050MiB/20001msec); 0 zone resets
+
+--- md1 escritura
+  WRITE: bw=544MiB/s (570MB/s), 544MiB/s-544MiB/s (570MB/s-570MB/s), io=256MiB (268MB), run=471-471msec
+--- md1 lectura
+   READ: bw=2438MiB/s (2557MB/s), 2438MiB/s-2438MiB/s (2557MB/s-2557MB/s), io=256MiB (268MB), run=105-105msec
+--- md1 escritura en trozos pequeños (4 KiB, al azar, 20 s)
+  write: IOPS=8470, BW=33.1MiB/s (34.7MB/s)(662MiB/20001msec); 0 zone resets
+
+--- md5 escritura
+  WRITE: bw=593MiB/s (621MB/s), 593MiB/s-593MiB/s (621MB/s-621MB/s), io=256MiB (268MB), run=432-432msec
+--- md5 lectura
+   READ: bw=2306MiB/s (2418MB/s), 2306MiB/s-2306MiB/s (2418MB/s-2418MB/s), io=256MiB (268MB), run=111-111msec
+--- md5 escritura en trozos pequeños (4 KiB, al azar, 20 s)
+  write: IOPS=5206, BW=20.3MiB/s (21.3MB/s)(407MiB/20001msec); 0 zone resets
+
+===== 7. Fallo de un disco en RAID 1 (md1): se marca sdc2 como roto · 10:22:54
+
+$ mdadm /dev/md1 --fail /dev/sdc2
+
+$ grep -A2 '^md1' /proc/mdstat
+md1 : active raid1 sdc2[1](F) sdb2[0]
+      785408 blocks super 1.2 [2/1] [U_]
+      
+
+$ sha256sum -c /root/suma-md1.txt
+/mnt/md1/datos-ficticios.bin: La suma coincide
+
+$ echo 'escrito con un disco roto' > /mnt/md1/nota-degradado.txt && cat /mnt/md1/nota-degradado.txt
+escrito con un disco roto
+
+$ mdadm /dev/md1 --remove /dev/sdc2
+mdadm: hot removed /dev/sdc2 from /dev/md1
+
+--- se cambia por un disco nuevo (sdd2) y se reconstruye
+
+$ mdadm /dev/md1 --add /dev/sdd2
+mdadm: added /dev/sdd2
+
+$ grep -A3 '^md1' /proc/mdstat
+md1 : active raid1 sdd2[2] sdb2[0]
+      785408 blocks super 1.2 [2/1] [U_]
+      [=====>...............]  recovery = 25.5% (200704/785408) finish=0.0min speed=200704K/sec
+      
+reconstrucción de md1 terminada en 8,45515 s
+
+$ grep -A2 '^md1' /proc/mdstat
+md1 : active raid1 sdd2[2] sdb2[0]
+      785408 blocks super 1.2 [2/2] [UU]
+      
+
+$ sha256sum -c /root/suma-md1.txt
+/mnt/md1/datos-ficticios.bin: La suma coincide
+
+===== 8. Fallo de un disco en RAID 5 (md5): se marca sdd3 como roto · 10:23:03
+
+$ mdadm /dev/md5 --fail /dev/sdd3
+
+$ grep -A2 '^md5' /proc/mdstat
+md5 : active raid5 sdd3[3](F) sdc3[1] sdb3[0]
+      1568768 blocks super 1.2 level 5, 512k chunk, algorithm 2 [3/2] [UU_]
+      
+
+$ sha256sum -c /root/suma-md5.txt
+/mnt/md5/datos-ficticios.bin: La suma coincide
+
+$ mdadm /dev/md5 --remove /dev/sdd3
+mdadm: hot removed /dev/sdd3 from /dev/md5
+
+$ mdadm --zero-superblock /dev/sdd3
+
+--- se vuelve a poner el disco (como si fuera uno nuevo) y se reconstruye
+
+$ mdadm /dev/md5 --add /dev/sdd3
+mdadm: added /dev/sdd3
+
+$ grep -A3 '^md5' /proc/mdstat
+md5 : active raid5 sdd3[3] sdc3[1] sdb3[0]
+      1568768 blocks super 1.2 level 5, 512k chunk, algorithm 2 [3/2] [UU_]
+      [=====>...............]  recovery = 25.7% (202240/784384) finish=0.0min speed=202240K/sec
+      
+reconstrucción de md5 terminada en 8,78853 s
+
+$ grep -A2 '^md5' /proc/mdstat
+md5 : active raid5 sdd3[3] sdc3[1] sdb3[0]
+      1568768 blocks super 1.2 level 5, 512k chunk, algorithm 2 [3/3] [UUU]
+      
+
+$ sha256sum -c /root/suma-md5.txt
+/mnt/md5/datos-ficticios.bin: La suma coincide
+
+===== 9. Fallo de un disco en RAID 0 (md0) · 10:23:12
+
+$ mdadm /dev/md0 --fail /dev/sdc1
+mdadm: set device faulty failed for /dev/sdc1: Device or resource busy
+(mdadm no deja marcar un disco como roto en RAID 0: no hay copia con la que seguir)
+
+--- se simula la pérdida del disco: se desmonta, se para el RAID y se borra la marca de RAID de sdc1
+
+$ umount /mnt/md0
+
+$ mdadm --stop /dev/md0
+mdadm: stopped /dev/md0
+
+$ mdadm --zero-superblock /dev/sdc1
+
+$ mdadm --assemble /dev/md0 /dev/sdb1 /dev/sdc1
+mdadm: No super block found on /dev/sdc1 (Expected magic a92b4efc, got 00000000)
+mdadm: no RAID superblock on /dev/sdc1
+mdadm: /dev/sdc1 has no superblock - assembly aborted
+
+$ mdadm --assemble --run /dev/md0 /dev/sdb1
+mdadm: failed to RUN_ARRAY /dev/md0: Invalid argument
+mdadm: Not enough devices to start the array.
+
+$ cat /proc/mdstat | grep -A1 '^md0' ; mount /dev/md0 /mnt/md0
+mount: /mnt/md0: fsconfig() failed: /dev/md0: Can't lookup blockdev.
+       dmesg(1) may have more information after failed mount system call.
+
+$ ls -la /mnt/md0/
+total 8
+drwxr-xr-x 2 root root 4096 nov 19 10:21 .
+drwxr-xr-x 5 root root 4096 nov 19 10:21 ..
+
+===== 10. Se vuelve a crear el RAID 0 (los datos anteriores se han perdido) · 10:23:23
+
+$ mdadm --create /dev/md0 --level=0 --raid-devices=2 /dev/sdb1 /dev/sdc1 --run
+mdadm: /dev/sdb1 appears to be part of a raid array:
+       level=raid0 devices=2 ctime=Thu Nov 19 10:21:11 2026
+mdadm: Defaulting to version 1.2 metadata
+mdadm: array /dev/md0 started.
+
+$ mkfs.ext4 -q -F -L md0 /dev/md0 && mount /dev/md0 /mnt/md0 && ls /mnt/md0
+lost+found
+
+===== 11. Que los RAID se monten solos al arrancar
+
+$ mdadm --detail --scan | tee -a /etc/mdadm/mdadm.conf
+ARRAY /dev/md1 metadata=1.2 UUID=10ddab0d:0c9eb3df:11e2047b:fe738054
+ARRAY /dev/md5 metadata=1.2 UUID=af221efa:898e64f8:6add12a8:fafe5e6c
+ARRAY /dev/md0 metadata=1.2 UUID=0e989689:f776c8bc:1c19167b:c2accd3e
+
+$ update-initramfs -u 2>&1 | tail -1
+update-initramfs: Generating /boot/initrd.img-6.12.43+deb13-amd64
+
+$ printf 'LABEL=md0 /mnt/md0 ext4 defaults,nofail 0 2\nLABEL=md1 /mnt/md1 ext4 defaults,nofail 0 2\nLABEL=md5 /mnt/md5 ext4 defaults,nofail 0 2\n' >> /etc/fstab; tail -3 /etc/fstab
+LABEL=md0 /mnt/md0 ext4 defaults,nofail 0 2
+LABEL=md1 /mnt/md1 ext4 defaults,nofail 0 2
+LABEL=md5 /mnt/md5 ext4 defaults,nofail 0 2
+
+$ cat /proc/mdstat
+Personalities : [raid0] [raid1] [raid6] [raid5] [raid4] [raid10] 
+md0 : active raid0 sdc1[1] sdb1[0]
+      1568768 blocks super 1.2 512k chunks
+      
+md5 : active raid5 sdd3[3] sdc3[1] sdb3[0]
+      1568768 blocks super 1.2 level 5, 512k chunk, algorithm 2 [3/3] [UUU]
+      
+md1 : active raid1 sdd2[2] sdb2[0]
+      785408 blocks super 1.2 [2/2] [UU]
+      
+unused devices: <none>
+
+===== 12. Después de reiniciar la VM · 19/11/2026 10:23:45
+
+$ cat /proc/mdstat
+Personalities : [raid0] [raid6] [raid5] [raid4] [raid1] [raid10] 
+md0 : active raid0 sdb1[0] sdc1[1]
+      1568768 blocks super 1.2 512k chunks
+      
+md5 : active raid5 sdd3[3] sdc3[1] sdb3[0]
+      1568768 blocks super 1.2 level 5, 512k chunk, algorithm 2 [3/3] [UUU]
+      
+md1 : active raid1 sdd2[2] sdb2[0]
+      785408 blocks super 1.2 [2/2] [UU]
+      
+unused devices: <none>
+
+$ df -h /mnt/md0 /mnt/md1 /mnt/md5
+S.ficheros     Tamaño Usados  Disp Uso% Montado en
+/dev/md0         1,5G   404K  1,4G   1% /mnt/md0
+/dev/md1         738M   101M  584M  15% /mnt/md1
+/dev/md5         1,5G   101M  1,3G   8% /mnt/md5
+
+$ sha256sum -c /root/suma-md1.txt /root/suma-md5.txt
+/mnt/md1/datos-ficticios.bin: La suma coincide
+/mnt/md5/datos-ficticios.bin: La suma coincide
+
+$ cat /mnt/md1/nota-degradado.txt
+escrito con un disco roto
+
+$ lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINTS /dev/sdb /dev/sdc /dev/sdd
+NAME     SIZE TYPE  FSTYPE            MOUNTPOINTS
+sdb        5G disk                    
+├─sdb1   768M part  linux_raid_member 
+│ └─md0  1,5G raid0 ext4              /mnt/md0
+├─sdb2   768M part  linux_raid_member 
+│ └─md1  767M raid1 ext4              /mnt/md1
+└─sdb3   768M part  linux_raid_member 
+  └─md5  1,5G raid5 ext4              /mnt/md5
+sdc        5G disk                    
+├─sdc1   768M part  linux_raid_member 
+│ └─md0  1,5G raid0 ext4              /mnt/md0
+├─sdc2   768M part  linux_raid_member 
+└─sdc3   768M part  linux_raid_member 
+  └─md5  1,5G raid5 ext4              /mnt/md5
+sdd        5G disk                    
+├─sdd1   768M part                    
+├─sdd2   768M part  linux_raid_member 
+│ └─md1  767M raid1 ext4              /mnt/md1
+└─sdd3   768M part  linux_raid_member 
+  └─md5  1,5G raid5 ext4              /mnt/md5
+ens18            UP             fe80::5fb1:c779:221f:b31/64 

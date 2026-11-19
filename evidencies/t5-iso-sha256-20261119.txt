@@ -1,0 +1,28 @@
+===== Suma SHA256 de las imágenes de instalación guardadas en los nodos · 19/11/2026 11:01:30
+8152356864 2026-11-16 26100.32230.260111-0550.lt_release_svc_refresh_SERVER_EVAL_x64FRE_en-us.iso
+8161130496 2026-11-16 26100.32230.260111-0550.lt_release_svc_refresh_SERVER_EVAL_x64FRE_es-es.iso
+726501376 2026-11-17 virtio-win-0.1.271.iso
+7b052573ba7894c9924e3e87ba732ccd354d18cb75a883efa9b900ea125bfd51  26100.32230.260111-0550.lt_release_svc_refresh_SERVER_EVAL_x64FRE_en-us.iso
+8f27939fbed7bcd6235700fce5f2be9748e46639d329e050a5fe5da4b99041aa  26100.32230.260111-0550.lt_release_svc_refresh_SERVER_EVAL_x64FRE_es-es.iso
+bbe6166ad86a490caefad438fef8aa494926cb0a1b37fa1212925cfd81656429  virtio-win-0.1.271.iso
+658b28e209b578fe788ec5867deebae57b6aac5fce3692bbb116bab9c65568b3  debian-13.1.0-amd64-netinst.iso
+93f62a2e324d1a7e8514a12738f48d1461fdf6bf07ff244846648ada5b1a783a  debian-13-lxc-amd64.tar.xz
+
+--- Suma publicada por Debian para debian-13.1.0-amd64-netinst.iso (https://cdimage.debian.org/cdimage/archive/13.1.0/amd64/iso-cd/SHA256SUMS)
+658b28e209b578fe788ec5867deebae57b6aac5fce3692bbb116bab9c65568b3  debian-13.1.0-amd64-netinst.iso
+ebfa0ce7fc30917b226c4f2398622933f57a7e6c1dd4ff18e892b4a0944f0136  debian-edu-13.1.0-amd64-netinst.iso
+f081cd49a65f8b6e54b60b96ca65f476a3d149205c9f851585f130c36bd1a048  debian-mac-13.1.0-amd64-netinst.iso
+--- Suma publicada por Fedora para virtio-win-0.1.271.iso
+virtio-win-0.1.271.iso
+virtio-win-0.1.271.iso</a>                                   2025-04-07 09:11  693M  
+<html>
+<head>
+--- Plantilla de contenedor: suma del índice de Proxmox
+system          debian-13-standard_13.6-1_amd64.tar.zst                      amd64
+system          debian-13-standard_13.6-1_arm64.tar.zst                      arm64
+ A small Debian Bookworm system including all standard packages.
+Package: debian-13-standard
+Version: 13.6-1
+Location: system/debian-13-standard_13.6-1_amd64.tar.zst
+sha512sum: 4c0c27ca6ceab5ef0b84db57825a00f26157ef1854bafe97297813e1cbe8ecb8cc9c453cab6b3b0efe1ba193a50c47ece1e41d950e411b8730b835b71e9e754b
+ A small Debian Trixie system including all standard packages.

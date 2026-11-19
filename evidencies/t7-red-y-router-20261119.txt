@@ -1,0 +1,34 @@
+===== Red entre nodos: iperf3 de pve (cliente) a pve2 (servidor), 20 s · 19/11/2026 10:26:26
+[  5]   0.00-20.00  sec   209 GBytes  89.7 Gbits/sec    0            sender
+[  5]   0.00-20.00  sec   209 GBytes  89.7 Gbits/sec                  receiver
+
+iperf Done.
+--- sentido contrario (-R)
+[  5]   0.00-20.00  sec   213 GBytes  91.4 Gbits/sec    0            sender
+[  5]   0.00-20.00  sec   213 GBytes  91.4 Gbits/sec                  receiver
+
+iperf Done.
+--- ping
+20 packets transmitted, 20 received, 0% packet loss, time 3951ms
+rtt min/avg/max/mdev = 0.037/0.150/0.262/0.065 ms
+
+Descarga por HTTPS desde un portátil de la LAN (192.168.30.198) a través del MikroTik: 4 descargas a la vez durante 40 s.
+Fichero: https://proof.ovh.net/files/1Gb.dat
+descarga 1: 1606 bytes en 0.134253 s = 11962 bytes/s
+===== MikroTik · con 4 descargas a la vez desde la LAN · 19/11/2026 10:40:44 · 12 lecturas cada 3 s
+10:40:44 CPU 29 % | RAM libre 190 MiB | WAN bajada 0.0 Mbit/s subida 0.0 Mbit/s
+10:40:47 CPU 27 % | RAM libre 190 MiB | WAN bajada 123.5 Mbit/s subida 2.2 Mbit/s
+10:40:50 CPU 18 % | RAM libre 190 MiB | WAN bajada 126.0 Mbit/s subida 2.3 Mbit/s
+10:40:53 CPU 6 % | RAM libre 190 MiB | WAN bajada 95.1 Mbit/s subida 1.8 Mbit/s
+10:40:56 CPU 13 % | RAM libre 190 MiB | WAN bajada 124.7 Mbit/s subida 2.4 Mbit/s
+10:40:59 CPU 10 % | RAM libre 190 MiB | WAN bajada 124.4 Mbit/s subida 2.3 Mbit/s
+10:41:02 CPU 13 % | RAM libre 190 MiB | WAN bajada 124.3 Mbit/s subida 2.4 Mbit/s
+10:41:05 CPU 6 % | RAM libre 190 MiB | WAN bajada 127.3 Mbit/s subida 2.4 Mbit/s
+10:41:08 CPU 3 % | RAM libre 190 MiB | WAN bajada 104.5 Mbit/s subida 2.0 Mbit/s
+10:41:11 CPU 0 % | RAM libre 190 MiB | WAN bajada 125.5 Mbit/s subida 2.3 Mbit/s
+10:41:14 CPU 10 % | RAM libre 190 MiB | WAN bajada 120.8 Mbit/s subida 2.3 Mbit/s
+10:41:17 CPU 1 % | RAM libre 190 MiB | WAN bajada 125.4 Mbit/s subida 2.4 Mbit/s
+resumen: CPU media 11 % máx 29 % · bajada media 110.1 Mbit/s máx 127.3 Mbit/s
+descarga 2: 244023296 bytes en 39.999233 s = 6100699 bytes/s
+descarga 3: 104955868 bytes en 40.000215 s = 2623882 bytes/s
+descarga 4: 205242314 bytes en 40.000179 s = 5131034 bytes/s
